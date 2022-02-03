@@ -71,7 +71,7 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
     ///- info: おそらく選択されたイメージ
     /// - Returns: none
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        
+        ///ここのイメージがシュミレーターだと無理っぽいよ
         if let pickerImage = info[.originalImage] as? UIImageView{
             print(pickerImage)
             ///pickerImageを使用した処理
