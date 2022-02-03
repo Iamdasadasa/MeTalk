@@ -1,0 +1,841 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		333D0CDDC86CADB990AFCBAB /* Pods_MeTalk_MeTalkUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C97C79AF021687F4CB77D1C /* Pods_MeTalk_MeTalkUITests.framework */; };
+		829D4F8A452FB3A80C9EC528 /* Pods_MeTalkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4525AD4AD3C475377C4AB64A /* Pods_MeTalkTests.framework */; };
+		B4C33AA386E40690D6FFDF5F /* Pods_MeTalk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 659AD8E54966BD0CAAA7A8ED /* Pods_MeTalk.framework */; };
+		D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBED27A581BE00800693 /* AppDelegate.swift */; };
+		D631EBF027A581BE00800693 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBEF27A581BE00800693 /* SceneDelegate.swift */; };
+		D631EBF227A581BE00800693 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBF127A581BE00800693 /* ViewController.swift */; };
+		D631EBF527A581BE00800693 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D631EBF327A581BE00800693 /* Main.storyboard */; };
+		D631EBF727A581BF00800693 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D631EBF627A581BF00800693 /* Assets.xcassets */; };
+		D631EBFA27A581BF00800693 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D631EBF827A581BF00800693 /* LaunchScreen.storyboard */; };
+		D631EC0527A581BF00800693 /* MeTalkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EC0427A581BF00800693 /* MeTalkTests.swift */; };
+		D631EC0F27A581BF00800693 /* MeTalkUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EC0E27A581BF00800693 /* MeTalkUITests.swift */; };
+		D631EC1127A581BF00800693 /* MeTalkUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EC1027A581BF00800693 /* MeTalkUITestsLaunchTests.swift */; };
+		D631EC2127A582A200800693 /* initialSettingViewcontroller.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */; };
+		D631EC2327A5831400800693 /* initialSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EC2227A5831400800693 /* initialSettingView.swift */; };
+		D631EC2527A7E26D00800693 /* initialSettingData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EC2427A7E26D00800693 /* initialSettingData.swift */; };
+		D69EC37427AA55DA00290B18 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */; };
+		D69EC37627AA66D400290B18 /* MeTalkUserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37527AA66D400290B18 /* MeTalkUserListViewController.swift */; };
+		D69EC37827AA67E100290B18 /* MeTalkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37727AA67E100290B18 /* MeTalkViewController.swift */; };
+		D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37927AA681100290B18 /* MainTabBarController.swift */; };
+		D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37B27AA85C300290B18 /* loadingView.swift */; };
+		D69EC37E27AA928300290B18 /* MeTalkUserListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37D27AA928300290B18 /* MeTalkUserListView.swift */; };
+		D69EC38027AA92F100290B18 /* MeTalkProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37F27AA92F100290B18 /* MeTalkProfileViewController.swift */; };
+		D69EC38227AA952000290B18 /* MeTalkProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC38127AA952000290B18 /* MeTalkProfileView.swift */; };
+		D69EC38427AAB04400290B18 /* ProfileImageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC38327AAB04400290B18 /* ProfileImageData.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D631EC0127A581BF00800693 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D631EBE227A581BE00800693 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D631EBE927A581BE00800693;
+			remoteInfo = MeTalk;
+		};
+		D631EC0B27A581BF00800693 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D631EBE227A581BE00800693 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D631EBE927A581BE00800693;
+			remoteInfo = MeTalk;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		06180C1C23603AD372040F99 /* Pods-MeTalk-MeTalkUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalk-MeTalkUITests.debug.xcconfig"; path = "Target Support Files/Pods-MeTalk-MeTalkUITests/Pods-MeTalk-MeTalkUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		0C97C79AF021687F4CB77D1C /* Pods_MeTalk_MeTalkUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MeTalk_MeTalkUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1D1FC72FF81D171811862F09 /* Pods-MeTalk.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalk.debug.xcconfig"; path = "Target Support Files/Pods-MeTalk/Pods-MeTalk.debug.xcconfig"; sourceTree = "<group>"; };
+		2D40998BCFDC9EEE2EFF5628 /* Pods-MeTalkTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalkTests.release.xcconfig"; path = "Target Support Files/Pods-MeTalkTests/Pods-MeTalkTests.release.xcconfig"; sourceTree = "<group>"; };
+		3F79D61CD2472FFEF59EF755 /* Pods-MeTalk-MeTalkUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalk-MeTalkUITests.release.xcconfig"; path = "Target Support Files/Pods-MeTalk-MeTalkUITests/Pods-MeTalk-MeTalkUITests.release.xcconfig"; sourceTree = "<group>"; };
+		4525AD4AD3C475377C4AB64A /* Pods_MeTalkTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MeTalkTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		659AD8E54966BD0CAAA7A8ED /* Pods_MeTalk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MeTalk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		796431D3D1E22AE1E4A2F1E9 /* Pods-MeTalkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalkTests.debug.xcconfig"; path = "Target Support Files/Pods-MeTalkTests/Pods-MeTalkTests.debug.xcconfig"; sourceTree = "<group>"; };
+		D631EBEA27A581BE00800693 /* MeTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D631EBED27A581BE00800693 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		D631EBEF27A581BE00800693 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		D631EBF127A581BE00800693 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		D631EBF427A581BE00800693 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		D631EBF627A581BF00800693 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D631EBF927A581BF00800693 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		D631EBFB27A581BF00800693 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D631EC0027A581BF00800693 /* MeTalkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MeTalkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D631EC0427A581BF00800693 /* MeTalkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkTests.swift; sourceTree = "<group>"; };
+		D631EC0A27A581BF00800693 /* MeTalkUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MeTalkUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D631EC0E27A581BF00800693 /* MeTalkUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkUITests.swift; sourceTree = "<group>"; };
+		D631EC1027A581BF00800693 /* MeTalkUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingViewcontroller.swift; sourceTree = "<group>"; };
+		D631EC2227A5831400800693 /* initialSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingView.swift; sourceTree = "<group>"; };
+		D631EC2427A7E26D00800693 /* initialSettingData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingData.swift; sourceTree = "<group>"; };
+		D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		D69EC37527AA66D400290B18 /* MeTalkUserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkUserListViewController.swift; sourceTree = "<group>"; };
+		D69EC37727AA67E100290B18 /* MeTalkViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkViewController.swift; sourceTree = "<group>"; };
+		D69EC37927AA681100290B18 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
+		D69EC37B27AA85C300290B18 /* loadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = loadingView.swift; sourceTree = "<group>"; };
+		D69EC37D27AA928300290B18 /* MeTalkUserListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkUserListView.swift; sourceTree = "<group>"; };
+		D69EC37F27AA92F100290B18 /* MeTalkProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkProfileViewController.swift; sourceTree = "<group>"; };
+		D69EC38127AA952000290B18 /* MeTalkProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkProfileView.swift; sourceTree = "<group>"; };
+		D69EC38327AAB04400290B18 /* ProfileImageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageData.swift; sourceTree = "<group>"; };
+		DC56F677BBCA503621EE7776 /* Pods-MeTalk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalk.release.xcconfig"; path = "Target Support Files/Pods-MeTalk/Pods-MeTalk.release.xcconfig"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D631EBE727A581BE00800693 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B4C33AA386E40690D6FFDF5F /* Pods_MeTalk.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D631EBFD27A581BF00800693 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				829D4F8A452FB3A80C9EC528 /* Pods_MeTalkTests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D631EC0727A581BF00800693 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				333D0CDDC86CADB990AFCBAB /* Pods_MeTalk_MeTalkUITests.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		76184AF77D6C692D38313F13 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				1D1FC72FF81D171811862F09 /* Pods-MeTalk.debug.xcconfig */,
+				DC56F677BBCA503621EE7776 /* Pods-MeTalk.release.xcconfig */,
+				06180C1C23603AD372040F99 /* Pods-MeTalk-MeTalkUITests.debug.xcconfig */,
+				3F79D61CD2472FFEF59EF755 /* Pods-MeTalk-MeTalkUITests.release.xcconfig */,
+				796431D3D1E22AE1E4A2F1E9 /* Pods-MeTalkTests.debug.xcconfig */,
+				2D40998BCFDC9EEE2EFF5628 /* Pods-MeTalkTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		D631EBE127A581BE00800693 = {
+			isa = PBXGroup;
+			children = (
+				D631EBEC27A581BE00800693 /* MeTalk */,
+				D631EC0327A581BF00800693 /* MeTalkTests */,
+				D631EC0D27A581BF00800693 /* MeTalkUITests */,
+				D631EBEB27A581BE00800693 /* Products */,
+				76184AF77D6C692D38313F13 /* Pods */,
+				EA1B404FC81B12ED36056CCA /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		D631EBEB27A581BE00800693 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D631EBEA27A581BE00800693 /* MeTalk.app */,
+				D631EC0027A581BF00800693 /* MeTalkTests.xctest */,
+				D631EC0A27A581BF00800693 /* MeTalkUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D631EBEC27A581BE00800693 /* MeTalk */ = {
+			isa = PBXGroup;
+			children = (
+				D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */,
+				D631EC1D27A5821D00800693 /* Model */,
+				D631EC1E27A5822900800693 /* View */,
+				D631EC1F27A5823000800693 /* Controller */,
+			);
+			path = MeTalk;
+			sourceTree = "<group>";
+		};
+		D631EC0327A581BF00800693 /* MeTalkTests */ = {
+			isa = PBXGroup;
+			children = (
+				D631EC0427A581BF00800693 /* MeTalkTests.swift */,
+			);
+			path = MeTalkTests;
+			sourceTree = "<group>";
+		};
+		D631EC0D27A581BF00800693 /* MeTalkUITests */ = {
+			isa = PBXGroup;
+			children = (
+				D631EC0E27A581BF00800693 /* MeTalkUITests.swift */,
+				D631EC1027A581BF00800693 /* MeTalkUITestsLaunchTests.swift */,
+			);
+			path = MeTalkUITests;
+			sourceTree = "<group>";
+		};
+		D631EC1D27A5821D00800693 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				D631EC2427A7E26D00800693 /* initialSettingData.swift */,
+				D69EC38327AAB04400290B18 /* ProfileImageData.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		D631EC1E27A5822900800693 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D631EC2227A5831400800693 /* initialSettingView.swift */,
+				D69EC37B27AA85C300290B18 /* loadingView.swift */,
+				D69EC37D27AA928300290B18 /* MeTalkUserListView.swift */,
+				D69EC38127AA952000290B18 /* MeTalkProfileView.swift */,
+				D631EBF327A581BE00800693 /* Main.storyboard */,
+				D631EBF627A581BF00800693 /* Assets.xcassets */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		D631EC1F27A5823000800693 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */,
+				D69EC37F27AA92F100290B18 /* MeTalkProfileViewController.swift */,
+				D69EC37527AA66D400290B18 /* MeTalkUserListViewController.swift */,
+				D69EC37727AA67E100290B18 /* MeTalkViewController.swift */,
+				D69EC37927AA681100290B18 /* MainTabBarController.swift */,
+				D631EBF127A581BE00800693 /* ViewController.swift */,
+				D631EBED27A581BE00800693 /* AppDelegate.swift */,
+				D631EBEF27A581BE00800693 /* SceneDelegate.swift */,
+				D631EBF827A581BF00800693 /* LaunchScreen.storyboard */,
+				D631EBFB27A581BF00800693 /* Info.plist */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		EA1B404FC81B12ED36056CCA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				659AD8E54966BD0CAAA7A8ED /* Pods_MeTalk.framework */,
+				0C97C79AF021687F4CB77D1C /* Pods_MeTalk_MeTalkUITests.framework */,
+				4525AD4AD3C475377C4AB64A /* Pods_MeTalkTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D631EBE927A581BE00800693 /* MeTalk */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D631EC1427A581BF00800693 /* Build configuration list for PBXNativeTarget "MeTalk" */;
+			buildPhases = (
+				9EFF9FDBD9C5B4E323CAE225 /* [CP] Check Pods Manifest.lock */,
+				D631EBE627A581BE00800693 /* Sources */,
+				D631EBE727A581BE00800693 /* Frameworks */,
+				D631EBE827A581BE00800693 /* Resources */,
+				5AD4BC0DB57189FF8E2BE1C6 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MeTalk;
+			productName = MeTalk;
+			productReference = D631EBEA27A581BE00800693 /* MeTalk.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D631EBFF27A581BF00800693 /* MeTalkTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D631EC1727A581BF00800693 /* Build configuration list for PBXNativeTarget "MeTalkTests" */;
+			buildPhases = (
+				E2C0DC73EE04821B6F40E956 /* [CP] Check Pods Manifest.lock */,
+				D631EBFC27A581BF00800693 /* Sources */,
+				D631EBFD27A581BF00800693 /* Frameworks */,
+				D631EBFE27A581BF00800693 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D631EC0227A581BF00800693 /* PBXTargetDependency */,
+			);
+			name = MeTalkTests;
+			productName = MeTalkTests;
+			productReference = D631EC0027A581BF00800693 /* MeTalkTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D631EC0927A581BF00800693 /* MeTalkUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D631EC1A27A581BF00800693 /* Build configuration list for PBXNativeTarget "MeTalkUITests" */;
+			buildPhases = (
+				0587B68EB8E4C20709BC0329 /* [CP] Check Pods Manifest.lock */,
+				D631EC0627A581BF00800693 /* Sources */,
+				D631EC0727A581BF00800693 /* Frameworks */,
+				D631EC0827A581BF00800693 /* Resources */,
+				49BE1AF26E344F77CE289AC0 /* [CP] Embed Pods Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D631EC0C27A581BF00800693 /* PBXTargetDependency */,
+			);
+			name = MeTalkUITests;
+			productName = MeTalkUITests;
+			productReference = D631EC0A27A581BF00800693 /* MeTalkUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D631EBE227A581BE00800693 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1320;
+				LastUpgradeCheck = 1320;
+				TargetAttributes = {
+					D631EBE927A581BE00800693 = {
+						CreatedOnToolsVersion = 13.2.1;
+					};
+					D631EBFF27A581BF00800693 = {
+						CreatedOnToolsVersion = 13.2.1;
+						TestTargetID = D631EBE927A581BE00800693;
+					};
+					D631EC0927A581BF00800693 = {
+						CreatedOnToolsVersion = 13.2.1;
+						TestTargetID = D631EBE927A581BE00800693;
+					};
+				};
+			};
+			buildConfigurationList = D631EBE527A581BE00800693 /* Build configuration list for PBXProject "MeTalk" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D631EBE127A581BE00800693;
+			productRefGroup = D631EBEB27A581BE00800693 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D631EBE927A581BE00800693 /* MeTalk */,
+				D631EBFF27A581BF00800693 /* MeTalkTests */,
+				D631EC0927A581BF00800693 /* MeTalkUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D631EBE827A581BE00800693 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D631EBFA27A581BF00800693 /* LaunchScreen.storyboard in Resources */,
+				D69EC37427AA55DA00290B18 /* GoogleService-Info.plist in Resources */,
+				D631EBF727A581BF00800693 /* Assets.xcassets in Resources */,
+				D631EBF527A581BE00800693 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D631EBFE27A581BF00800693 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D631EC0827A581BF00800693 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0587B68EB8E4C20709BC0329 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MeTalk-MeTalkUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		49BE1AF26E344F77CE289AC0 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MeTalk-MeTalkUITests/Pods-MeTalk-MeTalkUITests-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MeTalk-MeTalkUITests/Pods-MeTalk-MeTalkUITests-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MeTalk-MeTalkUITests/Pods-MeTalk-MeTalkUITests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		5AD4BC0DB57189FF8E2BE1C6 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MeTalk/Pods-MeTalk-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-MeTalk/Pods-MeTalk-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MeTalk/Pods-MeTalk-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		9EFF9FDBD9C5B4E323CAE225 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MeTalk-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E2C0DC73EE04821B6F40E956 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MeTalkTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D631EBE627A581BE00800693 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D631EC2127A582A200800693 /* initialSettingViewcontroller.swift in Sources */,
+				D631EBF227A581BE00800693 /* ViewController.swift in Sources */,
+				D69EC38027AA92F100290B18 /* MeTalkProfileViewController.swift in Sources */,
+				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,
+				D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */,
+				D69EC37827AA67E100290B18 /* MeTalkViewController.swift in Sources */,
+				D69EC37627AA66D400290B18 /* MeTalkUserListViewController.swift in Sources */,
+				D69EC38427AAB04400290B18 /* ProfileImageData.swift in Sources */,
+				D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */,
+				D69EC37E27AA928300290B18 /* MeTalkUserListView.swift in Sources */,
+				D631EC2527A7E26D00800693 /* initialSettingData.swift in Sources */,
+				D69EC38227AA952000290B18 /* MeTalkProfileView.swift in Sources */,
+				D631EC2327A5831400800693 /* initialSettingView.swift in Sources */,
+				D631EBF027A581BE00800693 /* SceneDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D631EBFC27A581BF00800693 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D631EC0527A581BF00800693 /* MeTalkTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D631EC0627A581BF00800693 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D631EC1127A581BF00800693 /* MeTalkUITestsLaunchTests.swift in Sources */,
+				D631EC0F27A581BF00800693 /* MeTalkUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D631EC0227A581BF00800693 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D631EBE927A581BE00800693 /* MeTalk */;
+			targetProxy = D631EC0127A581BF00800693 /* PBXContainerItemProxy */;
+		};
+		D631EC0C27A581BF00800693 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D631EBE927A581BE00800693 /* MeTalk */;
+			targetProxy = D631EC0B27A581BF00800693 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		D631EBF327A581BE00800693 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D631EBF427A581BE00800693 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		D631EBF827A581BF00800693 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D631EBF927A581BF00800693 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		D631EC1227A581BF00800693 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		D631EC1327A581BF00800693 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D631EC1527A581BF00800693 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1D1FC72FF81D171811862F09 /* Pods-MeTalk.debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MS365LSR9U;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MeTalk/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "写真投稿機能のためのカメラアクセス";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "写真投稿機能のためのフォトライブラリアクセス";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Black-Vual.MeTalk";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		D631EC1627A581BF00800693 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = DC56F677BBCA503621EE7776 /* Pods-MeTalk.release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MS365LSR9U;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MeTalk/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "写真投稿機能のためのカメラアクセス";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "写真投稿機能のためのフォトライブラリアクセス";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = Main;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Black-Vual.MeTalk";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		D631EC1827A581BF00800693 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 796431D3D1E22AE1E4A2F1E9 /* Pods-MeTalkTests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MS365LSR9U;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Black-Vual.MeTalkTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MeTalk.app/MeTalk";
+			};
+			name = Debug;
+		};
+		D631EC1927A581BF00800693 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2D40998BCFDC9EEE2EFF5628 /* Pods-MeTalkTests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MS365LSR9U;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Black-Vual.MeTalkTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MeTalk.app/MeTalk";
+			};
+			name = Release;
+		};
+		D631EC1B27A581BF00800693 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 06180C1C23603AD372040F99 /* Pods-MeTalk-MeTalkUITests.debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MS365LSR9U;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Black-Vual.MeTalkUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MeTalk;
+			};
+			name = Debug;
+		};
+		D631EC1C27A581BF00800693 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 3F79D61CD2472FFEF59EF755 /* Pods-MeTalk-MeTalkUITests.release.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MS365LSR9U;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Black-Vual.MeTalkUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MeTalk;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D631EBE527A581BE00800693 /* Build configuration list for PBXProject "MeTalk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D631EC1227A581BF00800693 /* Debug */,
+				D631EC1327A581BF00800693 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D631EC1427A581BF00800693 /* Build configuration list for PBXNativeTarget "MeTalk" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D631EC1527A581BF00800693 /* Debug */,
+				D631EC1627A581BF00800693 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D631EC1727A581BF00800693 /* Build configuration list for PBXNativeTarget "MeTalkTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D631EC1827A581BF00800693 /* Debug */,
+				D631EC1927A581BF00800693 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D631EC1A27A581BF00800693 /* Build configuration list for PBXNativeTarget "MeTalkUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D631EC1B27A581BF00800693 /* Debug */,
+				D631EC1C27A581BF00800693 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D631EBE227A581BE00800693 /* Project object */;
+}
