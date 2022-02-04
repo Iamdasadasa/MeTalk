@@ -20,6 +20,14 @@ class  MeTalkProfileView:UIView{
         autoLayoutSetUp()
         autoLayout()
     }
+    
+    //※layoutSubviews レイアウト描写が更新された後※
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        ///プロフィール画像を丸くする処理
+        profileImageButton.layer.cornerRadius = profileImageButton.bounds.height/2
+    }
+    
 //※初期化処理※
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

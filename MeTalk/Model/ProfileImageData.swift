@@ -17,7 +17,7 @@ class ProfileImageData{
     }
     
     let userUID:String
-    let profileImageView:UIImageView
+    var profileImageView:UIImageView
     
     func uploadImage () {
             //ストレージサーバのURLを取得
@@ -50,6 +50,24 @@ class ProfileImageData{
                 
             }
             
+        }
+    
+    func imageCompressionReturn () -> UIImageView {
+        //保存したい画像のデータを変数として持つ
+        var ProfileImageData: Data = Data()
+        
+        //プロフィール画像が存在すれば
+        if profileImageView.image != nil {
+            
+            //画像を圧縮
+            ProfileImageData = (profileImageView.image?.jpegData(compressionQuality: 0.01))!
+                
+        }
+        profileImageView.image = UIImage(data: ProfileImageData)!
+            
+        return profileImageView
+        
+        
         }
     
     func contentOfFIRStorage(callback: @escaping (UIImage?) -> Void) {
