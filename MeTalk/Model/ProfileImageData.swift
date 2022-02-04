@@ -21,7 +21,7 @@ class ProfileImageData{
     
     func uploadImage () {
             //ストレージサーバのURLを取得
-            let storage = Storage.storage().reference(forURL: "gs://metalk-f132e.appspot.com/")
+            let storage = Storage.storage().reference(forURL: "gs://metalk-f132e.appspot.com")
             
             // パス: あなた固有のURL/profileImage/{user.uid}.jpeg
             let imageRef = storage.child("profileImage").child("\(userUID).jpeg")
@@ -51,4 +51,21 @@ class ProfileImageData{
             }
             
         }
+    
+    func contentOfFIRStorage(callback: @escaping (UIImage?) -> Void) {
+            let storage = Storage.storage()
+            let host = "gs://metalk-f132e.appspot.com"
+            storage.reference(forURL: host).child("profileImage").child("\(userUID).jpeg")
+                .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
+                if error != nil {
+                    callback(nil)
+                    return
+                }
+                if let imageData = data {
+                    let image = UIImage(data: imageData)
+                    callback(image)
+                }
+            }
+    }
+    
 }

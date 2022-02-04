@@ -48,8 +48,9 @@ class  MeTalkProfileView:UIView{
     ///プロフィール画像ボタン
     let profileImageButton:UIButton = {
         let returnUIButton = UIButton()
-        returnUIButton.layer.cornerRadius = 120
+        returnUIButton.layer.cornerRadius = 50
         returnUIButton.layer.borderWidth = 1
+        returnUIButton.clipsToBounds = true
         returnUIButton.layer.borderColor = UIColor.orange.cgColor
 
         returnUIButton.addTarget(self, action: #selector(profileImageButtonTapped), for: .touchUpInside)
@@ -82,7 +83,7 @@ class  MeTalkProfileView:UIView{
         signoutButton.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor).isActive = true
         
         profileImageButton.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.25).isActive = true
-        profileImageButton.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.25).isActive = true
+        profileImageButton.heightAnchor.constraint(equalTo: profileImageButton.widthAnchor).isActive = true
         profileImageButton.topAnchor.constraint(equalTo: self.signoutButton.topAnchor).isActive = true
         profileImageButton.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
         

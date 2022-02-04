@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import Firebase
+import FirebaseStorage
 import Photos
 
 class MeTalkProfileViewController:UIViewController{
@@ -19,6 +20,7 @@ class MeTalkProfileViewController:UIViewController{
     let picker = UIImagePickerController()
     ///インスタンス化（View）
     let meTalkProfileView = MeTalkProfileView()
+
     
     
     override func viewDidLoad() {
@@ -31,7 +33,17 @@ class MeTalkProfileViewController:UIViewController{
         super.viewWillAppear(animated)
         handle = Auth.auth().addStateDidChangeListener { auth, user in
             self.UID = user?.uid
+            self.contentOfFIRStorage(callback: { image in
+                self.meTalkProfileView.profileImageButton.setImage(image, for: .normal)
+            })
         }
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        print("ViewDidApperが呼ばれました")
+        self.contentOfFIRStorage(callback: { image in
+            self.meTalkProfileView.profileImageButton.setImage(image, for: .normal)
+        })
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -44,6 +56,7 @@ class MeTalkProfileViewController:UIViewController{
 ///※MeTalkProfileViewから受け取ったデリゲート処理※
 extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate{
     
+    
     ///プロフィール画像タップ後の処理
     /// - Parameters:
     /// - Returns: none
@@ -51,8 +64,15 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
         picker.delegate = self
         ///強制的にアルバム
         picker.sourceType = .photoLibrary
+        
+        picker.modalPresentationStyle = .fullScreen
         ///カメラピッカー表示
         self.present(picker, animated: true, completion: nil)
+        
+        ///カメラピッカーを表示して画像を送信した後にどうしてもこの処理を書きたい
+//        self.contentOfFIRStorage(callback: { image in
+//            self.meTalkProfileView.profileImageButton.setImage(image, for: .normal)
+//        })
     }
     
     ///カメラピッカーでキャンセルを押下した際の処理（デリゲートなので自動で呼ばれる）
@@ -71,13 +91,15 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
     ///- info: おそらく選択されたイメージ
     /// - Returns: none
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        ///ここのイメージがシュミレーターだと無理っぽいよ
-        if let pickerImage = info[.originalImage] as? UIImageView{
-            print(pickerImage)
+
+        if let pickerImage = info[.originalImage] as? UIImage{
+            let UIimageView = UIImageView()
+            UIimageView.image = pickerImage
             ///pickerImageを使用した処理
             ///プロフィールイメージ投稿Model
             guard let UID = UID else { return }
-            let profileImageData = ProfileImageData(userUID: UID, profileImageView: pickerImage)
+            let profileImageData = ProfileImageData(userUID: UID, profileImageView: UIimageView)
+            profileImageData.uploadImage()
             ///閉じる
             self.dismiss(animated: true, completion: nil)
         }
@@ -92,3 +114,24 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
     }
 }
 
+extension MeTalkProfileViewController{
+    func contentOfFIRStorage(callback: @escaping (UIImage?) -> Void) {
+            let storage = Storage.storage()
+            let host = "gs://metalk-f132e.appspot.com"
+            guard let UID = self.UID else { return }
+            storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg")
+
+                .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
+                if error != nil {
+                    print(error.debugDescription)
+                    callback(nil)
+                    return
+                }
+                if let imageData = data {
+                    let image = UIImage(data: imageData)
+                    callback(image)
+                }
+            }
+    }
+    
+}
