@@ -20,8 +20,7 @@ class MeTalkProfileViewController:UIViewController{
     let picker = UIImagePickerController()
     ///インスタンス化（View）
     let meTalkProfileView = MeTalkProfileView()
-
-    var profileImageNoneFlg:Int = 1
+    ///インスタンス化（Model）
     let storage = Storage.storage()
     let host = "gs://metalk-f132e.appspot.com"
     
@@ -42,7 +41,7 @@ class MeTalkProfileViewController:UIViewController{
             })
         }
     }
-    
+    ///リスナーの破棄
     override func viewWillDisappear(_ animated: Bool) {
             super.viewWillDisappear(animated)
             Auth.auth().removeStateDidChangeListener(handle!)
@@ -61,11 +60,8 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
         picker.delegate = self
         ///強制的にアルバム
         picker.sourceType = .photoLibrary
-        
         ///カメラピッカー表示
         self.present(picker, animated: true, completion: nil)
-        
-
     }
     
     ///カメラピッカーでキャンセルを押下した際の処理（デリゲートなので自動で呼ばれる）
@@ -102,7 +98,7 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
             self.dismiss(animated: true, completion: nil)
         }
     }
-    
+    ///開発用　サインアウトボタンタップ時の挙動
     func signoutButtonTappedDelegate() {
         do {
             try Auth.auth().signOut()
@@ -112,20 +108,26 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
     }
 }
 
+
 extension MeTalkProfileViewController{
+    ///カメラピッカーで写真が選択された際の処理（デリゲートなので自動で呼ばれる）
+    /// - Parameters:none
+    /// - Returns:
+    ///- callback: Fire Baseから取得したイメージデータ
     func contentOfFIRStorage(callback: @escaping (UIImage?) -> Void) {
         guard let UID = self.UID else { return }
+        ///Firebaseのストレージアクセス
         storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg")
-
             .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
+            ///ユーザーIDのプロフィール画像を設定していなかったら初期画像を設定
             if error != nil {
                 self.meTalkProfileView.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
                 print(error.debugDescription)
                 return
             }
+            ///ユーザーIDのプロフィール画像を設定していたらその画像を取得してリターン
             if let imageData = data {
                 let image = UIImage(data: imageData)
-                self.profileImageNoneFlg = 0
                 callback(image)
             }
         }

@@ -22,6 +22,7 @@
 		D631EC2127A582A200800693 /* initialSettingViewcontroller.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */; };
 		D631EC2327A5831400800693 /* initialSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EC2227A5831400800693 /* initialSettingView.swift */; };
 		D631EC2527A7E26D00800693 /* initialSettingData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EC2427A7E26D00800693 /* initialSettingData.swift */; };
+		D6543DBD27B0DC6E00444454 /* MeTalkProfileChildView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DBC27B0DC6E00444454 /* MeTalkProfileChildView.swift */; };
 		D69EC37427AA55DA00290B18 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */; };
 		D69EC37627AA66D400290B18 /* MeTalkUserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37527AA66D400290B18 /* MeTalkUserListViewController.swift */; };
 		D69EC37827AA67E100290B18 /* MeTalkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37727AA67E100290B18 /* MeTalkViewController.swift */; };
@@ -75,6 +76,7 @@
 		D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingViewcontroller.swift; sourceTree = "<group>"; };
 		D631EC2227A5831400800693 /* initialSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingView.swift; sourceTree = "<group>"; };
 		D631EC2427A7E26D00800693 /* initialSettingData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingData.swift; sourceTree = "<group>"; };
+		D6543DBC27B0DC6E00444454 /* MeTalkProfileChildView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkProfileChildView.swift; sourceTree = "<group>"; };
 		D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D69EC37527AA66D400290B18 /* MeTalkUserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkUserListViewController.swift; sourceTree = "<group>"; };
 		D69EC37727AA67E100290B18 /* MeTalkViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkViewController.swift; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 				D69EC37B27AA85C300290B18 /* loadingView.swift */,
 				D69EC37D27AA928300290B18 /* MeTalkUserListView.swift */,
 				D69EC38127AA952000290B18 /* MeTalkProfileView.swift */,
+				D6543DBC27B0DC6E00444454 /* MeTalkProfileChildView.swift */,
 				D631EBF327A581BE00800693 /* Main.storyboard */,
 				D631EBF627A581BF00800693 /* Assets.xcassets */,
 			);
@@ -473,6 +476,7 @@
 				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,
 				D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */,
 				D69EC37827AA67E100290B18 /* MeTalkViewController.swift in Sources */,
+				D6543DBD27B0DC6E00444454 /* MeTalkProfileChildView.swift in Sources */,
 				D69EC37627AA66D400290B18 /* MeTalkUserListViewController.swift in Sources */,
 				D69EC38427AAB04400290B18 /* ProfileImageData.swift in Sources */,
 				D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */,
