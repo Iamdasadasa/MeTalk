@@ -28,7 +28,7 @@ class MeTalkProfileChildView:UIView{
     override func layoutSubviews() {
         super.layoutSubviews()
         
-        TitleLabel.font = TitleLabel.font.withSize(TitleLabel.bounds.width)
+        TitleLabel.font = TitleLabel.font.withSize(TitleLabel.bounds.width * 0.13)
         ///valueLabelの値のサイズはTitleLabelの値のサイズの半分
         valueLabel.font = valueLabel.font.withSize(TitleLabel.font.pointSize * 0.5)
     }
@@ -109,8 +109,9 @@ class MeTalkProfileChildView:UIView{
         ///タイトルラベル
         TitleLabel.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
         TitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
-        TitleLabel.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.4).isActive = true
+//        TitleLabel.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.4).isActive = true
         TitleLabel.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.3).isActive = true
+        TitleLabel.widthAnchor.constraint(equalTo: self.widthAnchor).isActive = true
         ///値ラベル
         valueLabel.topAnchor.constraint(equalTo: self.TitleLabel.bottomAnchor).isActive = true
         valueLabel.leadingAnchor.constraint(equalTo: self.TitleLabel.leadingAnchor).isActive = true

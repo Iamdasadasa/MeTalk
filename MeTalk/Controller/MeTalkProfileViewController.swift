@@ -25,10 +25,15 @@ class MeTalkProfileViewController:UIViewController{
     let host = "gs://metalk-f132e.appspot.com"
     
     override func viewDidLoad() {
-        self.view = meTalkProfileView
         ///デリゲート委譲
         meTalkProfileView.delegate = self
+
     }
+    
+    override func viewDidLayoutSubviews() {
+        self.view = meTalkProfileView
+    }
+    
     ///※リスナーハンドラーを使用して画面が表示される前にUIDを取ってくる※
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)

@@ -18,15 +18,17 @@ class  MeTalkProfileView:UIView{
     var objectMedianValue:CGFloat?
     
     let nickNameItemView = MeTalkProfileChildView()
-    let sexItemView = MeTalkProfileChildView()
+    let AboutMeItemView = MeTalkProfileChildView()
     let ageItemView = MeTalkProfileChildView()
+    let areaItemView = MeTalkProfileChildView()
+    
+
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .black
         autoLayoutSetUp()
         autoLayout()
-        
     }
     
     //※layoutSubviews レイアウト描写が更新された後※
@@ -44,6 +46,7 @@ class  MeTalkProfileView:UIView{
     }
     
 //※初期化処理※
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -132,6 +135,73 @@ class  MeTalkProfileView:UIView{
 //        delegate?.profileNameButtonTappedDelegate()
     }
     
+    ///変更不可情報ラベル
+    let cantBeChangedInfoTitleLabel:UILabel = {
+        let returnLabel = UILabel()
+        returnLabel.text = "基本情報"
+        returnLabel.textColor = .white
+        returnLabel.backgroundColor = .clear
+        returnLabel.textAlignment = NSTextAlignment.left
+        returnLabel.adjustsFontSizeToFitWidth = true
+        return returnLabel
+    }()
+    
+    ///性別ImageView
+    let sexImageView:UIImageView = {
+        let image:UIImage? = UIImage(named: "ManWomanSex")
+        let returnImageView:UIImageView! = UIImageView(image: image)
+
+        return returnImageView
+    }()
+    
+    ///性別ラベル
+    let sexInfoLabel:UILabel = {
+        let returnLabel = UILabel()
+        returnLabel.text = "まだ値は分かりません"
+        returnLabel.textColor = .white
+        returnLabel.backgroundColor = .clear
+        returnLabel.textAlignment = NSTextAlignment.center
+        returnLabel.adjustsFontSizeToFitWidth = true
+        return returnLabel
+    }()
+    
+    ///ふぁぼImageView
+    let favImageView:UIImageView = {
+        let image:UIImage? = UIImage(named: "Heart")
+        let returnImageView:UIImageView! = UIImageView(image: image)
+
+        return returnImageView
+    }()
+    
+    ///ふぁぼラベル
+    let favInfoLabel:UILabel = {
+        let returnLabel = UILabel()
+        returnLabel.text = "まだ値は分かりません"
+        returnLabel.textColor = .white
+        returnLabel.backgroundColor = .clear
+        returnLabel.textAlignment = NSTextAlignment.center
+        returnLabel.adjustsFontSizeToFitWidth = true
+        return returnLabel
+    }()
+    
+    ///開始日ImageView
+    let startDateImageView:UIImageView = {
+        let image:UIImage? = UIImage(named: "Calender")
+        let returnImageView:UIImageView! = UIImageView(image: image)
+
+        return returnImageView
+    }()
+    
+    ///開始日ラベル
+    let startDateInfoLabel:UILabel = {
+        let returnLabel = UILabel()
+        returnLabel.text = "まだ値は分かりません"
+        returnLabel.textColor = .white
+        returnLabel.backgroundColor = .clear
+        returnLabel.textAlignment = NSTextAlignment.center
+        returnLabel.adjustsFontSizeToFitWidth = true
+        return returnLabel
+    }()
     
     //※レイアウト設定※
     func autoLayoutSetUp() {
@@ -142,10 +212,16 @@ class  MeTalkProfileView:UIView{
         addSubview(profileTitleLabel)
         addSubview(personalInformationLabel)
         addSubview(nickNameItemView)
-        addSubview(sexItemView)
+        addSubview(AboutMeItemView)
         addSubview(ageItemView)
-        //addSubview(placeTextField)
-
+        addSubview(areaItemView)
+        addSubview(cantBeChangedInfoTitleLabel)
+        addSubview(favImageView)
+        addSubview(favInfoLabel)
+        addSubview(sexImageView)
+        addSubview(startDateImageView)
+        addSubview(sexInfoLabel)
+        addSubview(startDateInfoLabel)
 
         ///UIオートレイアウトと競合させない処理
         nickNameItemView.translatesAutoresizingMaskIntoConstraints = false
@@ -153,12 +229,19 @@ class  MeTalkProfileView:UIView{
         profileImageButton.translatesAutoresizingMaskIntoConstraints = false
         profileTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         personalInformationLabel.translatesAutoresizingMaskIntoConstraints = false
-        sexItemView.translatesAutoresizingMaskIntoConstraints = false
+        AboutMeItemView.translatesAutoresizingMaskIntoConstraints = false
         ageItemView.translatesAutoresizingMaskIntoConstraints = false
+        areaItemView.translatesAutoresizingMaskIntoConstraints = false
+        cantBeChangedInfoTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        sexImageView.translatesAutoresizingMaskIntoConstraints = false
+        favImageView.translatesAutoresizingMaskIntoConstraints = false
+        startDateImageView.translatesAutoresizingMaskIntoConstraints = false
+        sexInfoLabel.translatesAutoresizingMaskIntoConstraints = false
+        favInfoLabel.translatesAutoresizingMaskIntoConstraints = false
+        startDateInfoLabel.translatesAutoresizingMaskIntoConstraints = false
     }
     //※レイアウト※
     func autoLayout() {
-        
         profileTitleLabel.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor).isActive = true
         profileTitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10).isActive = true
         profileTitleLabel.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.05).isActive = true
@@ -180,21 +263,61 @@ class  MeTalkProfileView:UIView{
         personalInformationLabel.bottomAnchor.constraint(equalTo: self.profileImageButton.bottomAnchor).isActive = true
         
         nickNameItemView.topAnchor.constraint(equalTo: self.profileImageButton.bottomAnchor,constant: 50).isActive = true
-        nickNameItemView.leadingAnchor.constraint(equalTo: self.profileImageButton.leadingAnchor).isActive = true
-        nickNameItemView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+//        nickNameItemView.leadingAnchor.constraint(equalTo: self.profileImageButton.leadingAnchor).isActive = true
+//        nickNameItemView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+        nickNameItemView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 5).isActive = true
+        nickNameItemView.trailingAnchor.constraint(equalTo: self.centerXAnchor, constant: -2.5).isActive = true
         nickNameItemView.heightAnchor.constraint(equalTo: self.profileImageButton.heightAnchor).isActive = true
         
-        sexItemView.topAnchor.constraint(equalTo: self.nickNameItemView.bottomAnchor, constant: 10).isActive = true
-        sexItemView.leadingAnchor.constraint(equalTo: self.nickNameItemView.leadingAnchor).isActive = true
-        sexItemView.trailingAnchor.constraint(equalTo: self.nickNameItemView.trailingAnchor).isActive = true
-        sexItemView.heightAnchor.constraint(equalTo: self.nickNameItemView.heightAnchor).isActive = true
+        AboutMeItemView.topAnchor.constraint(equalTo: self.nickNameItemView.topAnchor).isActive = true
+        AboutMeItemView.leadingAnchor.constraint(equalTo: self.centerXAnchor, constant: 2.5).isActive = true
+        AboutMeItemView.trailingAnchor.constraint(equalTo: self.trailingAnchor,constant: -5).isActive = true
+        AboutMeItemView.heightAnchor.constraint(equalTo: self.nickNameItemView.heightAnchor).isActive = true
         
-        ageItemView.topAnchor.constraint(equalTo: self.sexItemView.bottomAnchor, constant: 10).isActive = true
+        ageItemView.topAnchor.constraint(equalTo: self.nickNameItemView.bottomAnchor, constant: 5).isActive = true
         ageItemView.leadingAnchor.constraint(equalTo: self.nickNameItemView.leadingAnchor).isActive = true
         ageItemView.trailingAnchor.constraint(equalTo: self.nickNameItemView.trailingAnchor).isActive = true
         ageItemView.heightAnchor.constraint(equalTo: self.nickNameItemView.heightAnchor).isActive = true
 
+        areaItemView.topAnchor.constraint(equalTo: self.AboutMeItemView.bottomAnchor, constant: 5).isActive = true
+        areaItemView.leadingAnchor.constraint(equalTo: self.centerXAnchor, constant: 2.5).isActive = true
+        areaItemView.trailingAnchor.constraint(equalTo: self.trailingAnchor,constant: -5).isActive = true
+        areaItemView.heightAnchor.constraint(equalTo: self.AboutMeItemView.heightAnchor).isActive = true
         
+        cantBeChangedInfoTitleLabel.topAnchor.constraint(equalTo: self.ageItemView.bottomAnchor, constant: 5).isActive = true
+        cantBeChangedInfoTitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 5).isActive = true
+        cantBeChangedInfoTitleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -5).isActive = true
+        cantBeChangedInfoTitleLabel.heightAnchor.constraint(equalTo: self.nickNameItemView.heightAnchor, multiplier: 0.25).isActive = true
+        
+        favImageView.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        favImageView.topAnchor.constraint(equalTo: self.cantBeChangedInfoTitleLabel.bottomAnchor, constant: 5).isActive = true
+        favImageView.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.3).isActive = true
+        favImageView.heightAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.3).isActive = true
+        
+        favInfoLabel.topAnchor.constraint(equalTo: self.favImageView.bottomAnchor, constant: 1).isActive = true
+        favInfoLabel.widthAnchor.constraint(equalTo: self.favImageView.widthAnchor).isActive = true
+        favInfoLabel.heightAnchor.constraint(equalTo: cantBeChangedInfoTitleLabel.heightAnchor).isActive = true
+        favInfoLabel.leadingAnchor.constraint(equalTo: self.favImageView.leadingAnchor).isActive = true
+        
+        sexImageView.topAnchor.constraint(equalTo: self.favImageView.topAnchor).isActive = true
+        sexImageView.widthAnchor.constraint(equalTo: self.favImageView.widthAnchor).isActive = true
+        sexImageView.heightAnchor.constraint(equalTo: self.favImageView.heightAnchor).isActive = true
+        sexImageView.leadingAnchor.constraint(equalTo: self.cantBeChangedInfoTitleLabel.leadingAnchor).isActive = true
+        
+        sexInfoLabel.topAnchor.constraint(equalTo: self.sexImageView.bottomAnchor, constant: 1).isActive = true
+        sexInfoLabel.widthAnchor.constraint(equalTo: self.sexImageView.widthAnchor).isActive = true
+        sexInfoLabel.heightAnchor.constraint(equalTo: cantBeChangedInfoTitleLabel.heightAnchor).isActive = true
+        sexInfoLabel.leadingAnchor.constraint(equalTo: self.sexImageView.leadingAnchor).isActive = true
+        
+        startDateImageView.topAnchor.constraint(equalTo: self.sexImageView.topAnchor).isActive = true
+        startDateImageView.widthAnchor.constraint(equalTo: self.sexImageView.widthAnchor).isActive = true
+        startDateImageView.heightAnchor.constraint(equalTo: self.sexImageView.heightAnchor).isActive = true
+        startDateImageView.trailingAnchor.constraint(equalTo: self.cantBeChangedInfoTitleLabel.trailingAnchor).isActive = true
+        
+        startDateInfoLabel.topAnchor.constraint(equalTo: self.startDateImageView.bottomAnchor, constant: 1).isActive = true
+        startDateInfoLabel.widthAnchor.constraint(equalTo: self.startDateImageView.widthAnchor).isActive = true
+        startDateInfoLabel.heightAnchor.constraint(equalTo: cantBeChangedInfoTitleLabel.heightAnchor).isActive = true
+        startDateInfoLabel.trailingAnchor.constraint(equalTo: self.startDateImageView.trailingAnchor).isActive = true
     }
 }
 
@@ -209,7 +332,7 @@ extension MeTalkProfileView{
     }
 
     override func draw(_ rect: CGRect) {
-        // テキストフィールド間の直線 -------------------------------------
+        // オブジェクト間の直線 -------------------------------------
         guard let objectMedianValue = self.objectMedianValue else { return }
         // UIBezierPath のインスタンス生成
         let line = UIBezierPath();
