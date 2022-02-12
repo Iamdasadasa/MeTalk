@@ -24,10 +24,26 @@ class MeTalkProfileViewController:UIViewController{
     let storage = Storage.storage()
     let host = "gs://metalk-f132e.appspot.com"
     
+    
+    let cloudDB = Firestore.firestore()
+    
     override func viewDidLoad() {
         ///デリゲート委譲
         meTalkProfileView.delegate = self
+        meTalkProfileView.nickNameItemView.delegate = self
+        meTalkProfileView.AboutMeItemView.delegate = self
+        meTalkProfileView.ageItemView.delegate = self
+        meTalkProfileView.areaItemView.delegate = self
+        ///画面表示前にユーザー情報を取得
+        userInfoFireStorege(callback: {document in
+            ///ユーザー情報の取得が完了するまで下記は呼ばれません
 
+            guard let document = document else {
+                return
+            }
+            self.userInfoDataSetup(userInfoData: document)
+            print("\(document["nickname"] as? String)これは実行されていますか？")
+        })
     }
     
     override func viewDidLayoutSubviews() {
@@ -136,6 +152,82 @@ extension MeTalkProfileViewController{
                 callback(image)
             }
         }
+    }
+}
+
+extension MeTalkProfileViewController:MeTalkProfileChildViewDelegate{
+    func selfTappedclearButton(tag: Int) {
+        switch tag{
+        case 1:
+            print("うんちがぶり")
+        case 2:
+            
+        case 3:
+            
+        case 4:
+            
+        default:break
+        }
+        
+    }
+    
+}
+
+///各情報をFirebaseから取得してくる
+extension MeTalkProfileViewController{
+    func userInfoFireStorege(callback: @escaping  ([String:Any]?) -> Void) {
+
+        
+        guard let uid = Auth.auth().currentUser?.uid else {
+            print("UIDの取得ができませんでした")
+            return
+        }
+        ///ここでデータにアクセスしている（非同期処理）
+        let userDocuments = cloudDB.collection("users").document(uid)
+        ///getDocumentプロパティでコレクションデータからオブジェクトとしてデータを取得
+        userDocuments.getDocument{ (documents,err) in
+            if let document = documents, document.exists {
+                ///オブジェクトに対して.dataプロパティを使用して辞書型としてコールバック関数で返す
+                callback(document.data())
+            } else {
+                print("Document does not exist")
+            }
+        }
+    }
+}
+
+
+extension MeTalkProfileViewController{
+    
+    func userInfoDataSetup(userInfoData:[String:Any]) {
+        let dateFormatter = DateFormatter()
+        dateFormatter.locale = .init(identifier: "en_US_POSIX")
+        dateFormatter.dateFormat = "yyyy/MM/dd HH:mm"
+        dateFormatter.locale = Locale(identifier: "ja_JP")
+  
+        
+        let dateUnix = userInfoData["createdAt"] as! Timestamp
+        let date = dateUnix.dateValue()
+        
+        
+        let userCreatedAtdate:String = dateFormatter.string(from: date as Date)
+        
+        self.meTalkProfileView.nickNameItemView.valueLabel.text = userInfoData["nickname"] as? String
+        
+        switch userInfoData["Sex"] as? Int {
+        case 0:
+            self.meTalkProfileView.sexInfoLabel.text = "設定なし"
+        case 1:
+            self.meTalkProfileView.sexInfoLabel.text = "男性"
+        case 2:
+            self.meTalkProfileView.sexInfoLabel.text = "女性"
+        default:break
+        }
+        self.meTalkProfileView.startDateInfoLabel.text = userCreatedAtdate
+        
+        self.meTalkProfileView.personalInformationLabel.text = userInfoData["nickname"] as? String
+        
+//        self.meTalkProfileView.AboutMeItemView.valueLabel.text = userInfoData[""] as? String
     }
     
 }

@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 protocol MeTalkProfileChildViewDelegate:AnyObject{
-    func selfTappedclearButton()
+    func selfTappedclearButton(tag:Int)
 }
 
 class MeTalkProfileChildView:UIView{
@@ -54,13 +54,12 @@ class MeTalkProfileChildView:UIView{
     }()
     
     @objc func selfClearButtonTapped(){
-        delegate?.selfTappedclearButton()
+        delegate?.selfTappedclearButton(tag: self.tag)
     }
     
     ///タイトルラベル
     let TitleLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.text = "ニックネーム"
         returnLabel.textColor = .white
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
@@ -71,7 +70,8 @@ class MeTalkProfileChildView:UIView{
     ///値ラベル
     let valueLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.text = "まだ用意していません値"
+        returnLabel.text = ""
+        returnLabel.font = UIFont.boldSystemFont(ofSize: 200.0)
         returnLabel.textColor = .gray
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left

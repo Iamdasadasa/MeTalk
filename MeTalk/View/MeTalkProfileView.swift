@@ -29,6 +29,7 @@ class  MeTalkProfileView:UIView{
         self.backgroundColor = .black
         autoLayoutSetUp()
         autoLayout()
+        viewSetUp()
     }
     
     //※layoutSubviews レイアウト描写が更新された後※
@@ -157,7 +158,7 @@ class  MeTalkProfileView:UIView{
     ///性別ラベル
     let sexInfoLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.text = "まだ値は分かりません"
+        returnLabel.text = ""
         returnLabel.textColor = .white
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.center
@@ -176,7 +177,7 @@ class  MeTalkProfileView:UIView{
     ///ふぁぼラベル
     let favInfoLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.text = "まだ値は分かりません"
+        returnLabel.text = ""
         returnLabel.textColor = .white
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.center
@@ -195,7 +196,7 @@ class  MeTalkProfileView:UIView{
     ///開始日ラベル
     let startDateInfoLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.text = "まだ値は分かりません"
+        returnLabel.text = ""
         returnLabel.textColor = .white
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.center
@@ -351,6 +352,19 @@ extension MeTalkProfileView{
     }
 }
 
+///Viewセットアップ
 extension MeTalkProfileView{
+    func viewSetUp(){
+        ///タイトルセットアップ
+        self.nickNameItemView.TitleLabel.text = "ニックネーム"
+        self.AboutMeItemView.TitleLabel.text = "ひとこと"
+        self.ageItemView.TitleLabel.text = "年齢"
+        self.areaItemView.TitleLabel.text = "住まい"
+        ///View判断タグセットアップ
+        self.nickNameItemView.tag = 1
+        self.AboutMeItemView.tag = 2
+        self.ageItemView.tag = 3
+        self.areaItemView.tag = 4
+    }
     
 }
