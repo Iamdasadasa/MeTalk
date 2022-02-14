@@ -21,6 +21,7 @@ pod 'Firebase/Firestore'
 pod 'Firebase/Auth'
 pod 'Firebase/Database'
 pod 'Firebase/Storage'
-
+#ここから一般ライブラリ
+pod 'FloatingPanel'
 
 end

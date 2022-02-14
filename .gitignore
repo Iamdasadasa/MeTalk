@@ -17,6 +17,7 @@ DerivedData
 *.xcuserstate
 *.UserInterfaceState.xcuserstate
 MeTalk.xcworkspace/xcuserdata/kojiromaruyama.xcuserdatad/UserInterfaceState.xcuserstate
+*./xcschemes/xcschememanagement.plist
 
 # CocoaPod
 Pods/*
