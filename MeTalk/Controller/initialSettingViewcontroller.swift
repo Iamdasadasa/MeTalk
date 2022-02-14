@@ -175,14 +175,6 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
     ///   - view: 呼び出し元View
     /// - Returns: none
     func dicisionButtonTappedAction(button: UIButton, view: InitialSettingView) {
-        ///もしもニックネームをLogoutにしたらログアウトされる処理(開発用)
-//        if initialSettingView.nicknameTextField.text == "Logout"{
-//            do {
-//                try Auth.auth().signOut()
-//            } catch let signOutError as NSError {
-//                print("SignOut Error: %@", signOutError)
-//            }
-//        }
         ///匿名登録処理
         Auth.auth().signInAnonymously { authResult, error in
             ///匿名登録自体の失敗（Authentication）
@@ -215,7 +207,8 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
                     UIApplication.shared.windows.filter{$0.isKeyWindow}.first?.addSubview(self.loadingView)
                     ///遷移先ページのインスタンス
                     let mainTabBarController = MainTabBarController()
-                    mainTabBarController.modalTransitionStyle = .partialCurl
+                    //.partialCurlにするとバグるのでflipHorizontalに変更
+                    mainTabBarController.modalTransitionStyle = .flipHorizontal
                     mainTabBarController.modalPresentationStyle = .fullScreen
                     ///3秒後に execute のコードが実行されるようにする。
                     DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3), execute: {
