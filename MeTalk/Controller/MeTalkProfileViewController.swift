@@ -22,6 +22,7 @@ class MeTalkProfileViewController:UIViewController{
     ///インスタンス化（View）
     let meTalkProfileView = MeTalkProfileView()
     ///インスタンス化（Model）
+    let userDataManagedData = UserDataManagedData()
     let storage = Storage.storage()
     let host = "gs://metalk-f132e.appspot.com"
     
@@ -29,8 +30,6 @@ class MeTalkProfileViewController:UIViewController{
     var fpc = FloatingPanelController()
     ///後ろにいるビューコントローラー（このビューコントローラー）をタップできないようにするためのView
     let semiModalTranslucentView = SemiModalTranslucentView()
-    
-    let cloudDB = Firestore.firestore()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,8 +47,7 @@ class MeTalkProfileViewController:UIViewController{
         fpc.isRemovalInteractionEnabled  =  true
         fpc.backdropView.dismissalTapGestureRecognizer.isEnabled = true
         ///画面表示前にユーザー情報を取得
-        userInfoFireStorege(callback: {document in
-            ///ユーザー情報の取得が完了するまで下記は呼ばれません
+        userDataManagedData.userInfoDataGet(callback: {document in
             guard let document = document else {
                 return
             }
@@ -193,32 +191,6 @@ extension MeTalkProfileViewController:MeTalkProfileChildViewDelegate{
         
     }
     
-}
-
-///各情報をFirebaseから取得してくる
-extension MeTalkProfileViewController{
-    ///四つの変更項目のどれかが押されたら起動する
-    /// - Parameters:
-    /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
-    /// 　　　　　　（ニックネーム、性別等が含まれる）
-    /// - Returns:
-    func userInfoFireStorege(callback: @escaping  ([String:Any]?) -> Void) {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            print("UIDの取得ができませんでした")
-            return
-        }
-        ///ここでデータにアクセスしている（非同期処理）
-        let userDocuments = cloudDB.collection("users").document(uid)
-        ///getDocumentプロパティでコレクションデータからオブジェクトとしてデータを取得
-        userDocuments.getDocument{ (documents,err) in
-            if let document = documents, document.exists {
-                ///オブジェクトに対して.dataプロパティを使用して辞書型としてコールバック関数で返す
-                callback(document.data())
-            } else {
-                print("Document does not exist")
-            }
-        }
-    }
 }
 
 
