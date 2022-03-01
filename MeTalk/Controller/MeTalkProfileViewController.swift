@@ -19,6 +19,8 @@ class MeTalkProfileViewController:UIViewController{
     var UID:String?
     ///カメラピッカーの定義
     let picker = UIImagePickerController()
+    ///インスタンス化(Controller)
+    var contentVC:UIViewController?
     ///インスタンス化（View）
     let meTalkProfileView = MeTalkProfileView()
     ///インスタンス化（Model）
@@ -39,9 +41,9 @@ class MeTalkProfileViewController:UIViewController{
         meTalkProfileView.AboutMeItemView.delegate = self
         meTalkProfileView.ageItemView.delegate = self
         meTalkProfileView.areaItemView.delegate = self
-        ///半モーダルの初期設定
-        let contentVC = SemiModalViewController()
-        fpc.set(contentViewController: contentVC)
+//        ///半モーダルの初期設定
+//        contentVC = SemiModalViewController()
+//        fpc.set(contentViewController: contentVC)
         fpc.delegate = self
         fpc.layout = CustomFloatingPanelLayout()
         fpc.isRemovalInteractionEnabled  =  true
@@ -59,22 +61,24 @@ class MeTalkProfileViewController:UIViewController{
         self.view = meTalkProfileView
     }
     
-    ///※リスナーハンドラーを使用して画面が表示される前にUIDを取ってくる※
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        handle = Auth.auth().addStateDidChangeListener { auth, user in
-            self.UID = user?.uid
             ///自身のプロフィール画像を取ってくる
-            self.contentOfFIRStorage(callback: { image in
-                self.meTalkProfileView.profileImageButton.setImage(image, for: .normal)
+            self.userDataManagedData.contentOfFIRStorageGet(callback: { image in
+                ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
+                if image != nil {
+                    self.meTalkProfileView.profileImageButton.setImage(image, for: .normal)
+                ///コールバック関数でNilが返ってきたら初期画像を設定
+                } else {
+                    self.meTalkProfileView.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
+                }
             })
-        }
     }
-    ///リスナーの破棄
+    
     override func viewWillDisappear(_ animated: Bool) {
             super.viewWillDisappear(animated)
-            Auth.auth().removeStateDidChangeListener(handle!)
         }
     
 }
@@ -110,20 +114,15 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
     ///- info: おそらく選択されたイメージ
     /// - Returns: none
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-
+        ///pickerが取得した画像データをUIimageに変換して格納
         if let pickerImage = info[.originalImage] as? UIImage{
-            var UIimageView = UIImageView()
+            ///UIimageViewをModelインスタンス先で圧縮するためにImageviewをインスタンス化
+            let UIimageView = UIImageView()
             UIimageView.image = pickerImage
-            ///pickerImageを使用した処理
             ///プロフィールイメージ投稿Model
-            guard let UID = UID else { return }
-            let profileImageData = ProfileImageData(userUID: UID, profileImageView: UIimageView)
-            profileImageData.uploadImage()
-            
-            ///カメラピッカーを表示して画像を送信した後にどうしてもこの処理を書きたい
-            UIimageView = profileImageData.imageCompressionReturn()
-            self.meTalkProfileView.profileImageButton.setImage(UIimageView.image, for: .normal)
-            
+            userDataManagedData.contentOfFIRStorageUpload(callback: { pressureImage in
+                self.meTalkProfileView.profileImageButton.setImage(pressureImage, for: .normal)
+            }, UIimagedata: UIimageView)
             ///閉じる
             self.dismiss(animated: true, completion: nil)
         }
@@ -138,34 +137,7 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
     }
 }
 
-
-extension MeTalkProfileViewController{
-    ///カメラピッカーで写真が選択された際の処理（デリゲートなので自動で呼ばれる）
-    /// - Parameters:none
-    /// - Returns:
-    ///- callback: Fire Baseから取得したイメージデータ
-    func contentOfFIRStorage(callback: @escaping (UIImage?) -> Void) {
-        guard let UID = self.UID else { return }
-        ///Firebaseのストレージアクセス
-        storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg")
-            .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
-            ///ユーザーIDのプロフィール画像を設定していなかったら初期画像を設定
-            if error != nil {
-                self.meTalkProfileView.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
-                print(error.debugDescription)
-                return
-            }
-            ///ユーザーIDのプロフィール画像を設定していたらその画像を取得してリターン
-            if let imageData = data {
-                let image = UIImage(data: imageData)
-                callback(image)
-            }
-        }
-    }
-}
-
 extension MeTalkProfileViewController:MeTalkProfileChildViewDelegate{
-    
     ///四つの変更項目のどれかが押されたら起動する
     /// - Parameters:
     /// - tag:タグがViewから渡されてくる。このタグによってどの項目かを判断している
@@ -179,11 +151,17 @@ extension MeTalkProfileViewController:MeTalkProfileChildViewDelegate{
         self.view.addSubview(semiModalTranslucentView)
         switch tag{
         case 1:
+            let semiModalViewController = SemiModalViewController(viewFlg: 1)
+            fpc.set(contentViewController: semiModalViewController)
             fpc.addPanel(toParent: self)
         case 2:
-            print("うんちがぶり")
+            let semiModalViewController = SemiModalViewController(viewFlg: 2)
+            fpc.set(contentViewController: semiModalViewController)
+            fpc.addPanel(toParent: self)
         case 3:
-            print("うんちがぶり")
+            let semiModalViewController = SemiModalViewController(viewFlg: 3)
+            fpc.set(contentViewController: semiModalViewController)
+            fpc.addPanel(toParent: self)
         case 4:
             print("うんちがぶり")
         default:break
@@ -195,7 +173,7 @@ extension MeTalkProfileViewController:MeTalkProfileChildViewDelegate{
 
 
 extension MeTalkProfileViewController{
-    ///変更できない項目の初期セットアップ
+    ///各情報のSetUp
     /// - Parameters:
     /// - userInfoData:画面表示の際に取得してきているユーザーデータ
     /// - Returns:
@@ -220,9 +198,23 @@ extension MeTalkProfileViewController{
             self.meTalkProfileView.sexInfoLabel.text = "女性"
         default:break
         }
+        ///文字列に改行処理を入れる
+        let aboutMeMassageValue = userInfoData["aboutMeMassage"] as? String
+        let resultValue:String!
+        guard let aboutMeMassageValue = aboutMeMassageValue else { return }
+        if aboutMeMassageValue.count >= 15 {
+            resultValue = aboutMeMassageValue.prefix(15) + "\n" + aboutMeMassageValue.suffix(aboutMeMassageValue.count - 15)
+            print(resultValue)
+        } else {
+            resultValue = aboutMeMassageValue
+        }
+        guard let resultValue = resultValue else {return}
         ///ニックネームのラベルとニックネームの項目にデータセット
         self.meTalkProfileView.nickNameItemView.valueLabel.text = userInfoData["nickname"] as? String
         self.meTalkProfileView.personalInformationLabel.text = userInfoData["nickname"] as? String
+        ///ひとことにデータセット
+        self.meTalkProfileView.AboutMeItemView.valueLabel.text = resultValue
+
     }
     
 }
@@ -235,9 +227,12 @@ extension MeTalkProfileViewController:FloatingPanelControllerDelegate{
     }
     ///モーダルが特定の位置に来たときに処理を行う
     func floatingPanelWillEndDragging(_ fpc: FloatingPanelController, withVelocity velocity: CGPoint, targetState: UnsafeMutablePointer<FloatingPanelState>) {
+
         ///三段階中の.tipの高さにきたら処理
-        if targetState.pointee == .tip{
+        if targetState.pointee == .half{
             removesemiModal()
+            ///FpcのViewを破棄
+            self.fpc.view.removeFromSuperview()
         }
     }
     ///fpcを閉じる
@@ -248,8 +243,16 @@ extension MeTalkProfileViewController:FloatingPanelControllerDelegate{
     func floatingPanelWillRemove(_ fpc: FloatingPanelController) {
         ///後ろのブラービューを破棄
         semiModalTranslucentView.removeFromSuperview()
+        ///ユーザー情報を再取得
+        userDataManagedData.userInfoDataGet(callback: {document in
+            guard let document = document else {
+                return
+            }
+            self.userInfoDataSetup(userInfoData: document)
+        })
         ///タブバーコントローラーを表示
         self.tabBarController?.tabBar.isHidden = false
+
     }
 
     

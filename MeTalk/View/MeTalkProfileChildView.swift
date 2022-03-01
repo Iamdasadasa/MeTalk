@@ -67,6 +67,13 @@ class MeTalkProfileChildView:UIView{
         return returnLabel
     }()
     
+    ///編集イメージビュー
+    let editImageView:UIImageView = {
+        let returnImageView = UIImageView()
+        returnImageView.image = UIImage(named: "edit")
+        return returnImageView
+    }()
+    
     ///値ラベル
     let valueLabel:UILabel = {
         let returnLabel = UILabel()
@@ -76,13 +83,8 @@ class MeTalkProfileChildView:UIView{
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
         returnLabel.adjustsFontSizeToFitWidth = true
+        returnLabel.numberOfLines = 0
         return returnLabel
-    }()
-    
-    ///イメージ
-    let image:UIImageView = {
-        let returnUIImageView = UIImageView()
-        return returnUIImageView
     }()
     
     //※レイアウト設定※
@@ -91,13 +93,13 @@ class MeTalkProfileChildView:UIView{
         addSubview(selfClearButton)
         addSubview(TitleLabel)
         addSubview(valueLabel)
-        addSubview(image)
+        addSubview(editImageView)
 
         ///UIオートレイアウトと競合させない処理
         selfClearButton.translatesAutoresizingMaskIntoConstraints = false
         TitleLabel.translatesAutoresizingMaskIntoConstraints = false
         valueLabel.translatesAutoresizingMaskIntoConstraints = false
-        image.translatesAutoresizingMaskIntoConstraints = false
+        editImageView.translatesAutoresizingMaskIntoConstraints = false
     }
     //※レイアウト※
     func autoLayout() {
@@ -111,12 +113,17 @@ class MeTalkProfileChildView:UIView{
         TitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
 //        TitleLabel.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.4).isActive = true
         TitleLabel.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.3).isActive = true
-        TitleLabel.widthAnchor.constraint(equalTo: self.widthAnchor).isActive = true
+        TitleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
         ///値ラベル
         valueLabel.topAnchor.constraint(equalTo: self.TitleLabel.bottomAnchor).isActive = true
         valueLabel.leadingAnchor.constraint(equalTo: self.TitleLabel.leadingAnchor).isActive = true
         valueLabel.widthAnchor.constraint(equalTo: self.TitleLabel.widthAnchor).isActive = true
         valueLabel.heightAnchor.constraint(equalTo: self.TitleLabel.heightAnchor).isActive = true
+        ///編集イメージビュー
+        editImageView.heightAnchor.constraint(equalTo: TitleLabel.heightAnchor, multiplier: 0.85).isActive = true
+        editImageView.widthAnchor.constraint(equalTo: self.editImageView.heightAnchor).isActive = true
+        editImageView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+        editImageView.topAnchor.constraint(equalTo: self.TitleLabel.topAnchor).isActive = true
         
     }
 }

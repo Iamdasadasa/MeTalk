@@ -15,6 +15,7 @@ class initialSettingViewcontroller:UIViewController{
     let loadingView = LoadingView()
     ///インスタンス化（Model）
     let initialSettingData = InitialSettingData()
+    let userDataManagedData = UserDataManagedData()
     ///ボタン押下中フラグ
     var buttonPushingFlg:Int? = nil
     ///性別タグNo格納
@@ -176,48 +177,24 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
     /// - Returns: none
     func dicisionButtonTappedAction(button: UIButton, view: InitialSettingView) {
         ///匿名登録処理
-        Auth.auth().signInAnonymously { authResult, error in
-            ///匿名登録自体の失敗（Authentication）
-            guard let user = authResult?.user else {
-            let dialog = UIAlertController(title: "新規登録失敗", message: error?.localizedDescription, preferredStyle: .alert)
-            dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                return
-            }
-            ///性別フラグが格納されていない時の処理（多分ありえない）
-            guard let sexNo = self.SexNo else {
-                print("なんらかの理由で\(self.SexNo)がNilです。sexButtonTappedAction処理でSexNoに値が格納されているかを確認してください。")
-                return
-            }
-            ///ニックネームと性別の登録処理（Cloud Firestore）
-            Firestore.firestore().collection("users").document(user.uid).setData([
-                "nickname": self.initialSettingView.nicknameTextField.text,
-                "Sex": self.SexNo,
-                "createdAt": FieldValue.serverTimestamp(),
-                "updatedAt": FieldValue.serverTimestamp()
-            ], completion: { error in
-                if let error = error {
-                    ///失敗した場合
-                    let dialog = UIAlertController(title: "ユーザー情報の登録に失敗", message: error.localizedDescription, preferredStyle: .alert)
-                    dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                    self.present(dialog, animated: true, completion: nil)
-                    return
-                } else {
-                    ///成功した場合遷移
-                    ///自身のloadingView をメイン Window の Subview に追加して画面に表示
-                    UIApplication.shared.windows.filter{$0.isKeyWindow}.first?.addSubview(self.loadingView)
-                    ///遷移先ページのインスタンス
-                    let mainTabBarController = MainTabBarController()
-                    //.partialCurlにするとバグるのでflipHorizontalに変更
-                    mainTabBarController.modalTransitionStyle = .flipHorizontal
-                    mainTabBarController.modalPresentationStyle = .fullScreen
-                    ///3秒後に execute のコードが実行されるようにする。
-                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3), execute: {
-                        self.present(mainTabBarController, animated: true, completion: nil)
-                    })
-                
-                }
-            })
-        }
-
+        userDataManagedData.signInAnonymously(callback: {errorFlg in
+            if errorFlg == nil {
+                ///自身のloadingView をメイン Window の Subview に追加して画面に表示
+                UIApplication.shared.windows.filter{$0.isKeyWindow}.first?.addSubview(self.loadingView)
+                ///遷移先ページのインスタンス
+                let mainTabBarController = MainTabBarController()
+                //.partialCurlにするとバグるのでflipHorizontalに変更
+                mainTabBarController.modalTransitionStyle = .flipHorizontal
+                mainTabBarController.modalPresentationStyle = .fullScreen
+                ///3秒後に execute のコードが実行されるようにする。
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3), execute: {
+                    self.present(mainTabBarController, animated: true, completion: nil)
+                })
+            } else {
+                ///コールバック関数でエラーが返ってきた場合は全てこちらで処理。
+                let dialog = UIAlertController(title: "ユーザー情報の登録に失敗", message: "もう一度やり直してください", preferredStyle: .alert)
+                dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+                self.present(dialog, animated: true, completion: nil)
+            }},nickName: self.initialSettingView.nicknameTextField.text, SexNo: self.SexNo)
     }
 }
