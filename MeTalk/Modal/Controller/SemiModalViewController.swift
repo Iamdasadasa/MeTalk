@@ -12,11 +12,12 @@ protocol SemiModalViewControllerProtcol:AnyObject{
     func ButtonTappedActionChildDelegateAction()
 }
 
-class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextFieldModalViewDelegateProtcol,AboutMeTextFieldModalViewDelegateProtcol{
+class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextFieldModalViewDelegateProtcol,AboutMeTextFieldModalViewDelegateProtcol,AgePickerModalViewDelegateProtcol,AreaPickerModalViewDelegateProtcol{
     ///インスタンス化(View)
     let nickNameTextFieldModalView = NickNameTextFieldModalView()
     let aboutMeTextFieldModalView = AboutMeTextFieldModalView()
-    let pickerModalView = PickerModalView()
+    let areaPickerModalView = AreaPickerModalView()
+    let agePickerModalView = AgePickerModalView()
     ///インスタンス化(Model)
     let userDataManageData = UserDataManagedData()
     let modalImageData = ModalImageData()
@@ -53,9 +54,9 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
                 }
                 ///ユーザー名情報をテキストフィールドにセット
                 self.nickNameTextFieldModalView.itemTextField.text = userInfoData["nickname"] as? String
-                ///クローズ画像データをセット
-                self.nickNameTextFieldModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
             })
+            ///クローズ画像データをセット
+            self.nickNameTextFieldModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
             NotificationCenter.default.addObserver(self,
               selector: #selector(textFieldDidChange(notification:)),
@@ -76,20 +77,48 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
                 }
                 ///ひとことをテキストフィールドにセット
                 self.aboutMeTextFieldModalView.itemTextField.text = userInfoData["aboutMeMassage"] as? String
-                ///クローズ画像データをセット
-                self.aboutMeTextFieldModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
             })
+            ///クローズ画像データをセット
+            self.aboutMeTextFieldModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
             NotificationCenter.default.addObserver(self,
               selector: #selector(textFieldDidChange(notification:)),
               name: UITextField.textDidChangeNotification,
               object: aboutMeTextFieldModalView.itemTextField)
-            ///★viewFlg3は住まい★
+            ///★viewFlg3は年齢★
         } else if viewFlag == 3{
-            self.view = pickerModalView
-            
+            self.view = agePickerModalView
+            ///デリゲート委譲
+            agePickerModalView.delegate = self
+            ///現在の年齢を取得
+            userDataManageData.userInfoDataGet(callback: { userInfoData in
+                guard let userInfoData = userInfoData else {
+                    print("ユーザーデータが取得できませんでした。SemiModalViewController")
+                    return
+                }
+                ///年齢をテキストフィールドにセット
+                self.agePickerModalView.itemTextField.text = userInfoData["age"] as? String
+
+            })
             ///クローズ画像データをセット
-            self.pickerModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
+            self.agePickerModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
+            ///★viewFlg4は住まい★
+        } else if viewFlag == 4{
+            self.view = areaPickerModalView
+            ///デリゲート委譲
+            areaPickerModalView.delegate = self
+            ///現在の住まいを取得
+            userDataManageData.userInfoDataGet(callback: { userInfoData in
+                guard let userInfoData = userInfoData else {
+                    print("ユーザーデータが取得できませんでした。SemiModalViewController")
+                    return
+                }
+                ///住まいをテキストフィールドにセット
+                self.areaPickerModalView.itemTextField.text = userInfoData["area"] as? String
+
+            })
+            ///クローズ画像データをセット
+            self.areaPickerModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
         }
     }
     ///オブザーバー破棄
@@ -193,6 +222,26 @@ extension SemiModalViewController{
     }
     ///クローズボタン画像押下　view: AboutMeTextFieldModalView
     func closeButtonTappedAction(button: UIButton, view: AboutMeTextFieldModalView) {
+        self.delegate?.ButtonTappedActionChildDelegateAction()
+    }
+    ///決定ボタン押下　view: AgePickerModalView
+    func dicisionButtonTappedAction(button: UIButton, view: AgePickerModalView) {
+        ///入力した年齢をUpload
+        userDataManageData.userInfoDataUpload(userData: view.itemTextField.text, dataFlg: 3)
+        self.delegate?.ButtonTappedActionChildDelegateAction()
+    }
+    ///クローズボタン画像押下　view: AgePickerModalView
+    func closeButtonTappedAction(button: UIButton, view: AgePickerModalView) {
+        self.delegate?.ButtonTappedActionChildDelegateAction()
+    }
+    ///決定ボタン押下　view: AreaPickerModalView
+    func dicisionButtonTappedAction(button: UIButton, view: AreaPickerModalView) {
+        ///入力した出身地をUpload
+        userDataManageData.userInfoDataUpload(userData: view.itemTextField.text, dataFlg: 4)
+        self.delegate?.ButtonTappedActionChildDelegateAction()
+    }
+    ///クローズボタン画像押下　view: AreaPickerModalView
+    func closeButtonTappedAction(button: UIButton, view: AreaPickerModalView) {
         self.delegate?.ButtonTappedActionChildDelegateAction()
     }
 }

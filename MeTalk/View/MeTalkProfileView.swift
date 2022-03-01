@@ -22,8 +22,6 @@ class  MeTalkProfileView:UIView{
     let ageItemView = MeTalkProfileChildView()
     let areaItemView = MeTalkProfileChildView()
     
-
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .black

@@ -7,12 +7,12 @@
 
 import UIKit
 
-protocol PickerModalViewDelegateProtcol:AnyObject{
-    func dicisionButtonTappedAction(button:UIButton,view: PickerModalView)
-    func closeButtonTappedAction(button:UIButton,view:PickerModalView)
+protocol AreaPickerModalViewDelegateProtcol:AnyObject{
+    func dicisionButtonTappedAction(button:UIButton,view: AreaPickerModalView)
+    func closeButtonTappedAction(button:UIButton,view:AreaPickerModalView)
 }
 
-class   PickerModalView:UIView{
+class AreaPickerModalView:UIView{
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -27,7 +27,7 @@ class   PickerModalView:UIView{
     }
 //※各定義※
     ///変数宣言
-    weak var delegate: PickerModalViewDelegateProtcol?
+    weak var delegate: AreaPickerModalViewDelegateProtcol?
     var pickerView: UIPickerView = UIPickerView()
         let list: [String] = ["選択しない",
                              "北海道", "青森", "岩手", "宮城", "秋田", "山形", "福島", "茨城", "栃木", "群馬",
@@ -159,7 +159,7 @@ class   PickerModalView:UIView{
 }
 
 // ピッカーの初期設定
-extension PickerModalView : UIPickerViewDelegate, UIPickerViewDataSource {
+extension AreaPickerModalView : UIPickerViewDelegate, UIPickerViewDataSource {
     
     // ピッカービューの列数
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -178,7 +178,7 @@ extension PickerModalView : UIPickerViewDelegate, UIPickerViewDataSource {
 }
 
 ///テキストフィールド装飾
-extension PickerModalView{
+extension AreaPickerModalView{
     ///テキストフィールドの枠線を自作
     override func draw(_ rect: CGRect) {
         // UIBezierPath のインスタンス生成

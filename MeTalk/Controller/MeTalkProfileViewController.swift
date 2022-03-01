@@ -168,7 +168,10 @@ extension MeTalkProfileViewController:MeTalkProfileChildViewDelegate{
             semiModalViewController.delegate = self
             fpc.addPanel(toParent: self)
         case 4:
-            print("うんちがぶり")
+            let semiModalViewController = SemiModalViewController(viewFlg: 4)
+            fpc.set(contentViewController: semiModalViewController)
+            semiModalViewController.delegate = self
+            fpc.addPanel(toParent: self)
         default:break
         }
         
@@ -219,7 +222,15 @@ extension MeTalkProfileViewController{
         self.meTalkProfileView.personalInformationLabel.text = userInfoData["nickname"] as? String
         ///ひとことにデータセット
         self.meTalkProfileView.AboutMeItemView.valueLabel.text = resultValue
-
+        //年齢にデータセット
+        if userInfoData["age"] as? String  == "0" {
+            self.meTalkProfileView.ageItemView.valueLabel.text = "未設定"
+        } else {
+            self.meTalkProfileView.ageItemView.valueLabel.text = userInfoData["age"] as? String
+        }
+        
+        //出身地にデータセット
+        self.meTalkProfileView.areaItemView.valueLabel.text = userInfoData["area"] as? String
     }
     
 }

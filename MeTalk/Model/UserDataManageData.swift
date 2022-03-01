@@ -34,7 +34,7 @@ struct UserDataManagedData{
             Firestore.firestore().collection("users").document(user.uid).setData([
                 "nickname": nickName,
                 "Sex": SexNo,
-                "aboutMeMassage":"よろしくお願いします( ∩'-' )=͟͟͞͞⊃",
+                "aboutMeMassage":"よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃",
                 "area":"未設定",
                 "age":0,
                 "createdAt": FieldValue.serverTimestamp(),
@@ -163,6 +163,12 @@ struct UserDataManagedData{
 //            DBRef.child("users").updateChildValues(["updatedAt":FieldValue.serverTimestamp()])
         case 2: ///ひとこと及び更新日時
             Firestore.firestore().collection("users").document(uid).updateData(["aboutMeMassage":userData])
+            Firestore.firestore().collection("users").document(uid).updateData(["updatedAt":FieldValue.serverTimestamp()])
+        case 3: ///年齢及び更新日時
+            Firestore.firestore().collection("users").document(uid).updateData(["age":userData])
+            Firestore.firestore().collection("users").document(uid).updateData(["updatedAt":FieldValue.serverTimestamp()])
+        case 4: ///出身地及び更新日時
+            Firestore.firestore().collection("users").document(uid).updateData(["area":userData])
             Firestore.firestore().collection("users").document(uid).updateData(["updatedAt":FieldValue.serverTimestamp()])
         default:break
         }
