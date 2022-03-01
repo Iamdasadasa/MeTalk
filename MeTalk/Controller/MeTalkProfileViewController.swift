@@ -13,6 +13,8 @@ import Photos
 import FloatingPanel
 
 class MeTalkProfileViewController:UIViewController{
+
+    
     ///認証状態をリッスンする変数定義
     var handle:AuthStateDidChangeListenerHandle?
     ///UID格納変数
@@ -153,14 +155,17 @@ extension MeTalkProfileViewController:MeTalkProfileChildViewDelegate{
         case 1:
             let semiModalViewController = SemiModalViewController(viewFlg: 1)
             fpc.set(contentViewController: semiModalViewController)
+            semiModalViewController.delegate = self
             fpc.addPanel(toParent: self)
         case 2:
             let semiModalViewController = SemiModalViewController(viewFlg: 2)
             fpc.set(contentViewController: semiModalViewController)
+            semiModalViewController.delegate = self
             fpc.addPanel(toParent: self)
         case 3:
             let semiModalViewController = SemiModalViewController(viewFlg: 3)
             fpc.set(contentViewController: semiModalViewController)
+            semiModalViewController.delegate = self
             fpc.addPanel(toParent: self)
         case 4:
             print("うんちがぶり")
@@ -254,6 +259,14 @@ extension MeTalkProfileViewController:FloatingPanelControllerDelegate{
         self.tabBarController?.tabBar.isHidden = false
 
     }
+}
 
-    
+///SemiModalViewControllerからのデリゲート処理で、二ついれこになっている。大元のデリゲート処理は
+///ここのViewControllerであるMeTalkProfileViewController。さらにそこからfpcで追加したSemiModalViewController。
+///さらにSemiModalViewControllerのViewで追加した各Viewの決定ボタンが大元の発火処理になっている。
+///fpcを取り除く処理をしなくてはならないためにsemiModalViewControllerからさらにこのコントローラにデリゲートして処理を行なっている。
+extension MeTalkProfileViewController:SemiModalViewControllerProtcol{
+    func ButtonTappedActionChildDelegateAction() {
+        fpc.removePanelFromParent(animated: true)
+    }
 }

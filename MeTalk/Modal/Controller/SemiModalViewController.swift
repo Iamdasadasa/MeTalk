@@ -8,6 +8,9 @@
 import Foundation
 import UIKit
 
+protocol SemiModalViewControllerProtcol:AnyObject{
+    func ButtonTappedActionChildDelegateAction()
+}
 
 class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextFieldModalViewDelegateProtcol,AboutMeTextFieldModalViewDelegateProtcol{
     ///インスタンス化(View)
@@ -19,6 +22,9 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
     let modalImageData = ModalImageData()
     ///Viewフラグ判断変数
     var viewFlag:Int
+    
+    ///デリゲート変数
+    weak var delegate:SemiModalViewControllerProtcol?
     
     init(viewFlg:Int){
         self.viewFlag = viewFlg
@@ -173,21 +179,21 @@ extension SemiModalViewController{
     func dicisionButtonTappedAction(button: UIButton, view: NickNameTextFieldModalView) {
         ///入力したユーザー名をUpload
         userDataManageData.userInfoDataUpload(userData: view.itemTextField.text, dataFlg: 1)
-        self.dismiss(animated: true, completion: nil)
+        self.delegate?.ButtonTappedActionChildDelegateAction()
     }
     ///クローズボタン画像押下　view: NickNameTextFieldModalView
     func closeButtonTappedAction(button: UIButton, view: NickNameTextFieldModalView) {
-        self.dismiss(animated: true, completion: nil)
+        self.delegate?.ButtonTappedActionChildDelegateAction()
     }
     ///決定ボタン押下　view: AboutMeTextFieldModalView
     func dicisionButtonTappedAction(button: UIButton, view: AboutMeTextFieldModalView) {
         ///入力したユーザー名をUpload
         userDataManageData.userInfoDataUpload(userData: view.itemTextField.text, dataFlg: 2)
-        self.dismiss(animated: true, completion: nil)
+        self.delegate?.ButtonTappedActionChildDelegateAction()
     }
     ///クローズボタン画像押下　view: AboutMeTextFieldModalView
     func closeButtonTappedAction(button: UIButton, view: AboutMeTextFieldModalView) {
-        self.dismiss(animated: true, completion: nil)
+        self.delegate?.ButtonTappedActionChildDelegateAction()
     }
 }
 ///★★★★★★★★★★★★★★★★★★★★★★★(主にviewFlag == 1と2の画面処理で使用)★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
