@@ -11,8 +11,9 @@ import Firebase
 import FirebaseStorage
 import Photos
 import FloatingPanel
+import CropViewController
 
-class MeTalkProfileViewController:UIViewController{
+class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
 
     
     ///認証状態をリッスンする変数定義
@@ -116,19 +117,38 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
     ///- info: おそらく選択されたイメージ
     /// - Returns: none
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        ///pickerが取得した画像データをUIimageに変換して格納
-        if let pickerImage = info[.originalImage] as? UIImage{
-            ///UIimageViewをModelインスタンス先で圧縮するためにImageviewをインスタンス化
-            let UIimageView = UIImageView()
-            UIimageView.image = pickerImage
-            ///プロフィールイメージ投稿Model
-            userDataManagedData.contentOfFIRStorageUpload(callback: { pressureImage in
-                self.meTalkProfileView.profileImageButton.setImage(pressureImage, for: .normal)
-            }, UIimagedata: UIimageView)
-            ///閉じる
-            self.dismiss(animated: true, completion: nil)
+        
+        ///ここでアルバムを表示しているPickerを閉じる
+        picker.dismiss(animated: true, completion: nil)
+        ///nil判定
+        guard let selectedImage = info[.originalImage] as? UIImage else {
+            print("選択した画像が取得もしくは変換できませんでした")
+            return
         }
+        ///CropViewControllerのライブラリをインスタンス化
+        ///-- croppingStyle:.circular 切り取りスタイルは円形
+        ///--image: info[.originalImage] as! UIImage　渡すイメージはアルバムで選択したイメージ
+        let cropViewController = CropViewController(croppingStyle: .circular, image: selectedImage)
+        cropViewController.delegate = self
+        present(cropViewController, animated: true)
+        
+
     }
+    ///CropView Controllerで画像切り取り処理を決定したら呼ばれる処理
+    func cropViewController(_ cropViewController: CropViewController, didCropToCircularImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
+
+        ///UIimageViewをModelインスタンス先で圧縮するためにImageviewをインスタンス化
+        let UIimageView = UIImageView()
+        UIimageView.image = image
+        ///プロフィールイメージ投稿Model
+        userDataManagedData.contentOfFIRStorageUpload(callback: { pressureImage in
+            self.meTalkProfileView.profileImageButton.setImage(pressureImage, for: .normal)
+        }, UIimagedata: UIimageView)
+        
+        ///cropViewControllerを閉じる
+        cropViewController.dismiss(animated: true, completion: nil)
+    }
+    
     ///開発用　サインアウトボタンタップ時の挙動
     func signoutButtonTappedDelegate() {
         do {

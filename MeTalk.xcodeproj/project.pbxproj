@@ -32,6 +32,8 @@
 		D6543DCD27BF6BC900444454 /* AboutMeTextFieldModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DCC27BF6BC900444454 /* AboutMeTextFieldModalView.swift */; };
 		D6543DD027C4822300444454 /* ModalImageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DCF27C4822300444454 /* ModalImageData.swift */; };
 		D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DD327C500D800444454 /* AreaPickerModalView.swift */; };
+		D696850227D08BD4006D85DC /* CropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = D696850127D08BD4006D85DC /* CropViewController */; };
+		D696850427D08BD4006D85DC /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = D696850327D08BD4006D85DC /* TOCropViewController */; };
 		D69EC37427AA55DA00290B18 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */; };
 		D69EC37627AA66D400290B18 /* MeTalkUserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37527AA66D400290B18 /* MeTalkUserListViewController.swift */; };
 		D69EC37827AA67E100290B18 /* MeTalkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37727AA67E100290B18 /* MeTalkViewController.swift */; };
@@ -111,6 +113,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				B4C33AA386E40690D6FFDF5F /* Pods_MeTalk.framework in Frameworks */,
+				D696850427D08BD4006D85DC /* TOCropViewController in Frameworks */,
+				D696850227D08BD4006D85DC /* CropViewController in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -304,6 +308,10 @@
 			dependencies = (
 			);
 			name = MeTalk;
+			packageProductDependencies = (
+				D696850127D08BD4006D85DC /* CropViewController */,
+				D696850327D08BD4006D85DC /* TOCropViewController */,
+			);
 			productName = MeTalk;
 			productReference = D631EBEA27A581BE00800693 /* MeTalk.app */;
 			productType = "com.apple.product-type.application";
@@ -379,6 +387,9 @@
 				Base,
 			);
 			mainGroup = D631EBE127A581BE00800693;
+			packageReferences = (
+				D696850027D08BD4006D85DC /* XCRemoteSwiftPackageReference "TOCropViewController" */,
+			);
 			productRefGroup = D631EBEB27A581BE00800693 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -904,6 +915,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		D696850027D08BD4006D85DC /* XCRemoteSwiftPackageReference "TOCropViewController" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TimOliver/TOCropViewController.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		D696850127D08BD4006D85DC /* CropViewController */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D696850027D08BD4006D85DC /* XCRemoteSwiftPackageReference "TOCropViewController" */;
+			productName = CropViewController;
+		};
+		D696850327D08BD4006D85DC /* TOCropViewController */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D696850027D08BD4006D85DC /* XCRemoteSwiftPackageReference "TOCropViewController" */;
+			productName = TOCropViewController;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = D631EBE227A581BE00800693 /* Project object */;
 }
