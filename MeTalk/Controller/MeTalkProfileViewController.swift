@@ -24,6 +24,7 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
     let picker = UIImagePickerController()
     ///インスタンス化(Controller)
     var contentVC:UIViewController?
+    var showImageViewController = ShowImageViewController()
     ///インスタンス化（View）
     let meTalkProfileView = MeTalkProfileView()
     ///インスタンス化（Model）
@@ -45,12 +46,12 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
         meTalkProfileView.ageItemView.delegate = self
         meTalkProfileView.areaItemView.delegate = self
 //        ///半モーダルの初期設定
-//        contentVC = SemiModalViewController()
-//        fpc.set(contentViewController: contentVC)
         fpc.delegate = self
         fpc.layout = CustomFloatingPanelLayout()
         fpc.isRemovalInteractionEnabled  =  true
         fpc.backdropView.dismissalTapGestureRecognizer.isEnabled = true
+        ///初期画像設定
+        self.meTalkProfileView.settingButton.setImage(UIImage(named: "setting"), for: .normal)
         ///画面表示前にユーザー情報を取得
         userDataManagedData.userInfoDataGet(callback: {document in
             guard let document = document else {
@@ -86,19 +87,38 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
     
 }
 
+
+
 ///※MeTalkProfileViewから受け取ったデリゲート処理※
 extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate{
+    func settingButtonTappedDelegate() {
+        print("一旦ね。")
+    }
     
     
     ///プロフィール画像タップ後の処理
     /// - Parameters:
     /// - Returns: none
     func profileImageButtonTappedDelegate() {
-        picker.delegate = self
-        ///強制的にアルバム
-        picker.sourceType = .photoLibrary
-        ///カメラピッカー表示
-        self.present(picker, animated: true, completion: nil)
+        ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
+        profileImageActionSheet(callback: {actionFlg in
+            if let actionFlg = actionFlg {
+                switch actionFlg{
+                ///画像を表示
+                case 1:
+                    self.present(self.showImageViewController, animated: true, completion: nil)
+                ///画像を変更
+                case 2:
+                    self.picker.delegate = self
+                    ///強制的にアルバム
+                    self.picker.sourceType = .photoLibrary
+                    ///カメラピッカー表示
+                    self.present(self.picker, animated: true, completion: nil)
+                default:
+                    break
+                }
+            }
+        })
     }
     
     ///カメラピッカーでキャンセルを押下した際の処理（デリゲートなので自動で呼ばれる）
@@ -150,12 +170,43 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
     }
     
     ///開発用　サインアウトボタンタップ時の挙動
-    func signoutButtonTappedDelegate() {
-        do {
-            try Auth.auth().signOut()
-        } catch let signOutError as NSError {
-            print("SignOut Error: %@", signOutError)
-        }
+//    func signoutButtonTappedDelegate() {
+//        do {
+//            try Auth.auth().signOut()
+//        } catch let signOutError as NSError {
+//            print("SignOut Error: %@", signOutError)
+//        }
+//    }
+}
+
+///プロフィール画像を選択した際のアクションシート
+extension MeTalkProfileViewController{
+    func profileImageActionSheet(callback:@escaping (Int?) -> Void){
+        var actionFlg:Int?
+        //アクションシートを作る
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+
+        //ボタン1
+        alert.addAction(UIAlertAction(title: "画像を表示", style: .default, handler: {
+            (action: UIAlertAction!) in
+            actionFlg = 1
+            callback(actionFlg)
+        }))
+
+        //ボタン２
+        alert.addAction(UIAlertAction(title: "画像を変更", style: .default, handler: {
+            (action: UIAlertAction!) in
+            actionFlg = 2
+            callback(actionFlg)
+        }))
+
+        //ボタン３
+        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
+
+        //アクションシートを表示する
+        self.present(alert, animated: true, completion: nil)
+        
+
     }
 }
 
@@ -261,16 +312,14 @@ extension MeTalkProfileViewController:FloatingPanelControllerDelegate{
     func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
         return CustomFloatingPanelLayout()
     }
-    ///モーダルが特定の位置に来たときに処理を行う
-    func floatingPanelWillEndDragging(_ fpc: FloatingPanelController, withVelocity velocity: CGPoint, targetState: UnsafeMutablePointer<FloatingPanelState>) {
 
-        ///三段階中の.tipの高さにきたら処理
-        if targetState.pointee == .half{
-            removesemiModal()
-            ///FpcのViewを破棄
-            self.fpc.view.removeFromSuperview()
-        }
+    ///FPCをどの位置でRemoveするかを決める
+    func floatingPanel(_ fpc: FloatingPanelController, shouldRemoveAt location: CGPoint, with velocity: CGVector) -> Bool {
+        ///下にドラッグした瞬間にRemoveしたいので0と0
+        location.equalTo(CGPoint(x: 0, y: 0))
+        return true
     }
+    
     ///fpcを閉じる
     func removesemiModal(){
         fpc.removePanelFromParent(animated: true)

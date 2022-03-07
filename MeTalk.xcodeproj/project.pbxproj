@@ -34,6 +34,8 @@
 		D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DD327C500D800444454 /* AreaPickerModalView.swift */; };
 		D696850227D08BD4006D85DC /* CropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = D696850127D08BD4006D85DC /* CropViewController */; };
 		D696850427D08BD4006D85DC /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = D696850327D08BD4006D85DC /* TOCropViewController */; };
+		D696850627D23FBD006D85DC /* showImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D696850527D23FBD006D85DC /* showImageViewController.swift */; };
+		D696850827D24100006D85DC /* ShowImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D696850727D24100006D85DC /* ShowImageView.swift */; };
 		D69EC37427AA55DA00290B18 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */; };
 		D69EC37627AA66D400290B18 /* MeTalkUserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37527AA66D400290B18 /* MeTalkUserListViewController.swift */; };
 		D69EC37827AA67E100290B18 /* MeTalkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37727AA67E100290B18 /* MeTalkViewController.swift */; };
@@ -96,6 +98,8 @@
 		D6543DCC27BF6BC900444454 /* AboutMeTextFieldModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutMeTextFieldModalView.swift; sourceTree = "<group>"; };
 		D6543DCF27C4822300444454 /* ModalImageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalImageData.swift; sourceTree = "<group>"; };
 		D6543DD327C500D800444454 /* AreaPickerModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaPickerModalView.swift; sourceTree = "<group>"; };
+		D696850527D23FBD006D85DC /* showImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = showImageViewController.swift; sourceTree = "<group>"; };
+		D696850727D24100006D85DC /* ShowImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowImageView.swift; sourceTree = "<group>"; };
 		D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D69EC37527AA66D400290B18 /* MeTalkUserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkUserListViewController.swift; sourceTree = "<group>"; };
 		D69EC37727AA67E100290B18 /* MeTalkViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkViewController.swift; sourceTree = "<group>"; };
@@ -218,6 +222,7 @@
 				D69EC37D27AA928300290B18 /* MeTalkUserListView.swift */,
 				D69EC38127AA952000290B18 /* MeTalkProfileView.swift */,
 				D6543DBC27B0DC6E00444454 /* MeTalkProfileChildView.swift */,
+				D696850727D24100006D85DC /* ShowImageView.swift */,
 				D631EBF327A581BE00800693 /* Main.storyboard */,
 				D631EBF627A581BF00800693 /* Assets.xcassets */,
 			);
@@ -232,6 +237,7 @@
 				D69EC37F27AA92F100290B18 /* MeTalkProfileViewController.swift */,
 				D69EC37727AA67E100290B18 /* MeTalkViewController.swift */,
 				D69EC37927AA681100290B18 /* MainTabBarController.swift */,
+				D696850527D23FBD006D85DC /* showImageViewController.swift */,
 				D631EBF127A581BE00800693 /* ViewController.swift */,
 				D631EBED27A581BE00800693 /* AppDelegate.swift */,
 				D631EBEF27A581BE00800693 /* SceneDelegate.swift */,
@@ -552,10 +558,12 @@
 				D6543DC927BA268200444454 /* NickNameTextFieldModalView.swift in Sources */,
 				D69EC37627AA66D400290B18 /* MeTalkUserListViewController.swift in Sources */,
 				D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */,
+				D696850827D24100006D85DC /* ShowImageView.swift in Sources */,
 				D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */,
 				D69EC37E27AA928300290B18 /* MeTalkUserListView.swift in Sources */,
 				D631EC2527A7E26D00800693 /* InitialSettingData.swift in Sources */,
 				D6543DC527B7F49800444454 /* SemiModalTranslucentView.swift in Sources */,
+				D696850627D23FBD006D85DC /* showImageViewController.swift in Sources */,
 				D69EC38227AA952000290B18 /* MeTalkProfileView.swift in Sources */,
 				D631EC2327A5831400800693 /* initialSettingView.swift in Sources */,
 				D631EBF027A581BE00800693 /* SceneDelegate.swift in Sources */,

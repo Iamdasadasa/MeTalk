@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 protocol MeTalkProfileViewDelegate:AnyObject{
-    func signoutButtonTappedDelegate()
+    func settingButtonTappedDelegate()
     func profileImageButtonTappedDelegate()
 }
 
@@ -55,21 +55,18 @@ class  MeTalkProfileView:UIView{
     
     ///ボタン・フィールド定義
 
-    //✨✨✨✨✨✨テストログアウトボタン✨✨✨✨✨
-    let signoutButton:UIButton = {
+    //設定ボタン
+    let settingButton:UIButton = {
         let returnUIButton = UIButton()
-        returnUIButton.backgroundColor = .orange
+        returnUIButton.backgroundColor = .clear
         returnUIButton.layer.cornerRadius = 10.0
-        returnUIButton.setTitle("ログアウト", for: .normal)
-        returnUIButton.titleLabel?.adjustsFontSizeToFitWidth = true
-        returnUIButton.addTarget(self, action: #selector(logoutButtonTapped), for: .touchUpInside)
+        returnUIButton.addTarget(self, action: #selector(settingButtonTapped), for: .touchUpInside)
         return returnUIButton
     }()
     
     ///ログアウトボタンタップ押下時の挙動
-    @objc func logoutButtonTapped(){
-        delegate?.signoutButtonTappedDelegate()
-        
+    @objc func settingButtonTapped(){
+        delegate?.settingButtonTappedDelegate()
     }
     
     ///プロフィールタイトルラベル
@@ -206,7 +203,7 @@ class  MeTalkProfileView:UIView{
     func autoLayoutSetUp() {
         ///各オブジェクトをViewに追加
         
-        addSubview(signoutButton)
+        addSubview(settingButton)
         addSubview(profileImageButton)
         addSubview(profileTitleLabel)
         addSubview(personalInformationLabel)
@@ -224,7 +221,7 @@ class  MeTalkProfileView:UIView{
 
         ///UIオートレイアウトと競合させない処理
         nickNameItemView.translatesAutoresizingMaskIntoConstraints = false
-        signoutButton.translatesAutoresizingMaskIntoConstraints = false
+        settingButton.translatesAutoresizingMaskIntoConstraints = false
         profileImageButton.translatesAutoresizingMaskIntoConstraints = false
         profileTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         personalInformationLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -251,10 +248,10 @@ class  MeTalkProfileView:UIView{
         profileImageButton.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.125).isActive = true
         profileImageButton.widthAnchor.constraint(equalTo: self.profileImageButton.heightAnchor).isActive = true
         
-        signoutButton.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor).isActive = true
-        signoutButton.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
-        signoutButton.heightAnchor.constraint(equalTo: self.profileTitleLabel.heightAnchor).isActive = true
-        signoutButton.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.25).isActive = true
+        settingButton.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor).isActive = true
+        settingButton.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+        settingButton.heightAnchor.constraint(equalTo: self.profileTitleLabel.heightAnchor).isActive = true
+        settingButton.widthAnchor.constraint(equalTo: self.profileTitleLabel.heightAnchor).isActive = true
         
         personalInformationLabel.topAnchor.constraint(equalTo: self.profileImageButton.topAnchor).isActive = true
         personalInformationLabel.leadingAnchor.constraint(equalTo: self.profileImageButton.trailingAnchor, constant: 10).isActive = true

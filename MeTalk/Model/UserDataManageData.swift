@@ -133,7 +133,7 @@ struct UserDataManagedData{
                     ///オブジェクトに対して.dataプロパティを使用して辞書型としてコールバック関数で返す
                     callback(document.data())
                 } else {
-                    print("Document does not exist")
+                    print(err?.localizedDescription)
                 }
             }
         }
