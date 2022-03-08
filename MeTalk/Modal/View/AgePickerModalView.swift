@@ -29,15 +29,15 @@ class AgePickerModalView:UIView{
     ///変数宣言
     weak var delegate: AgePickerModalViewDelegateProtcol?
     var pickerView: UIPickerView = UIPickerView()
-        let list: [Int] = [18, 19, 20,
-                          21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
-                          31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
-                          41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
-                          51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
-                          61, 62, 63, 64, 65, 66, 67, 68, 69, 70,
-                          71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
-                          81, 82, 83, 84, 85, 86, 87, 88, 89, 90,
-                          91, 92, 93, 94, 95, 96, 97, 98, 99, 100
+        let list: [String] = ["18", "19", "20",
+                          "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
+                          "31", "32", "33", "34", "35", "36", "37", "38", "39", "40",
+                          "41", "42", "43", "44", "45", "46", "47", "48", "49", "50",
+                          "51", "52", "53", "54", "55", "56", "57", "58", "59", "60",
+                          "61", "62", "63", "64", "65", "66", "67", "68", "69", "70",
+                          "71", "72", "73", "74", "75", "76", "77", "78", "79", "80",
+                          "81", "82", "83", "84", "85", "86", "87", "88", "89", "90",
+                          "91", "92", "93", "94", "95", "96", "97", "98", "99", "100"
                          ]
     ///項目変更タイトルラベル
     let itemTitleLabel:UILabel = {
@@ -53,6 +53,7 @@ class AgePickerModalView:UIView{
     let itemTextField:UITextField = {
         let returnTextField = UITextField()
         returnTextField.borderStyle = .none
+        returnTextField.textColor = .white
         returnTextField.placeholder = "年齢"
         returnTextField.textAlignment = .center
         return returnTextField
@@ -177,7 +178,7 @@ extension AgePickerModalView : UIPickerViewDelegate, UIPickerViewDataSource {
     
     // ピッカービューに表示する内容
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
-        return String(list[row])
+        return list[row]
     }
 }
 

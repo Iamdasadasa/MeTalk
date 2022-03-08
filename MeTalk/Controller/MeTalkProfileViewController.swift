@@ -12,6 +12,7 @@ import FirebaseStorage
 import Photos
 import FloatingPanel
 import CropViewController
+import SideMenu
 
 class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
 
@@ -25,6 +26,7 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
     ///インスタンス化(Controller)
     var contentVC:UIViewController?
     var showImageViewController = ShowImageViewController()
+    var sideMenuViewController = SideMenuViewcontroller()
     ///インスタンス化（View）
     let meTalkProfileView = MeTalkProfileView()
     ///インスタンス化（Model）
@@ -45,6 +47,7 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
         meTalkProfileView.AboutMeItemView.delegate = self
         meTalkProfileView.ageItemView.delegate = self
         meTalkProfileView.areaItemView.delegate = self
+        
 //        ///半モーダルの初期設定
         fpc.delegate = self
         fpc.layout = CustomFloatingPanelLayout()
@@ -91,11 +94,6 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
 
 ///※MeTalkProfileViewから受け取ったデリゲート処理※
 extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate{
-    func settingButtonTappedDelegate() {
-        print("一旦ね。")
-    }
-    
-    
     ///プロフィール画像タップ後の処理
     /// - Parameters:
     /// - Returns: none
@@ -177,6 +175,12 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
 //            print("SignOut Error: %@", signOutError)
 //        }
 //    }
+    ///設定ボタンをタップ後の処理
+    func settingButtonTappedDelegate() {
+        settingSidemenu()
+        print("設定ボタンが押下")
+    }
+    
 }
 
 ///プロフィール画像を選択した際のアクションシート
@@ -294,10 +298,14 @@ extension MeTalkProfileViewController{
         ///ひとことにデータセット
         self.meTalkProfileView.AboutMeItemView.valueLabel.text = resultValue
         //年齢にデータセット
-        if userInfoData["age"] as? String  == "0" {
+        guard let ageTypeInt:Int = userInfoData["age"] as? Int else {
+            print("年齢を取得できませんでした。")
+            return
+        }
+        if String(ageTypeInt)  == "0" {
             self.meTalkProfileView.ageItemView.valueLabel.text = "未設定"
         } else {
-            self.meTalkProfileView.ageItemView.valueLabel.text = userInfoData["age"] as? String
+            self.meTalkProfileView.ageItemView.valueLabel.text = String(ageTypeInt)
         }
         
         //出身地にデータセット
@@ -338,6 +346,32 @@ extension MeTalkProfileViewController:FloatingPanelControllerDelegate{
         ///タブバーコントローラーを表示
         self.tabBarController?.tabBar.isHidden = false
 
+    }
+}
+
+///サイドメニュー関連の拡張
+extension MeTalkProfileViewController{
+    
+    ///サイドメニュー表示
+    func settingSidemenu() {
+        
+        let MenuNavigationController = SideMenuNavigationController(rootViewController: sideMenuViewController)
+        MenuNavigationController.settings = makeSettings()
+//        MenuNavigationController.
+        present(MenuNavigationController, animated: true, completion: nil)
+    }
+    
+    ///サイドメニューの設定内容
+    private func makeSettings() -> SideMenuSettings {
+        ///スライドスタイル
+        let presentationStyle: SideMenuPresentationStyle = .viewSlideOutMenuOut
+        ///陰影をつけて立体的に
+        presentationStyle.onTopShadowOpacity = 1.0
+        var settings = SideMenuSettings()
+        settings.presentationStyle = presentationStyle
+        ///SafeAriaまで表示しない。
+        settings.statusBarEndAlpha = 100
+        return settings
     }
 }
 

@@ -493,6 +493,7 @@ PODS:
   - nanopb/decode (2.30908.0)
   - nanopb/encode (2.30908.0)
   - PromisesObjC (2.0.0)
+  - SideMenu (6.5.0)
 
 DEPENDENCIES:
   - Firebase/Auth
@@ -501,6 +502,7 @@ DEPENDENCIES:
   - Firebase/Firestore
   - Firebase/Storage
   - FloatingPanel
+  - SideMenu
 
 SPEC REPOS:
   trunk:
@@ -525,6 +527,7 @@ SPEC REPOS:
     - leveldb-library
     - nanopb
     - PromisesObjC
+    - SideMenu
 
 SPEC CHECKSUMS:
   abseil: 6c8eb7892aefa08d929b39f9bb108e5367e3228f
@@ -548,7 +551,8 @@ SPEC CHECKSUMS:
   leveldb-library: 50c7b45cbd7bf543c81a468fe557a16ae3db8729
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
+  SideMenu: f583187d21c5b1dd04c72002be544b555a2627a2
 
-PODFILE CHECKSUM: 49968853d2e0ecc7c071be5329f0bacb98929094
+PODFILE CHECKSUM: a183964a11f05e79d947b8fa16a5d283d711416e
 
 COCOAPODS: 1.11.2

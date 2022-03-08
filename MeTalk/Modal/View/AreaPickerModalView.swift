@@ -49,6 +49,7 @@ class AreaPickerModalView:UIView{
     let itemTextField:UITextField = {
         let returnTextField = UITextField()
         returnTextField.borderStyle = .none
+        returnTextField.textColor = .white
         returnTextField.placeholder = "住まい"
         returnTextField.textAlignment = .center
         return returnTextField

@@ -23,5 +23,6 @@ pod 'Firebase/Database'
 pod 'Firebase/Storage'
 #ここから一般ライブラリ
 pod 'FloatingPanel'
+pod 'SideMenu'
 
 end

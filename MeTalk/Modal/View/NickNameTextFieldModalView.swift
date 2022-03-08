@@ -42,6 +42,7 @@ class   NickNameTextFieldModalView:UIView{
     let itemTextField:UITextField = {
         let returnTextField = UITextField()
         returnTextField.borderStyle = .roundedRect
+        returnTextField.textColor = .white
         returnTextField.placeholder = "10文字以内"
         returnTextField.borderStyle = .none
         returnTextField.clearButtonMode = .always

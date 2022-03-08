@@ -42,6 +42,7 @@ class   AboutMeTextFieldModalView:UIView{
     let itemTextField:UITextField = {
         let returnTextField = UITextField()
         returnTextField.borderStyle = .none
+        returnTextField.textColor = .white
         returnTextField.placeholder = "30文字以内"
         returnTextField.clearButtonMode = .always
         returnTextField.tag = 2

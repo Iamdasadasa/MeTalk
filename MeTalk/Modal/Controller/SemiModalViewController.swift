@@ -97,7 +97,15 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
                     return
                 }
                 ///年齢をテキストフィールドにセット
-                self.agePickerModalView.itemTextField.text = userInfoData["age"] as? String
+                guard let ageTypeInt:Int = userInfoData["age"] as? Int else {
+                    print("年齢を取得できませんでした。")
+                    return
+                }
+                if String(ageTypeInt)  == "0" {
+                    self.agePickerModalView.itemTextField.text = "未設定"
+                } else {
+                    self.agePickerModalView.itemTextField.text = String(ageTypeInt)
+                }
 
             })
             ///クローズ画像データをセット
@@ -227,7 +235,17 @@ extension SemiModalViewController{
     ///決定ボタン押下　view: AgePickerModalView
     func dicisionButtonTappedAction(button: UIButton, view: AgePickerModalView) {
         ///入力した年齢をUpload
-        userDataManageData.userInfoDataUpload(userData: view.itemTextField.text, dataFlg: 3)
+        ///（年齢をIntに変換）
+        guard let AgeTypeString = view.itemTextField.text else {
+            print("年齢が取得もしくはキャストできませんでした")
+            return
+        }
+        guard let AgeTypeInt = Int(AgeTypeString) else {
+            print("年齢が取得もしくはキャストできませんでした")
+            return
+        }
+        print(AgeTypeInt)
+        userDataManageData.userInfoDataUpload(userData: AgeTypeInt, dataFlg: 3)
         self.delegate?.ButtonTappedActionChildDelegateAction()
     }
     ///クローズボタン画像押下　view: AgePickerModalView

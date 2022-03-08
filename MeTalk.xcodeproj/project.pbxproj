@@ -32,6 +32,9 @@
 		D6543DCD27BF6BC900444454 /* AboutMeTextFieldModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DCC27BF6BC900444454 /* AboutMeTextFieldModalView.swift */; };
 		D6543DD027C4822300444454 /* ModalImageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DCF27C4822300444454 /* ModalImageData.swift */; };
 		D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DD327C500D800444454 /* AreaPickerModalView.swift */; };
+		D68FB39227D5AC5300E57F5A /* sideMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */; };
+		D68FB39427D5C6CC00E57F5A /* SideMenuTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39327D5C6CC00E57F5A /* SideMenuTableView.swift */; };
+		D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */; };
 		D696850227D08BD4006D85DC /* CropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = D696850127D08BD4006D85DC /* CropViewController */; };
 		D696850427D08BD4006D85DC /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = D696850327D08BD4006D85DC /* TOCropViewController */; };
 		D696850627D23FBD006D85DC /* showImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D696850527D23FBD006D85DC /* showImageViewController.swift */; };
@@ -98,6 +101,9 @@
 		D6543DCC27BF6BC900444454 /* AboutMeTextFieldModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutMeTextFieldModalView.swift; sourceTree = "<group>"; };
 		D6543DCF27C4822300444454 /* ModalImageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalImageData.swift; sourceTree = "<group>"; };
 		D6543DD327C500D800444454 /* AreaPickerModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaPickerModalView.swift; sourceTree = "<group>"; };
+		D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sideMenuViewController.swift; sourceTree = "<group>"; };
+		D68FB39327D5C6CC00E57F5A /* SideMenuTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuTableView.swift; sourceTree = "<group>"; };
+		D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuTableViewCell.swift; sourceTree = "<group>"; };
 		D696850527D23FBD006D85DC /* showImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = showImageViewController.swift; sourceTree = "<group>"; };
 		D696850727D24100006D85DC /* ShowImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowImageView.swift; sourceTree = "<group>"; };
 		D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -180,6 +186,7 @@
 			isa = PBXGroup;
 			children = (
 				D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */,
+				D68FB39027D5AC3500E57F5A /* SideMenu */,
 				D6543DBE27B7B55F00444454 /* Modal */,
 				D631EC1D27A5821D00800693 /* Model */,
 				D631EC1E27A5822900800693 /* View */,
@@ -284,6 +291,16 @@
 				D6543DCF27C4822300444454 /* ModalImageData.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		D68FB39027D5AC3500E57F5A /* SideMenu */ = {
+			isa = PBXGroup;
+			children = (
+				D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */,
+				D68FB39327D5C6CC00E57F5A /* SideMenuTableView.swift */,
+				D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */,
+			);
+			path = SideMenu;
 			sourceTree = "<group>";
 		};
 		EA1B404FC81B12ED36056CCA /* Frameworks */ = {
@@ -545,13 +562,16 @@
 			files = (
 				D62FBE1327CDFBE500EE7768 /* AgePickerModalView.swift in Sources */,
 				D6543DC327B7BE7400444454 /* CustomFloatingPanelLayout.swift in Sources */,
+				D68FB39227D5AC5300E57F5A /* sideMenuViewController.swift in Sources */,
 				D631EC2127A582A200800693 /* initialSettingViewcontroller.swift in Sources */,
+				D68FB39427D5C6CC00E57F5A /* SideMenuTableView.swift in Sources */,
 				D631EBF227A581BE00800693 /* ViewController.swift in Sources */,
 				D6543DC127B7B61500444454 /* SemiModalViewController.swift in Sources */,
 				D69EC38027AA92F100290B18 /* MeTalkProfileViewController.swift in Sources */,
 				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,
 				D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */,
 				D69EC37827AA67E100290B18 /* MeTalkViewController.swift in Sources */,
+				D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */,
 				D6543DBD27B0DC6E00444454 /* MeTalkProfileChildView.swift in Sources */,
 				D6543DCB27BA7AC200444454 /* UserDataManageData.swift in Sources */,
 				D6543DCD27BF6BC900444454 /* AboutMeTextFieldModalView.swift in Sources */,

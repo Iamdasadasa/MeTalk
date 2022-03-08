@@ -30,6 +30,7 @@ struct UserDataManagedData{
                 callback("ユーザー登録処理で失敗しました\(error?.localizedDescription)")
                 return
             }
+            
             ///各登録処理（Cloud Firestore）
             Firestore.firestore().collection("users").document(user.uid).setData([
                 "nickname": nickName,
@@ -37,6 +38,7 @@ struct UserDataManagedData{
                 "aboutMeMassage":"よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃",
                 "area":"未設定",
                 "age":0,
+                "signUpFlg":"SignUp",
                 "createdAt": FieldValue.serverTimestamp(),
                 "updatedAt": FieldValue.serverTimestamp()
             ], completion: { error in
@@ -122,7 +124,7 @@ struct UserDataManagedData{
     //    /// - Returns:
         func userInfoDataGet(callback: @escaping  ([String:Any]?) -> Void) {
             guard let uid = uid else {
-            print("UIDの取得ができませんでした")
+                print("UIDの取得ができませんでした")
             return 
             }
             ///ここでデータにアクセスしている（非同期処理）
@@ -150,24 +152,33 @@ struct UserDataManagedData{
         return
         }
         
-        guard let userData = userData as? String else {
-            return
-        }
+
         ///フラグによってアップデートする項目を仕分け
         switch dataFlg {
         case 1: ///ニックネーム及び更新日時
-            print(userData)
+            guard let userData = userData as? String else {
+                return
+            }
             Firestore.firestore().collection("users").document(uid).updateData(["nickname":userData])
             Firestore.firestore().collection("users").document(uid).updateData(["updatedAt":FieldValue.serverTimestamp()])
 //            DBRef.child("users/\(uid)").updateChildValues(["nickname":userData])
 //            DBRef.child("users").updateChildValues(["updatedAt":FieldValue.serverTimestamp()])
         case 2: ///ひとこと及び更新日時
+            guard let userData = userData as? String else {
+                return
+            }
             Firestore.firestore().collection("users").document(uid).updateData(["aboutMeMassage":userData])
             Firestore.firestore().collection("users").document(uid).updateData(["updatedAt":FieldValue.serverTimestamp()])
         case 3: ///年齢及び更新日時
+            guard let userData = userData as? Int else {
+                return
+            }
             Firestore.firestore().collection("users").document(uid).updateData(["age":userData])
             Firestore.firestore().collection("users").document(uid).updateData(["updatedAt":FieldValue.serverTimestamp()])
         case 4: ///出身地及び更新日時
+            guard let userData = userData as? String else {
+                return
+            }
             Firestore.firestore().collection("users").document(uid).updateData(["area":userData])
             Firestore.firestore().collection("users").document(uid).updateData(["updatedAt":FieldValue.serverTimestamp()])
         default:break

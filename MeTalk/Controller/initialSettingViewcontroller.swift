@@ -192,7 +192,7 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
                 })
             } else {
                 ///コールバック関数でエラーが返ってきた場合は全てこちらで処理。
-                let dialog = UIAlertController(title: "ユーザー情報の登録に失敗", message: "もう一度やり直してください", preferredStyle: .alert)
+                let dialog = UIAlertController(title: "ユーザー情報の登録に失敗", message: "もう一度やり直してください\(errorFlg)", preferredStyle: .alert)
                 dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
                 self.present(dialog, animated: true, completion: nil)
             }},nickName: self.initialSettingView.nicknameTextField.text, SexNo: self.SexNo)
