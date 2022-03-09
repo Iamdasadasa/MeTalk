@@ -47,6 +47,7 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
         meTalkProfileView.AboutMeItemView.delegate = self
         meTalkProfileView.ageItemView.delegate = self
         meTalkProfileView.areaItemView.delegate = self
+        sideMenuViewController.delegate = self
         
 //        ///半モーダルの初期設定
         fpc.delegate = self
@@ -350,8 +351,7 @@ extension MeTalkProfileViewController:FloatingPanelControllerDelegate{
 }
 
 ///サイドメニュー関連の拡張
-extension MeTalkProfileViewController{
-    
+extension MeTalkProfileViewController:SideMenuViewControllerDelegate{
     ///サイドメニュー表示
     func settingSidemenu() {
         
@@ -373,6 +373,12 @@ extension MeTalkProfileViewController{
         settings.statusBarEndAlpha = 100
         return settings
     }
+    
+    func pushViewController(nextViewController: UIViewController, sideMenuViewcontroller: SideMenuViewcontroller) {
+        sideMenuViewcontroller.dismiss(animated: true, completion: nil)
+        self.navigationController.pushViewController(nextViewController, animated: true)
+    }
+    
 }
 
 ///SemiModalViewControllerからのデリゲート処理で、二ついれこになっている。大元のデリゲート処理は
