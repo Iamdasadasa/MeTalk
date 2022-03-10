@@ -184,6 +184,28 @@ struct UserDataManagedData{
         default:break
         }
     }
+    
+    ///ブロックユーザーリスト取得関数(コレクションは"Users")
+    /// - Parameters:
+    /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
+    /// 　　　　　　（ニックネーム、性別等が含まれる）
+    /// - Returns:
+    func blockUserDataGet(callback: @escaping  ([String:Any]?) -> Void) {
+        
+        ///ここで自身のUIDに登録されているブロックリストを取得する処理
+        let blockUserUID = "dammyUser01"
+        ///ここでデータにアクセスしている（非同期処理）
+        let userDocuments = cloudDB.collection("users").document(blockUserUID)
+        ///getDocumentプロパティでコレクションデータからオブジェクトとしてデータを取得
+        userDocuments.getDocument{ (documents,err) in
+            if let document = documents, document.exists {
+                ///オブジェクトに対して.dataプロパティを使用して辞書型としてコールバック関数で返す
+                callback(document.data())
+            } else {
+                print(err?.localizedDescription)
+            }
+        }
+    }
 }
 
 

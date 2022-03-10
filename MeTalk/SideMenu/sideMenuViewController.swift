@@ -32,19 +32,19 @@ enum menuCellItem:Int,CaseIterable {
     var info:Menudata {
         switch self {
         case .notification:
-            let menudata = Menudata(cellTitle: "通知", viewController: NotificationController())
+            let menudata = Menudata(cellTitle: "通知", viewController: NotificationViewController())
             return menudata
         case .blockList:
-            let menudata = Menudata(cellTitle: "ブロックリスト", viewController: NotificationController())
+            let menudata = Menudata(cellTitle: "ブロックリスト", viewController: BlockListViewController())
             return menudata
         case .inquiry:
-            let menudata = Menudata(cellTitle: "問い合わせ", viewController: NotificationController())
+            let menudata = Menudata(cellTitle: "問い合わせ", viewController: NotificationViewController())
             return menudata
         case .aboutApp:
-            let menudata = Menudata(cellTitle: "このアプリについて", viewController: NotificationController())
+            let menudata = Menudata(cellTitle: "このアプリについて", viewController: NotificationViewController())
             return menudata
         case .cancelTheMembership:
-            let menudata = Menudata(cellTitle: "メンバーシップの削除", viewController: NotificationController())
+            let menudata = Menudata(cellTitle: "メンバーシップの削除", viewController: NotificationViewController())
             return menudata
         }
     }
@@ -82,24 +82,13 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
     ///Barボタンの設定(NavigationBar)
     var backButtonItem: UIBarButtonItem! // 追加ボタン
     ///インスタンス化(View)
-    let sideMenuTableView = SideMenuTableView()
+    let sideMenuTableView = GeneralTableView()
 
-    
-    
-    let Item: [[String]] = [
-        ["通知","ブロックリスト"],
-        ["問い合わせ","このアプリについて"],
-        ["退会"]
-    ]
     ///デリゲート変数設定
     weak var delegate:SideMenuViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-//        guard let menu = menuSectionItem(rawValue: 0) else {
-//            return
-//        }
-//        print(menu.info.sectionTitle)
         ///barボタン初期設定
         backButtonItem = UIBarButtonItem(barButtonSystemItem: .reply, target: self, action: #selector(backButtonPressed(_:)))
         self.navigationItem.leftBarButtonItem = backButtonItem

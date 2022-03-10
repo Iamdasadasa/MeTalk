@@ -8,6 +8,6 @@
 import Foundation
 import UIKit
 
-class SideMenuTableView:UITableView{
+class GeneralTableView:UITableView{
     
 }

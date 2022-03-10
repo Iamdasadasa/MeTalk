@@ -375,8 +375,10 @@ extension MeTalkProfileViewController:SideMenuViewControllerDelegate{
     }
     
     func pushViewController(nextViewController: UIViewController, sideMenuViewcontroller: SideMenuViewcontroller) {
-        sideMenuViewcontroller.dismiss(animated: true, completion: nil)
-        self.navigationController.pushViewController(nextViewController, animated: true)
+        sideMenuViewcontroller.dismiss(animated: false, completion: nil)
+        let UINavigationController = UINavigationController(rootViewController: nextViewController)
+        UINavigationController.modalPresentationStyle = .fullScreen
+        present(UINavigationController, animated: true, completion: nil)
     }
     
 }
