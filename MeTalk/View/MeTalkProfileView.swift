@@ -83,7 +83,6 @@ class  MeTalkProfileView:UIView{
     ///プロフィール画像ボタン
     let profileImageButton:UIButton = {
         let returnUIButton = UIButton()
-        returnUIButton.layer.cornerRadius = 50
         returnUIButton.layer.borderWidth = 1
         returnUIButton.clipsToBounds = true
         returnUIButton.layer.borderColor = UIColor.orange.cgColor

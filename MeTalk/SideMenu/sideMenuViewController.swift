@@ -27,6 +27,29 @@ enum menuCellItem:Int,CaseIterable {
         let cellTitle:String
         let viewController:UIViewController?
     }
+    ///メンバーシップ削除のためのFunction
+    func profileImageActionSheet() -> UIAlertController{
+        //アクションシートを作る
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+
+        //ボタン1
+        alert.addAction(UIAlertAction(title: "テスト的ログアウトボタン", style: .default, handler: {
+            (action: UIAlertAction!) in
+                do {
+                    try Auth.auth().signOut()
+                } catch let signOutError as NSError {
+                    print("SignOut Error: %@", signOutError)
+                }
+            
+        }))
+
+        //ボタン３
+        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
+
+        return alert
+        
+
+    }
     
     ///アイテムに対して適切なセル情報を投入
     var info:Menudata {
@@ -44,7 +67,7 @@ enum menuCellItem:Int,CaseIterable {
             let menudata = Menudata(cellTitle: "このアプリについて", viewController: NotificationViewController())
             return menudata
         case .cancelTheMembership:
-            let menudata = Menudata(cellTitle: "メンバーシップの削除", viewController: NotificationViewController())
+            let menudata = Menudata(cellTitle: "メンバーシップの削除", viewController: nil)
             return menudata
         }
     }
@@ -61,6 +84,7 @@ enum menuSectionItem:Int,CaseIterable {
         var sectionTitle:String
         var numberOfRowsInSection:Int
     }
+    
     ///アイテムに対して適切なセクション情報を投入
     var info:Menudata {
         switch self {
@@ -154,8 +178,12 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let menusectionitem = menuCellItem(rawValue: returnNumber(sectionNo: indexPath.section, itemNo: indexPath.row)) else { return }
-        guard let nextViewController = menusectionitem.info.viewController else { return }
-//        pushViewController(nextViewController, animated: true)
+        guard let nextViewController = menusectionitem.info.viewController else {
+            if menusectionitem.info.cellTitle == "メンバーシップの削除" {
+                self.present(menusectionitem.profileImageActionSheet(), animated: true, completion: nil)
+            }
+            return
+        }
         self.delegate?.pushViewController(nextViewController: nextViewController, sideMenuViewcontroller: self)
     }
 

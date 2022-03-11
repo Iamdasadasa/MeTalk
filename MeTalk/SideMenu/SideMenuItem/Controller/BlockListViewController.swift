@@ -48,23 +48,32 @@ class BlockListViewController:UIViewController{
             guard let document = document else {
                 return
             }
-            print(document["nickname"] as? String)
-
+//            print(document["nickname"] as? String)
+            print(document)
+            document
         })
+        
+//        userDataManagedData.contentOfFIRStorageGetAnotherUser(callback: { image in
+//            ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
+//            if image != nil {
+//                print(image)
+//            ///コールバック関数でNilが返ってきたら初期画像を設定
+//            } else {
+////                self.meTalkProfileView.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
+//            }
+//        }, anotherUserUID: "")
         ///✨✨✨✨✨✨✨✨✨
         ///Viewの適用
-//        self.view = BlockListView()
+        self.view = blockListTableView
         blockListTableView.dataSource = self
         blockListTableView.delegate = self
-        blockListTableView.register(NotificationTableViewCell.self, forCellReuseIdentifier: "BlockListTableViewCell")
+        blockListTableView.register(blockListTableViewCell.self, forCellReuseIdentifier: "BlockListTableViewCell")
         
         ///barボタン初期設定
         backButtonItem = UIBarButtonItem(barButtonSystemItem: .reply, target: self, action: #selector(backButtonPressed(_:)))
         self.navigationItem.leftBarButtonItem = backButtonItem
         ///タイトルラベル追加
         navigationItem.title = "ブロックリスト"
-        
-        
     }
     
     @objc func backButtonPressed(_ sender: UIBarButtonItem) {
@@ -85,13 +94,14 @@ extension BlockListViewController:UITableViewDelegate,UITableViewDataSource{
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "NotificationTableViewCell", for: indexPath) as! NotificationTableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "BlockListTableViewCell", for: indexPath) as! blockListTableViewCell
         
         guard let blockListMenuCellItem = blockListMenuCellItem(rawValue: indexPath.row) else {return cell}
         cell.setCell(Item: blockListMenuCellItem.info.celltitle)
         
         return cell
     }
+    
     
     func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
         return false

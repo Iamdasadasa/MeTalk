@@ -168,14 +168,6 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
         cropViewController.dismiss(animated: true, completion: nil)
     }
     
-    ///開発用　サインアウトボタンタップ時の挙動
-//    func signoutButtonTappedDelegate() {
-//        do {
-//            try Auth.auth().signOut()
-//        } catch let signOutError as NSError {
-//            print("SignOut Error: %@", signOutError)
-//        }
-//    }
     ///設定ボタンをタップ後の処理
     func settingButtonTappedDelegate() {
         settingSidemenu()

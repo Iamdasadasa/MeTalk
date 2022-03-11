@@ -77,6 +77,30 @@ struct UserDataManagedData{
         }
     }
     
+    ///自分ではないUser IDを基にイメージデータを取得してくる処理
+    /// - Parameters:
+    /// -anotherUserUID:呼び出し元が指定している画像が欲しい対象のUID
+    /// - callback:ユーザーIDを基に取得できるImage
+    /// - Returns:
+    ///- callback: Fire Baseから取得したイメージデータ
+    func contentOfFIRStorageGetAnotherUser(callback: @escaping (UIImage?) -> Void,anotherUserUID:String) {
+        ///Firebaseのストレージアクセス
+        storage.reference(forURL: host).child("profileImage").child("\(anotherUserUID).jpeg")
+            .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
+            ///ユーザーIDのプロフィール画像が取得できなかったらnilを返す
+            if error != nil {
+                callback(nil)
+                print(error?.localizedDescription)
+            }
+            ///ユーザーIDのプロフィール画像を設定していたらその画像を取得してリターン
+            if let imageData = data {
+                let image = UIImage(data: imageData)
+                callback(image)
+            }
+        }
+    }
+    
+    
     ///ユーザーIDを基にイメージデータをアップロードして圧縮したファイルを返す処理
     /// - Parameters:none
     /// - Returns:
@@ -185,24 +209,49 @@ struct UserDataManagedData{
         }
     }
     
+    ///ブロックリスト登録処理
+    func blockListRegister() {
+        guard let uid = uid else { print("UIDの取得ができませんでした")
+            return }
+        ///各登録処理（Cloud Firestore）
+        Firestore.firestore().collection("blocklist").document(uid).collection("blockUser").document("").setData([
+            "createdAt": FieldValue.serverTimestamp(),
+            "updatedAt": FieldValue.serverTimestamp()
+        ], completion: { error in
+            if let error = error {
+                ///失敗した場合
+                print(error.localizedDescription)
+                return
+            } else {
+                ///成功した場合遷移
+//                callback(nil)
+            }
+        })
+    }
+    
     ///ブロックユーザーリスト取得関数(コレクションは"Users")
     /// - Parameters:
     /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
     /// 　　　　　　（ニックネーム、性別等が含まれる）
     /// - Returns:
-    func blockUserDataGet(callback: @escaping  ([String:Any]?) -> Void) {
-        
-        ///ここで自身のUIDに登録されているブロックリストを取得する処理
-        let blockUserUID = "dammyUser01"
+    func blockUserDataGet(callback: @escaping  ([String]) -> Void) {
+        var blockUserList:[String] = []
+        guard let uid = uid else { print("UIDの取得ができませんでした")
+            return }
+
         ///ここでデータにアクセスしている（非同期処理）
-        let userDocuments = cloudDB.collection("users").document(blockUserUID)
-        ///getDocumentプロパティでコレクションデータからオブジェクトとしてデータを取得
-        userDocuments.getDocument{ (documents,err) in
-            if let document = documents, document.exists {
-                ///オブジェクトに対して.dataプロパティを使用して辞書型としてコールバック関数で返す
-                callback(document.data())
+        let userDocuments = cloudDB.collection("blocklist").document(uid).collection("blockUser")
+        userDocuments.getDocuments(){ (querySnapshot, err) in
+            if let err = err {
+                print("Error getting documents: \(err)")
             } else {
-                print(err?.localizedDescription)
+                for document in querySnapshot!.documents {
+                    
+                    blockUserList.append(document.documentID)
+//                    print("\(document.documentID) => \(document.data())")
+                }
+                ///ここでブロックユーザーリストを読んだらさらにそのリストからそのユーザーの情報を取得してくる。
+                callback(blockUserList)
             }
         }
     }

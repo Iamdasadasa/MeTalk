@@ -176,6 +176,8 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
     ///   - view: 呼び出し元View
     /// - Returns: none
     func dicisionButtonTappedAction(button: UIButton, view: InitialSettingView) {
+        ///一回ボタンを押したら二回目は押せなくする。
+        button.isEnabled = false
         ///匿名登録処理
         userDataManagedData.signInAnonymously(callback: {errorFlg in
             if errorFlg == nil {
