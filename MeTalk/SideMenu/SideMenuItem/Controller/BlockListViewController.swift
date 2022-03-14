@@ -8,30 +8,8 @@
 import Foundation
 import UIKit
 import FloatingPanel
+import Firebase
 
-
-///セルを制御するためのenum構造体(ここの)
-enum blockListMenuCellItem:Int,CaseIterable{
-    ///Item
-    case pushNotification
-    case vibration
-    ///セルに対する情報項目(適宜増やしてOK)
-    struct Menudata{
-        let celltitle:String
-    }
-    
-    var info:Menudata{
-        switch self {
-        case .pushNotification:
-            let menudata = Menudata(celltitle: "プッシュ通知")
-            return menudata
-        case .vibration:
-            let menudata = Menudata(celltitle: "バイブレーション")
-            return menudata
-        }
-    }
-    
-}
 
 class BlockListViewController:UIViewController{
     ///Barボタンの設定(NavigationBar)
@@ -40,29 +18,19 @@ class BlockListViewController:UIViewController{
     let blockListTableView = GeneralTableView()
     ///インスタンス化（Model）
     let userDataManagedData = UserDataManagedData()
+    let uid = Auth.auth().currentUser?.uid
+    ///ブロックリストユーザーID格納配列
+    var blockUsersID:[String]? = []
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
-       ///✨✨✨✨ここで一旦ブロックユーザーのリストが取得できているかの確認✨✨✨✨✨
+        ///自身のブロックユーザーの一覧を取得
         userDataManagedData.blockUserDataGet(callback: {document in
-            guard let document = document else {
-                return
-            }
-//            print(document["nickname"] as? String)
-            print(document)
-            document
-        })
-        
-//        userDataManagedData.contentOfFIRStorageGetAnotherUser(callback: { image in
-//            ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-//            if image != nil {
-//                print(image)
-//            ///コールバック関数でNilが返ってきたら初期画像を設定
-//            } else {
-////                self.meTalkProfileView.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
-//            }
-//        }, anotherUserUID: "")
-        ///✨✨✨✨✨✨✨✨✨
+            self.blockUsersID = document
+            self.blockListTableView.reloadData()
+        }, UID: uid)
+
         ///Viewの適用
         self.view = blockListTableView
         blockListTableView.dataSource = self
@@ -84,21 +52,38 @@ class BlockListViewController:UIViewController{
 
 ///TableView関連の処理
 extension BlockListViewController:UITableViewDelegate,UITableViewDataSource{
-    
+    ///セクション数--ブロックユーザーの数
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return blockListMenuCellItem.allCases.count
+        return blockUsersID?.count ?? 0
     }
-    
+    ///セルの高さ--固定
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50
     }
-    
+    ///セルの生成--ブロックユーザーの情報を取得してCELLオブジェクトに投入
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        ///対象セルインスタンス化
         let cell = tableView.dequeueReusableCell(withIdentifier: "BlockListTableViewCell", for: indexPath) as! blockListTableViewCell
-        
-        guard let blockListMenuCellItem = blockListMenuCellItem(rawValue: indexPath.row) else {return cell}
-        cell.setCell(Item: blockListMenuCellItem.info.celltitle)
-        
+        ///ブロックユーザーIDの配列から取得
+        guard let blockUserID = blockUsersID?[indexPath.row] else {return cell}
+        ///取得したIDでユーザー情報の取得を開始(ユーザーニックネーム)
+        userDataManagedData.userInfoDataGet(callback: {blockUserInfoDoc in
+            guard let blockUserInfoDoc = blockUserInfoDoc else {
+                print("ブロックリストのユーザー情報が取得できませんでした")
+                return
+            }
+            cell.setCell(Item: blockUserInfoDoc["nickname"] as? String ?? "エラー")
+        }, UID: blockUserID)
+        ///取得したIDでユーザー情報の取得を開始(プロフィール画像)
+        self.userDataManagedData.contentOfFIRStorageGet(callback: { image in
+            ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
+            if image != nil {
+                cell.blockUserProfileImageView.image = image
+            ///コールバック関数でNilが返ってきたら初期画像を設定
+            } else {
+                cell.blockUserProfileImageView.image = UIImage(named: "InitIMage")
+            }
+        }, UID: blockUserID)
         return cell
     }
     

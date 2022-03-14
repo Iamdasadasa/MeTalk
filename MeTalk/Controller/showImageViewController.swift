@@ -24,6 +24,7 @@ class ShowImageViewController:UIViewController{
     let userDataManagedData = UserDataManagedData()
     let storage = Storage.storage()
     let host = "gs://metalk-f132e.appspot.com"
+    let uid = Auth.auth().currentUser?.uid
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -36,7 +37,7 @@ class ShowImageViewController:UIViewController{
             } else {
                 self.showImageView.imageView.image = UIImage(named: "InitIMage")
             }
-        })
+        }, UID: uid)
     }
     
     override func viewDidLoad() {

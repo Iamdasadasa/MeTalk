@@ -59,8 +59,12 @@ struct UserDataManagedData{
     /// - callback:ユーザーIDを基に取得できるImage
     /// - Returns:
     ///- callback: Fire Baseから取得したイメージデータ
-    func contentOfFIRStorageGet(callback: @escaping (UIImage?) -> Void) {
-        guard let UID = uid else { return }
+    func contentOfFIRStorageGet(callback: @escaping (UIImage?) -> Void,UID:String?) {
+        guard let UID = UID else {
+            print("UIDが確認できませんでした")
+            return
+        }
+
         ///Firebaseのストレージアクセス
         storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg")
             .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
@@ -83,9 +87,13 @@ struct UserDataManagedData{
     /// - callback:ユーザーIDを基に取得できるImage
     /// - Returns:
     ///- callback: Fire Baseから取得したイメージデータ
-    func contentOfFIRStorageGetAnotherUser(callback: @escaping (UIImage?) -> Void,anotherUserUID:String) {
+    func contentOfFIRStorageGetAnotherUser(callback: @escaping (UIImage?) -> Void,UID:String?) {
+        guard let UID = UID else {
+            print("UIDが確認できませんでした")
+            return
+        }
         ///Firebaseのストレージアクセス
-        storage.reference(forURL: host).child("profileImage").child("\(anotherUserUID).jpeg")
+        storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg")
             .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
             ///ユーザーIDのプロフィール画像が取得できなかったらnilを返す
             if error != nil {
@@ -105,36 +113,39 @@ struct UserDataManagedData{
     /// - Parameters:none
     /// - Returns:
     ///- callback: Fire Baseから取得したイメージデータ
-    func contentOfFIRStorageUpload (callback: @escaping (UIImage?) -> Void,UIimagedata:UIImageView) {
-            guard let UID = uid else { return }
-            //ストレージサーバのURLを取得
-            let storage = Storage.storage().reference(forURL: "gs://metalk-f132e.appspot.com")
-            
-            // パス: あなた固有のURL/profileImage/{user.uid}.jpeg
-            let imageRef = storage.child("profileImage").child("\(UID).jpeg")
-            
-            //保存したい画像のデータを変数として持つ
-            var ProfileImageData: Data = Data()
-            
-            //プロフィール画像が存在すれば
-            if UIimagedata.image != nil {
-                //画像を圧縮
-                ProfileImageData = (UIimagedata.image?.jpegData(compressionQuality: 0.01))!
-            }
-            
-            //storageに画像を送信
+    func contentOfFIRStorageUpload (callback: @escaping (UIImage?) -> Void,UIimagedata:UIImageView,UID:String?) {
+        guard let UID = UID else {
+            print("UIDが確認できませんでした")
+            return
+        }
+        //ストレージサーバのURLを取得
+        let storage = Storage.storage().reference(forURL: "gs://metalk-f132e.appspot.com")
+        
+        // パス: あなた固有のURL/profileImage/{user.uid}.jpeg
+        let imageRef = storage.child("profileImage").child("\(UID).jpeg")
+        
+        //保存したい画像のデータを変数として持つ
+        var ProfileImageData: Data = Data()
+        
+        //プロフィール画像が存在すれば
+        if UIimagedata.image != nil {
+            //画像を圧縮
+            ProfileImageData = (UIimagedata.image?.jpegData(compressionQuality: 0.01))!
+        }
+        
+        //storageに画像を送信
 
-            imageRef.putData(ProfileImageData, metadata: nil) { (metaData, error) in
-                ///画像送信に失敗したら
-                if let error = error {
-                    //エラーであれば
-                    print(error.localizedDescription)
-                ///画像送信に成功したら、圧縮済みのイメージを返す
-                } else {
-                    callback(UIimagedata.image)
-                }
+        imageRef.putData(ProfileImageData, metadata: nil) { (metaData, error) in
+            ///画像送信に失敗したら
+            if let error = error {
+                //エラーであれば
+                print(error.localizedDescription)
+            ///画像送信に成功したら、圧縮済みのイメージを返す
+            } else {
+                callback(UIimagedata.image)
             }
         }
+    }
     
     ///Cloud Fire DBにデータを登録
     func userInfoDataDBRegister() {
@@ -146,13 +157,13 @@ struct UserDataManagedData{
     //    /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
     //    /// 　　　　　　（ニックネーム、性別等が含まれる）
     //    /// - Returns:
-        func userInfoDataGet(callback: @escaping  ([String:Any]?) -> Void) {
-            guard let uid = uid else {
-                print("UIDの取得ができませんでした")
-            return 
+        func userInfoDataGet(callback: @escaping  ([String:Any]?) -> Void,UID:String?) {
+            guard let UID = UID else {
+                print("UIDが確認できませんでした")
+                return
             }
             ///ここでデータにアクセスしている（非同期処理）
-            let userDocuments = cloudDB.collection("users").document(uid)
+            let userDocuments = cloudDB.collection("users").document(UID)
             ///getDocumentプロパティでコレクションデータからオブジェクトとしてデータを取得
             userDocuments.getDocument{ (documents,err) in
                 if let document = documents, document.exists {
@@ -170,51 +181,51 @@ struct UserDataManagedData{
     //    /// - dataFlg: どのデータかを判断する 1="nickname",2="aboutMeMassage"
     //    /// - callback:コールバック。エラーを返す。エラーにならなかったら返さない。
     //    /// - Returns:
-    func userInfoDataUpload(userData:Any?,dataFlg:Int?) {
-        guard let uid = uid else {
-        print("UIDの取得ができませんでした")
-        return
+    func userInfoDataUpload(userData:Any?,dataFlg:Int?,UID:String?) {
+        guard let UID = UID else {
+            print("UIDが確認できませんでした")
+            return
         }
-        
-
         ///フラグによってアップデートする項目を仕分け
         switch dataFlg {
         case 1: ///ニックネーム及び更新日時
             guard let userData = userData as? String else {
                 return
             }
-            Firestore.firestore().collection("users").document(uid).updateData(["nickname":userData])
-            Firestore.firestore().collection("users").document(uid).updateData(["updatedAt":FieldValue.serverTimestamp()])
+            Firestore.firestore().collection("users").document(UID).updateData(["nickname":userData])
+            Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
 //            DBRef.child("users/\(uid)").updateChildValues(["nickname":userData])
 //            DBRef.child("users").updateChildValues(["updatedAt":FieldValue.serverTimestamp()])
         case 2: ///ひとこと及び更新日時
             guard let userData = userData as? String else {
                 return
             }
-            Firestore.firestore().collection("users").document(uid).updateData(["aboutMeMassage":userData])
-            Firestore.firestore().collection("users").document(uid).updateData(["updatedAt":FieldValue.serverTimestamp()])
+            Firestore.firestore().collection("users").document(UID).updateData(["aboutMeMassage":userData])
+            Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
         case 3: ///年齢及び更新日時
             guard let userData = userData as? Int else {
                 return
             }
-            Firestore.firestore().collection("users").document(uid).updateData(["age":userData])
-            Firestore.firestore().collection("users").document(uid).updateData(["updatedAt":FieldValue.serverTimestamp()])
+            Firestore.firestore().collection("users").document(UID).updateData(["age":userData])
+            Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
         case 4: ///出身地及び更新日時
             guard let userData = userData as? String else {
                 return
             }
-            Firestore.firestore().collection("users").document(uid).updateData(["area":userData])
-            Firestore.firestore().collection("users").document(uid).updateData(["updatedAt":FieldValue.serverTimestamp()])
+            Firestore.firestore().collection("users").document(UID).updateData(["area":userData])
+            Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
         default:break
         }
     }
     
     ///ブロックリスト登録処理
-    func blockListRegister() {
-        guard let uid = uid else { print("UIDの取得ができませんでした")
-            return }
+    func blockListRegister(UID:String?) {
+        guard let UID = UID else {
+            print("UIDが確認できませんでした")
+            return
+        }
         ///各登録処理（Cloud Firestore）
-        Firestore.firestore().collection("blocklist").document(uid).collection("blockUser").document("").setData([
+        Firestore.firestore().collection("users").document(UID).collection("blockUser").document("  ここにブロックする相手のUID").setData([
             "createdAt": FieldValue.serverTimestamp(),
             "updatedAt": FieldValue.serverTimestamp()
         ], completion: { error in
@@ -229,32 +240,33 @@ struct UserDataManagedData{
         })
     }
     
-    ///ブロックユーザーリスト取得関数(コレクションは"Users")
+    ///【非同期】ブロックユーザーリスト取得関数(コレクションは"Users")
     /// - Parameters:
     /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
     /// 　　　　　　（ニックネーム、性別等が含まれる）
     /// - Returns:
-    func blockUserDataGet(callback: @escaping  ([String]) -> Void) {
+    func blockUserDataGet(callback: @escaping  ([String]) -> Void,UID:String?) {
         var blockUserList:[String] = []
-        guard let uid = uid else { print("UIDの取得ができませんでした")
-            return }
-
+        guard let UID = UID else {
+            print("UIDが確認できませんでした")
+            return
+        }
         ///ここでデータにアクセスしている（非同期処理）
-        let userDocuments = cloudDB.collection("blocklist").document(uid).collection("blockUser")
+        let userDocuments = cloudDB.collection("users").document(UID).collection("blockUser")
         userDocuments.getDocuments(){ (querySnapshot, err) in
             if let err = err {
                 print("Error getting documents: \(err)")
             } else {
-                for document in querySnapshot!.documents {
-                    
-                    blockUserList.append(document.documentID)
+                for blockuserinfo in querySnapshot!.documents {
+                    ///ここでブロックリストのユーザーID一覧を格納
+                    blockUserList.append(blockuserinfo.documentID)
+                    callback(blockUserList)
 //                    print("\(document.documentID) => \(document.data())")
                 }
-                ///ここでブロックユーザーリストを読んだらさらにそのリストからそのユーザーの情報を取得してくる。
-                callback(blockUserList)
             }
         }
     }
+    
 }
 
 

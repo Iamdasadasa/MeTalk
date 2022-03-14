@@ -39,6 +39,7 @@
 		D68FB3A927D884F700E57F5A /* NotificationTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB3A827D884F700E57F5A /* NotificationTableViewCell.swift */; };
 		D68FB3AD27D9D65400E57F5A /* BlockListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB3AC27D9D65400E57F5A /* BlockListViewController.swift */; };
 		D68FB3AF27D9EF6D00E57F5A /* blockListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB3AE27D9EF6D00E57F5A /* blockListTableViewCell.swift */; };
+		D68FB3B127DF046B00E57F5A /* emailInquiry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB3B027DF046B00E57F5A /* emailInquiry.swift */; };
 		D696850227D08BD4006D85DC /* CropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = D696850127D08BD4006D85DC /* CropViewController */; };
 		D696850427D08BD4006D85DC /* TOCropViewController in Frameworks */ = {isa = PBXBuildFile; productRef = D696850327D08BD4006D85DC /* TOCropViewController */; };
 		D696850627D23FBD006D85DC /* showImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D696850527D23FBD006D85DC /* showImageViewController.swift */; };
@@ -112,6 +113,7 @@
 		D68FB3A827D884F700E57F5A /* NotificationTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationTableViewCell.swift; sourceTree = "<group>"; };
 		D68FB3AC27D9D65400E57F5A /* BlockListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockListViewController.swift; sourceTree = "<group>"; };
 		D68FB3AE27D9EF6D00E57F5A /* blockListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = blockListTableViewCell.swift; sourceTree = "<group>"; };
+		D68FB3B027DF046B00E57F5A /* emailInquiry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = emailInquiry.swift; sourceTree = "<group>"; };
 		D696850527D23FBD006D85DC /* showImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = showImageViewController.swift; sourceTree = "<group>"; };
 		D696850727D24100006D85DC /* ShowImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowImageView.swift; sourceTree = "<group>"; };
 		D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -342,6 +344,7 @@
 			isa = PBXGroup;
 			children = (
 				D68FB3A127D7410800E57F5A /* NotificationViewController.swift */,
+				D68FB3B027DF046B00E57F5A /* emailInquiry.swift */,
 				D68FB3AC27D9D65400E57F5A /* BlockListViewController.swift */,
 			);
 			path = Controller;
@@ -620,6 +623,7 @@
 				D68FB3AD27D9D65400E57F5A /* BlockListViewController.swift in Sources */,
 				D68FB39427D5C6CC00E57F5A /* GeneralTableView.swift in Sources */,
 				D631EBF227A581BE00800693 /* ViewController.swift in Sources */,
+				D68FB3B127DF046B00E57F5A /* emailInquiry.swift in Sources */,
 				D6543DC127B7B61500444454 /* SemiModalViewController.swift in Sources */,
 				D69EC38027AA92F100290B18 /* MeTalkProfileViewController.swift in Sources */,
 				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,

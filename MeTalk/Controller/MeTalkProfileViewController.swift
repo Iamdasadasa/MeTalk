@@ -33,6 +33,7 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
     let userDataManagedData = UserDataManagedData()
     let storage = Storage.storage()
     let host = "gs://metalk-f132e.appspot.com"
+    let uid = Auth.auth().currentUser?.uid
     
     ///ライブラリのハンモーダルインスタンス
     var fpc = FloatingPanelController()
@@ -62,7 +63,7 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
                 return
             }
             self.userInfoDataSetup(userInfoData: document)
-        })
+        }, UID: uid)
     }
     
     override func viewDidLayoutSubviews() {
@@ -82,7 +83,7 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
                 } else {
                     self.meTalkProfileView.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
                 }
-            })
+            }, UID: uid)
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -162,7 +163,7 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
         ///プロフィールイメージ投稿Model
         userDataManagedData.contentOfFIRStorageUpload(callback: { pressureImage in
             self.meTalkProfileView.profileImageButton.setImage(pressureImage, for: .normal)
-        }, UIimagedata: UIimageView)
+        }, UIimagedata: UIimageView, UID: uid)
         
         ///cropViewControllerを閉じる
         cropViewController.dismiss(animated: true, completion: nil)
@@ -335,7 +336,7 @@ extension MeTalkProfileViewController:FloatingPanelControllerDelegate{
                 return
             }
             self.userInfoDataSetup(userInfoData: document)
-        })
+        }, UID: uid)
         ///タブバーコントローラーを表示
         self.tabBarController?.tabBar.isHidden = false
 

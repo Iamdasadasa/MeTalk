@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import Firebase
 
 protocol SemiModalViewControllerProtcol:AnyObject{
     func ButtonTappedActionChildDelegateAction()
@@ -21,6 +22,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
     ///インスタンス化(Model)
     let userDataManageData = UserDataManagedData()
     let modalImageData = ModalImageData()
+    let uid = Auth.auth().currentUser?.uid
     ///Viewフラグ判断変数
     var viewFlag:Int
     
@@ -54,7 +56,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
                 }
                 ///ユーザー名情報をテキストフィールドにセット
                 self.nickNameTextFieldModalView.itemTextField.text = userInfoData["nickname"] as? String
-            })
+            }, UID: uid)
             ///クローズ画像データをセット
             self.nickNameTextFieldModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
@@ -77,7 +79,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
                 }
                 ///ひとことをテキストフィールドにセット
                 self.aboutMeTextFieldModalView.itemTextField.text = userInfoData["aboutMeMassage"] as? String
-            })
+            }, UID: uid)
             ///クローズ画像データをセット
             self.aboutMeTextFieldModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
@@ -107,7 +109,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
                     self.agePickerModalView.itemTextField.text = String(ageTypeInt)
                 }
 
-            })
+            }, UID: uid)
             ///クローズ画像データをセット
             self.agePickerModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
             ///★viewFlg4は住まい★
@@ -124,7 +126,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
                 ///住まいをテキストフィールドにセット
                 self.areaPickerModalView.itemTextField.text = userInfoData["area"] as? String
 
-            })
+            }, UID: uid)
             ///クローズ画像データをセット
             self.areaPickerModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
         }
@@ -215,7 +217,7 @@ extension SemiModalViewController{
     ///決定ボタン押下　view: NickNameTextFieldModalView
     func dicisionButtonTappedAction(button: UIButton, view: NickNameTextFieldModalView) {
         ///入力したユーザー名をUpload
-        userDataManageData.userInfoDataUpload(userData: view.itemTextField.text, dataFlg: 1)
+        userDataManageData.userInfoDataUpload(userData: view.itemTextField.text, dataFlg: 1, UID: uid)
         self.delegate?.ButtonTappedActionChildDelegateAction()
     }
     ///クローズボタン画像押下　view: NickNameTextFieldModalView
@@ -225,7 +227,7 @@ extension SemiModalViewController{
     ///決定ボタン押下　view: AboutMeTextFieldModalView
     func dicisionButtonTappedAction(button: UIButton, view: AboutMeTextFieldModalView) {
         ///入力したユーザー名をUpload
-        userDataManageData.userInfoDataUpload(userData: view.itemTextField.text, dataFlg: 2)
+        userDataManageData.userInfoDataUpload(userData: view.itemTextField.text, dataFlg: 2, UID: uid)
         self.delegate?.ButtonTappedActionChildDelegateAction()
     }
     ///クローズボタン画像押下　view: AboutMeTextFieldModalView
@@ -245,7 +247,7 @@ extension SemiModalViewController{
             return
         }
         print(AgeTypeInt)
-        userDataManageData.userInfoDataUpload(userData: AgeTypeInt, dataFlg: 3)
+        userDataManageData.userInfoDataUpload(userData: AgeTypeInt, dataFlg: 3, UID: uid)
         self.delegate?.ButtonTappedActionChildDelegateAction()
     }
     ///クローズボタン画像押下　view: AgePickerModalView
@@ -255,7 +257,7 @@ extension SemiModalViewController{
     ///決定ボタン押下　view: AreaPickerModalView
     func dicisionButtonTappedAction(button: UIButton, view: AreaPickerModalView) {
         ///入力した出身地をUpload
-        userDataManageData.userInfoDataUpload(userData: view.itemTextField.text, dataFlg: 4)
+        userDataManageData.userInfoDataUpload(userData: view.itemTextField.text, dataFlg: 4, UID: uid)
         self.delegate?.ButtonTappedActionChildDelegateAction()
     }
     ///クローズボタン画像押下　view: AreaPickerModalView
