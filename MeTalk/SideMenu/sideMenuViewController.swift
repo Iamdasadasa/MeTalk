@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import Firebase
+import MessageUI
 
 protocol SideMenuViewControllerDelegate:AnyObject{
     func pushViewController(nextViewController:UIViewController,sideMenuViewcontroller:SideMenuViewcontroller)
@@ -22,16 +23,16 @@ enum menuCellItem:Int,CaseIterable {
     case inquiry
     case aboutApp
     case cancelTheMembership
+    
     ///セルに対する情報項目(適宜増やしてOK)
     struct  Menudata{
         let cellTitle:String
         let viewController:UIViewController?
     }
     ///メンバーシップ削除のためのFunction
-    func profileImageActionSheet() -> UIAlertController{
+    func deleteMemberShipActionSheet() -> UIAlertController{
         //アクションシートを作る
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-
         //ボタン1
         alert.addAction(UIAlertAction(title: "テスト的ログアウトボタン", style: .default, handler: {
             (action: UIAlertAction!) in
@@ -40,15 +41,31 @@ enum menuCellItem:Int,CaseIterable {
                 } catch let signOutError as NSError {
                     print("SignOut Error: %@", signOutError)
                 }
-            
         }))
-
-        //ボタン３
+        //ボタン2
         alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
 
         return alert
-        
+    }
+    
+    ///利用規約かプライバシーポリシー選択のためのFunction
+    func chooseAboutAppActionSheet(callback: @escaping (Int) -> Void) -> UIAlertController{
+        //アクションシートを作る
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        //ボタン1
+        alert.addAction(UIAlertAction(title: "利用規約", style: .default, handler: {
+            (action: UIAlertAction!) in
+                callback(1)
+        }))
+        //ボタン2
+        alert.addAction(UIAlertAction(title: "プライバシーポリシー", style: .default, handler: {
+            (action: UIAlertAction!) in
+            callback(2)
+        }))
+        //ボタン2
+        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
 
+        return alert
     }
     
     ///アイテムに対して適切なセル情報を投入
@@ -64,7 +81,7 @@ enum menuCellItem:Int,CaseIterable {
             let menudata = Menudata(cellTitle: "問い合わせ", viewController: NotificationViewController())
             return menudata
         case .aboutApp:
-            let menudata = Menudata(cellTitle: "このアプリについて", viewController: NotificationViewController())
+            let menudata = Menudata(cellTitle: "このアプリについて", viewController: nil)
             return menudata
         case .cancelTheMembership:
             let menudata = Menudata(cellTitle: "メンバーシップの削除", viewController: nil)
@@ -178,15 +195,79 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let menusectionitem = menuCellItem(rawValue: returnNumber(sectionNo: indexPath.section, itemNo: indexPath.row)) else { return }
-        guard let nextViewController = menusectionitem.info.viewController else {
-            if menusectionitem.info.cellTitle == "メンバーシップの削除" {
-                self.present(menusectionitem.profileImageActionSheet(), animated: true, completion: nil)
-            }
-            return
+        
+        switch (indexPath.section,indexPath.row){
+        case (1,0):
+            ///メール送信画面生成及び遷移
+            mailViewControllerSet()
+            print("メール問い合わせが押下されました。")
+        case(2,0):
+            self.present(menusectionitem.deleteMemberShipActionSheet(), animated: true, completion: nil)
+        case(1,1):
+            self.present(menusectionitem.chooseAboutAppActionSheet(callback: {viewFlg in
+                self.delegate?.pushViewController(nextViewController: WebViewTempleteController(webPageFlg: viewFlg), sideMenuViewcontroller: self)
+            }), animated: true, completion: nil)
+
+        default:
+        guard let nextViewController = menusectionitem.info.viewController else { return }
+            self.delegate?.pushViewController(nextViewController: nextViewController, sideMenuViewcontroller: self)
         }
-        self.delegate?.pushViewController(nextViewController: nextViewController, sideMenuViewcontroller: self)
     }
-
-
 }
 
+///メール送信画面についてはViewのレイアウトとかも存在しないためここで完結させる
+extension SideMenuViewcontroller:MFMailComposeViewControllerDelegate{
+    func mailViewControllerSet(){
+        //メール送信が可能なら
+        if MFMailComposeViewController.canSendMail() {
+            //MFMailComposeVCのインスタンス
+            let mail = MFMailComposeViewController()
+            //MFMailComposeのデリゲート
+            mail.mailComposeDelegate = self
+            //送り先
+            mail.setToRecipients(["penguin.inpuery@gmail.com"])
+            //件名
+            mail.setSubject("【penguin 問い合わせ】")
+            //メッセージ本文
+            mail.setMessageBody("【下記に問い合わせ内容を記載してください】", isHTML: false)
+            //メールを表示
+            self.present(mail, animated: true, completion: nil)
+        //メール送信が不可能なら
+        } else {
+            //アラートで通知
+            let alert = UIAlertController(title: "メールアカウントが存在しません", message: "問い合わせを行うにはメールアカウントのセットアップが必要です。", preferredStyle: .alert)
+            let dismiss = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+            alert.addAction(dismiss)
+            self.present(alert, animated: true, completion: nil)
+        }
+    }
+    ///エラー処理
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
+        if error != nil {
+            //送信失敗
+            print(error)
+        } else {
+            switch result {
+            case .cancelled:
+                //アラートで通知
+                let alert = UIAlertController(title: "キャンセルされました", message: nil, preferredStyle: .alert)
+                let dismiss = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+                alert.addAction(dismiss)
+                self.present(alert, animated: true, completion: nil)
+            case .saved:
+                let alert = UIAlertController(title: "下書きが保存されました", message: nil, preferredStyle: .alert)
+                let dismiss = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+                alert.addAction(dismiss)
+                self.present(alert, animated: true, completion: nil)
+            case .sent:
+                let alert = UIAlertController(title: "送信が完了しました", message: nil, preferredStyle: .alert)
+                let dismiss = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+                alert.addAction(dismiss)
+                self.present(alert, animated: true, completion: nil)
+            default:
+                break
+            }
+            controller.dismiss(animated: true, completion: nil)
+        }
+    }
+}

@@ -51,8 +51,6 @@ class NotificationViewController:UIViewController{
         self.navigationItem.leftBarButtonItem = backButtonItem
         ///タイトルラベル追加
         navigationItem.title = "通知設定"
-        
-        
     }
     
     @objc func backButtonPressed(_ sender: UIBarButtonItem) {
