@@ -193,13 +193,10 @@
 		D631EBEC27A581BE00800693 /* MeTalk */ = {
 			isa = PBXGroup;
 			children = (
-				D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */,
 				D68FB3A727D87ECE00E57F5A /* TableViewTemplete */,
-				D68FB39027D5AC3500E57F5A /* SideMenu */,
-				D6543DBE27B7B55F00444454 /* Modal */,
-				D631EC1D27A5821D00800693 /* Model */,
-				D631EC1E27A5822900800693 /* View */,
-				D631EC1F27A5823000800693 /* Controller */,
+				D655503E27E20F5300C86E34 /* Default */,
+				D655503F27E20FBF00C86E34 /* 00_initialScreen */,
+				D655504327E2107100C86E34 /* 01_ProfileScreen */,
 			);
 			path = MeTalk;
 			sourceTree = "<group>";
@@ -224,7 +221,6 @@
 		D631EC1D27A5821D00800693 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				D631EC2427A7E26D00800693 /* InitialSettingData.swift */,
 				D6543DCA27BA7AC200444454 /* UserDataManageData.swift */,
 			);
 			path = Model;
@@ -233,13 +229,10 @@
 		D631EC1E27A5822900800693 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				D631EC2227A5831400800693 /* initialSettingView.swift */,
 				D69EC37B27AA85C300290B18 /* loadingView.swift */,
 				D69EC38127AA952000290B18 /* ProfileView.swift */,
 				D6543DBC27B0DC6E00444454 /* ProfileChildView.swift */,
 				D696850727D24100006D85DC /* ShowImageView.swift */,
-				D631EBF327A581BE00800693 /* Main.storyboard */,
-				D631EBF627A581BF00800693 /* Assets.xcassets */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -247,17 +240,11 @@
 		D631EC1F27A5823000800693 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */,
 				D69EC37527AA66D400290B18 /* UserListViewController.swift */,
 				D69EC37F27AA92F100290B18 /* ProfileViewController.swift */,
 				D69EC37727AA67E100290B18 /* MeTalkViewController.swift */,
-				D69EC37927AA681100290B18 /* MainTabBarController.swift */,
 				D696850527D23FBD006D85DC /* showImageViewController.swift */,
 				D631EBF127A581BE00800693 /* ViewController.swift */,
-				D631EBED27A581BE00800693 /* AppDelegate.swift */,
-				D631EBEF27A581BE00800693 /* SceneDelegate.swift */,
-				D631EBF827A581BF00800693 /* LaunchScreen.storyboard */,
-				D631EBFB27A581BF00800693 /* Info.plist */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -299,6 +286,67 @@
 				D6543DCF27C4822300444454 /* ModalImageData.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		D655503E27E20F5300C86E34 /* Default */ = {
+			isa = PBXGroup;
+			children = (
+				D631EBF327A581BE00800693 /* Main.storyboard */,
+				D631EBF827A581BF00800693 /* LaunchScreen.storyboard */,
+				D631EBF627A581BF00800693 /* Assets.xcassets */,
+				D631EBFB27A581BF00800693 /* Info.plist */,
+				D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */,
+				D631EBED27A581BE00800693 /* AppDelegate.swift */,
+				D631EBEF27A581BE00800693 /* SceneDelegate.swift */,
+			);
+			path = Default;
+			sourceTree = "<group>";
+		};
+		D655503F27E20FBF00C86E34 /* 00_initialScreen */ = {
+			isa = PBXGroup;
+			children = (
+				D655504027E20FF800C86E34 /* Model */,
+				D655504127E2100200C86E34 /* View */,
+				D655504227E2100B00C86E34 /* Controller */,
+			);
+			path = 00_initialScreen;
+			sourceTree = "<group>";
+		};
+		D655504027E20FF800C86E34 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				D631EC2427A7E26D00800693 /* InitialSettingData.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		D655504127E2100200C86E34 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D631EC2227A5831400800693 /* initialSettingView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		D655504227E2100B00C86E34 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */,
+				D69EC37927AA681100290B18 /* MainTabBarController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		D655504327E2107100C86E34 /* 01_ProfileScreen */ = {
+			isa = PBXGroup;
+			children = (
+				D68FB39027D5AC3500E57F5A /* SideMenu */,
+				D6543DBE27B7B55F00444454 /* Modal */,
+				D631EC1D27A5821D00800693 /* Model */,
+				D631EC1E27A5822900800693 /* View */,
+				D631EC1F27A5823000800693 /* Controller */,
+			);
+			path = 01_ProfileScreen;
 			sourceTree = "<group>";
 		};
 		D68FB39027D5AC3500E57F5A /* SideMenu */ = {
