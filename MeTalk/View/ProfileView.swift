@@ -8,19 +8,19 @@
 import Foundation
 import UIKit
 
-protocol MeTalkProfileViewDelegate:AnyObject{
+protocol ProfileViewDelegate:AnyObject{
     func settingButtonTappedDelegate()
     func profileImageButtonTappedDelegate()
 }
 
-class  MeTalkProfileView:UIView{
+class  ProfileView:UIView{
     ///オブジェクト間の中間値格納変数
     var objectMedianValue:CGFloat?
     
-    let nickNameItemView = MeTalkProfileChildView()
-    let AboutMeItemView = MeTalkProfileChildView()
-    let ageItemView = MeTalkProfileChildView()
-    let areaItemView = MeTalkProfileChildView()
+    let nickNameItemView = ProfileChildView()
+    let AboutMeItemView = ProfileChildView()
+    let ageItemView = ProfileChildView()
+    let areaItemView = ProfileChildView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -51,7 +51,7 @@ class  MeTalkProfileView:UIView{
     }
 //※各定義※
     
-    weak var delegate:MeTalkProfileViewDelegate?
+    weak var delegate:ProfileViewDelegate?
     
     ///ボタン・フィールド定義
 
@@ -316,7 +316,7 @@ class  MeTalkProfileView:UIView{
     }
 }
 
-extension MeTalkProfileView{
+extension ProfileView{
     ///プロフィールタイトルラベルとプロフィールボタンの中間の位置を取得
     func medianValueGet(){
         ///プロフィール画像の最大Y座標の最大値からプロフィールボタンのY座標の最小値を減算した値を取得(オブジェクト同士の真ん中の値が取れる)
@@ -347,7 +347,7 @@ extension MeTalkProfileView{
 }
 
 ///Viewセットアップ
-extension MeTalkProfileView{
+extension ProfileView{
     func viewSetUp(){
         ///タイトルセットアップ
         self.nickNameItemView.TitleLabel.text = "ニックネーム"

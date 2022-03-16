@@ -16,13 +16,13 @@ final class MainTabBarController: UITabBarController {
     }
 
     func setupTab() {
-        let firstViewController = meTalkUserListViewController()
+        let firstViewController = UserListViewController()
         firstViewController.tabBarItem = UITabBarItem(title: "tab1", image: .none, tag: 0)
 
         let secondViewController = meTalkViewController()
         secondViewController.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 0)
         
-        let thirdViewController = MeTalkProfileViewController()
+        let thirdViewController = ProfileViewController()
         thirdViewController.tabBarItem = UITabBarItem(tabBarSystemItem: .favorites, tag: 0)
 
         viewControllers = [firstViewController, secondViewController, thirdViewController]

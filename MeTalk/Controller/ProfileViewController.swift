@@ -14,7 +14,7 @@ import FloatingPanel
 import CropViewController
 import SideMenu
 
-class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
+class ProfileViewController:UIViewController, CropViewControllerDelegate{
 
     
     ///認証状態をリッスンする変数定義
@@ -28,7 +28,7 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
     var showImageViewController = ShowImageViewController()
     var sideMenuViewController = SideMenuViewcontroller()
     ///インスタンス化（View）
-    let meTalkProfileView = MeTalkProfileView()
+    let profileView = ProfileView()
     ///インスタンス化（Model）
     let userDataManagedData = UserDataManagedData()
     let storage = Storage.storage()
@@ -43,11 +43,11 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
     override func viewDidLoad() {
         super.viewDidLoad()
         ///デリゲート委譲
-        meTalkProfileView.delegate = self
-        meTalkProfileView.nickNameItemView.delegate = self
-        meTalkProfileView.AboutMeItemView.delegate = self
-        meTalkProfileView.ageItemView.delegate = self
-        meTalkProfileView.areaItemView.delegate = self
+        profileView.delegate = self
+        profileView.nickNameItemView.delegate = self
+        profileView.AboutMeItemView.delegate = self
+        profileView.ageItemView.delegate = self
+        profileView.areaItemView.delegate = self
         sideMenuViewController.delegate = self
         
 //        ///半モーダルの初期設定
@@ -56,7 +56,7 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
         fpc.isRemovalInteractionEnabled  =  true
         fpc.backdropView.dismissalTapGestureRecognizer.isEnabled = true
         ///初期画像設定
-        self.meTalkProfileView.settingButton.setImage(UIImage(named: "setting"), for: .normal)
+        self.profileView.settingButton.setImage(UIImage(named: "setting"), for: .normal)
         ///画面表示前にユーザー情報を取得
         userDataManagedData.userInfoDataGet(callback: {document in
             guard let document = document else {
@@ -67,7 +67,7 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
     }
     
     override func viewDidLayoutSubviews() {
-        self.view = meTalkProfileView
+        self.view = profileView
     }
     
 
@@ -78,10 +78,10 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
             self.userDataManagedData.contentOfFIRStorageGet(callback: { image in
                 ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
                 if image != nil {
-                    self.meTalkProfileView.profileImageButton.setImage(image, for: .normal)
+                    self.profileView.profileImageButton.setImage(image, for: .normal)
                 ///コールバック関数でNilが返ってきたら初期画像を設定
                 } else {
-                    self.meTalkProfileView.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
+                    self.profileView.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
                 }
             }, UID: uid)
     }
@@ -94,8 +94,8 @@ class MeTalkProfileViewController:UIViewController, CropViewControllerDelegate{
 
 
 
-///※MeTalkProfileViewから受け取ったデリゲート処理※
-extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate{
+///※ProfileViewから受け取ったデリゲート処理※
+extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelegate,UIImagePickerControllerDelegate{
     ///プロフィール画像タップ後の処理
     /// - Parameters:
     /// - Returns: none
@@ -162,7 +162,7 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
         UIimageView.image = image
         ///プロフィールイメージ投稿Model
         userDataManagedData.contentOfFIRStorageUpload(callback: { pressureImage in
-            self.meTalkProfileView.profileImageButton.setImage(pressureImage, for: .normal)
+            self.profileView.profileImageButton.setImage(pressureImage, for: .normal)
         }, UIimagedata: UIimageView, UID: uid)
         
         ///cropViewControllerを閉じる
@@ -178,7 +178,7 @@ extension MeTalkProfileViewController:MeTalkProfileViewDelegate,UINavigationCont
 }
 
 ///プロフィール画像を選択した際のアクションシート
-extension MeTalkProfileViewController{
+extension ProfileViewController{
     func profileImageActionSheet(callback:@escaping (Int?) -> Void){
         var actionFlg:Int?
         //アクションシートを作る
@@ -208,7 +208,7 @@ extension MeTalkProfileViewController{
     }
 }
 
-extension MeTalkProfileViewController:MeTalkProfileChildViewDelegate{
+extension ProfileViewController:ProfileChildViewDelegate{
     ///四つの変更項目のどれかが押されたら起動する
     /// - Parameters:
     /// - tag:タグがViewから渡されてくる。このタグによってどの項目かを判断している
@@ -249,7 +249,7 @@ extension MeTalkProfileViewController:MeTalkProfileChildViewDelegate{
 }
 
 
-extension MeTalkProfileViewController{
+extension ProfileViewController{
     ///各情報のSetUp
     /// - Parameters:
     /// - userInfoData:画面表示の際に取得してきているユーザーデータ
@@ -264,15 +264,15 @@ extension MeTalkProfileViewController{
         let date = dateUnix.dateValue()
         ///日付型をStringに変更してラベルにセット
         let userCreatedAtdate:String = dateFormatter.string(from: date as Date)
-        self.meTalkProfileView.startDateInfoLabel.text = userCreatedAtdate
+        self.profileView.startDateInfoLabel.text = userCreatedAtdate
         ///性別を取得。Firebaseでは数値で入っているために数字を判断して性別表示
         switch userInfoData["Sex"] as? Int {
         case 0:
-            self.meTalkProfileView.sexInfoLabel.text = "設定なし"
+            self.profileView.sexInfoLabel.text = "設定なし"
         case 1:
-            self.meTalkProfileView.sexInfoLabel.text = "男性"
+            self.profileView.sexInfoLabel.text = "男性"
         case 2:
-            self.meTalkProfileView.sexInfoLabel.text = "女性"
+            self.profileView.sexInfoLabel.text = "女性"
         default:break
         }
         ///文字列に改行処理を入れる
@@ -287,29 +287,29 @@ extension MeTalkProfileViewController{
         }
         guard let resultValue = resultValue else {return}
         ///ニックネームのラベルとニックネームの項目にデータセット
-        self.meTalkProfileView.nickNameItemView.valueLabel.text = userInfoData["nickname"] as? String
-        self.meTalkProfileView.personalInformationLabel.text = userInfoData["nickname"] as? String
+        self.profileView.nickNameItemView.valueLabel.text = userInfoData["nickname"] as? String
+        self.profileView.personalInformationLabel.text = userInfoData["nickname"] as? String
         ///ひとことにデータセット
-        self.meTalkProfileView.AboutMeItemView.valueLabel.text = resultValue
+        self.profileView.AboutMeItemView.valueLabel.text = resultValue
         //年齢にデータセット
         guard let ageTypeInt:Int = userInfoData["age"] as? Int else {
             print("年齢を取得できませんでした。")
             return
         }
         if String(ageTypeInt)  == "0" {
-            self.meTalkProfileView.ageItemView.valueLabel.text = "未設定"
+            self.profileView.ageItemView.valueLabel.text = "未設定"
         } else {
-            self.meTalkProfileView.ageItemView.valueLabel.text = String(ageTypeInt)
+            self.profileView.ageItemView.valueLabel.text = String(ageTypeInt)
         }
         
         //出身地にデータセット
-        self.meTalkProfileView.areaItemView.valueLabel.text = userInfoData["area"] as? String
+        self.profileView.areaItemView.valueLabel.text = userInfoData["area"] as? String
     }
     
 }
 
 ///セミモーダルライブラリの適用
-extension MeTalkProfileViewController:FloatingPanelControllerDelegate{
+extension ProfileViewController:FloatingPanelControllerDelegate{
     // カスタマイズしたレイアウトに変更(デフォルトで使用する際は不要)
     func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
         return CustomFloatingPanelLayout()
@@ -344,7 +344,7 @@ extension MeTalkProfileViewController:FloatingPanelControllerDelegate{
 }
 
 ///サイドメニュー関連の拡張
-extension MeTalkProfileViewController:SideMenuViewControllerDelegate{
+extension ProfileViewController:SideMenuViewControllerDelegate{
     ///サイドメニュー表示
     func settingSidemenu() {
         
@@ -377,10 +377,10 @@ extension MeTalkProfileViewController:SideMenuViewControllerDelegate{
 }
 
 ///SemiModalViewControllerからのデリゲート処理で、二ついれこになっている。大元のデリゲート処理は
-///ここのViewControllerであるMeTalkProfileViewController。さらにそこからfpcで追加したSemiModalViewController。
+///ここのViewControllerであるProfileViewController。さらにそこからfpcで追加したSemiModalViewController。
 ///さらにSemiModalViewControllerのViewで追加した各Viewの決定ボタンが大元の発火処理になっている。
 ///fpcを取り除く処理をしなくてはならないためにsemiModalViewControllerからさらにこのコントローラにデリゲートして処理を行なっている。
-extension MeTalkProfileViewController:SemiModalViewControllerProtcol{
+extension ProfileViewController:SemiModalViewControllerProtcol{
     func ButtonTappedActionChildDelegateAction() {
         fpc.removePanelFromParent(animated: true)
     }

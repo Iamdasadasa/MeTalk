@@ -7,7 +7,7 @@
 
 import Foundation
 import UIKit
-class meTalkUserListViewController:UIViewController{
+class UserListViewController:UIViewController{
     
     override func viewDidLoad() {
         self.view.backgroundColor = .orange

@@ -8,11 +8,11 @@
 import Foundation
 import UIKit
 
-protocol MeTalkProfileChildViewDelegate:AnyObject{
+protocol ProfileChildViewDelegate:AnyObject{
     func selfTappedclearButton(tag:Int)
 }
 
-class MeTalkProfileChildView:UIView{
+class ProfileChildView:UIView{
     ///オブジェクト間の中間値格納変数
     var objectMedianValue:CGFloat?
     
@@ -39,7 +39,7 @@ class MeTalkProfileChildView:UIView{
     }
 //※各定義※
     
-    weak var delegate:MeTalkProfileChildViewDelegate?
+    weak var delegate:ProfileChildViewDelegate?
     
     ///ボタン・フィールド定義
 
