@@ -32,6 +32,7 @@
 		D6543DCD27BF6BC900444454 /* AboutMeTextFieldModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DCC27BF6BC900444454 /* AboutMeTextFieldModalView.swift */; };
 		D6543DD027C4822300444454 /* ModalImageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DCF27C4822300444454 /* ModalImageData.swift */; };
 		D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DD327C500D800444454 /* AreaPickerModalView.swift */; };
+		D655504927E3608900C86E34 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655504827E3608900C86E34 /* ChatViewController.swift */; };
 		D68FB39227D5AC5300E57F5A /* sideMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */; };
 		D68FB39427D5C6CC00E57F5A /* GeneralTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39327D5C6CC00E57F5A /* GeneralTableView.swift */; };
 		D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */; };
@@ -105,6 +106,7 @@
 		D6543DCC27BF6BC900444454 /* AboutMeTextFieldModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutMeTextFieldModalView.swift; sourceTree = "<group>"; };
 		D6543DCF27C4822300444454 /* ModalImageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalImageData.swift; sourceTree = "<group>"; };
 		D6543DD327C500D800444454 /* AreaPickerModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaPickerModalView.swift; sourceTree = "<group>"; };
+		D655504827E3608900C86E34 /* ChatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
 		D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sideMenuViewController.swift; sourceTree = "<group>"; };
 		D68FB39327D5C6CC00E57F5A /* GeneralTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralTableView.swift; sourceTree = "<group>"; };
 		D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuTableViewCell.swift; sourceTree = "<group>"; };
@@ -197,6 +199,7 @@
 				D655503E27E20F5300C86E34 /* Default */,
 				D655503F27E20FBF00C86E34 /* 00_initialScreen */,
 				D655504327E2107100C86E34 /* 01_ProfileScreen */,
+				D655504427E35FC800C86E34 /* 02_ChatScreen */,
 			);
 			path = MeTalk;
 			sourceTree = "<group>";
@@ -347,6 +350,38 @@
 				D631EC1F27A5823000800693 /* Controller */,
 			);
 			path = 01_ProfileScreen;
+			sourceTree = "<group>";
+		};
+		D655504427E35FC800C86E34 /* 02_ChatScreen */ = {
+			isa = PBXGroup;
+			children = (
+				D655504527E3604E00C86E34 /* Model */,
+				D655504627E3605500C86E34 /* View */,
+				D655504727E3605D00C86E34 /* Controller */,
+			);
+			path = 02_ChatScreen;
+			sourceTree = "<group>";
+		};
+		D655504527E3604E00C86E34 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		D655504627E3605500C86E34 /* View */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
+		D655504727E3605D00C86E34 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				D655504827E3608900C86E34 /* ChatViewController.swift */,
+			);
+			path = Controller;
 			sourceTree = "<group>";
 		};
 		D68FB39027D5AC3500E57F5A /* SideMenu */ = {
@@ -665,6 +700,7 @@
 				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,
 				D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */,
 				D69EC37827AA67E100290B18 /* MeTalkViewController.swift in Sources */,
+				D655504927E3608900C86E34 /* ChatViewController.swift in Sources */,
 				D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */,
 				D6543DBD27B0DC6E00444454 /* ProfileChildView.swift in Sources */,
 				D68FB3A227D7410800E57F5A /* NotificationViewController.swift in Sources */,
