@@ -14,7 +14,11 @@ import Firebase
 class ChatUserListViewController:UIViewController{
     ///インスタンス化(View)
     let ChatUserListTableView = GeneralTableView()
-
+    ///インスタンス化(Model)
+    let meInfo = UserDataManagedData()
+    ///自身のユーザー情報格納変数
+    var meInfoData:[String:Any]?
+    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,7 +27,18 @@ class ChatUserListViewController:UIViewController{
         self.view.backgroundColor = .black
         ChatUserListTableView.dataSource = self
         ChatUserListTableView.delegate = self
+        ChatUserListTableView.allowsSelection = false
         ChatUserListTableView.register(chatUserListTableViewCell.self, forCellReuseIdentifier: "chatUserListTableViewCell")
+        meInfo.userInfoDataGet(callback: { document in
+            guard let document = document else {
+                return
+            }
+            self.meInfoData = document
+            self.ChatUserListTableView.allowsSelection = true
+        }, UID: Auth.auth().currentUser?.uid)
+        
+        
+        
     }
 
 }
@@ -45,17 +60,11 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let MeUID = Auth.auth().currentUser?.uid
-        let userData = UserDataManagedData()
-        userData.userInfoDataGet(callback: { document in
-            if let document = document {
-                document["nickname"] as?String
-            } else {
-                print("ChatUserListViewController_ユーザー情報は取得できませんでした。対象ユーザー:\(MeUID)")
-                return
-            }
-        }, UID:MeUID)
+//        let MeUID = Auth.auth().currentUser?.uid
+//        let userData = userInfo()
+//        print(userData.nickName)
+
         
-       let chatViewController = ChatViewController(MeUID: <#T##String#>, YouUID: <#T##String#>)
+//       let chatViewController = ChatViewController(MeUID: <#T##String#>, YouUID: <#T##String#>)
     }
 }

@@ -18,7 +18,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         FirebaseApp.configure()
         
-        let db = Firestore.firestore()
         var rootViewController:UIViewController?
         
         // 1. 初期化

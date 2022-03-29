@@ -24,32 +24,7 @@ struct ChatDataManagedData{
             return
         }
     }
-    
-    //    ///Massage用データ取得関数
-    //    /// - Parameters:UID　関数呼び出しのとき取得したいデータのUIDを渡す
-    //    /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
-    //    /// 　　　　　　（ニックネーム、性別等が含まれる）
-    //    /// -callback Returns:コールバック関数にて戻り値あり。コールバックを呼んだ先でさらにその情報をSenderTypeで返す必要がある。
-    func Me_You_DataGet(callback: @escaping  ([String:Any]?) -> Void,MeUID:String?,YouUID:String?) {
-            guard let MeUID = MeUID,let YouUID = YouUID else {
-                print("UIDが確認できませんでした")
-                return
-            }
-            ///ここでデータにアクセスしている（非同期処理）
-        let usersDocuments =cloudDB.collection("users").whereField(<#T##field: String##String#>, in: <#T##[Any]#>)
-            let MeDocuments = cloudDB.collection("users").document(MeUID)
-            let YouDocuments = cloudDB.collection("users").document(YouUID)
-            ///getDocumentプロパティでコレクションデータからオブジェクトとしてデータを取得
-            userDocuments.getDocument{ (documents,err) in
-                if let document = documents, document.exists {
-                    ///オブジェクトに対して.dataプロパティを使用して辞書型としてコールバック関数で返す
-                    callback(document.data())
-                } else {
-                    print(err?.localizedDescription)
-                }
-            }
-        }
-    
+
     //    ///自身のUID返却関数
     //    /// - Parameters:
     //    /// Returns:UID
