@@ -13,7 +13,6 @@
 		D62FBE1327CDFBE500EE7768 /* AgePickerModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D62FBE1227CDFBE500EE7768 /* AgePickerModalView.swift */; };
 		D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBED27A581BE00800693 /* AppDelegate.swift */; };
 		D631EBF027A581BE00800693 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBEF27A581BE00800693 /* SceneDelegate.swift */; };
-		D631EBF227A581BE00800693 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBF127A581BE00800693 /* ViewController.swift */; };
 		D631EBF527A581BE00800693 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D631EBF327A581BE00800693 /* Main.storyboard */; };
 		D631EBF727A581BF00800693 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D631EBF627A581BF00800693 /* Assets.xcassets */; };
 		D631EBFA27A581BF00800693 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D631EBF827A581BF00800693 /* LaunchScreen.storyboard */; };
@@ -33,6 +32,10 @@
 		D6543DD027C4822300444454 /* ModalImageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DCF27C4822300444454 /* ModalImageData.swift */; };
 		D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DD327C500D800444454 /* AreaPickerModalView.swift */; };
 		D655504927E3608900C86E34 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655504827E3608900C86E34 /* ChatViewController.swift */; };
+		D655504B27E3630400C86E34 /* Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655504A27E3630400C86E34 /* Mock.swift */; };
+		D655504D27E4260C00C86E34 /* ChatDataManagedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655504C27E4260C00C86E34 /* ChatDataManagedData.swift */; };
+		D655504F27EADB7600C86E34 /* ChatUserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655504E27EADB7600C86E34 /* ChatUserListViewController.swift */; };
+		D655505127EADC7C00C86E34 /* chatUserListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655505027EADC7C00C86E34 /* chatUserListTableViewCell.swift */; };
 		D68FB39227D5AC5300E57F5A /* sideMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */; };
 		D68FB39427D5C6CC00E57F5A /* GeneralTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39327D5C6CC00E57F5A /* GeneralTableView.swift */; };
 		D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */; };
@@ -47,7 +50,6 @@
 		D698A0CB27E0BA66002C64DE /* WebViewTempleteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D698A0CA27E0BA66002C64DE /* WebViewTempleteController.swift */; };
 		D69EC37427AA55DA00290B18 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */; };
 		D69EC37627AA66D400290B18 /* UserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37527AA66D400290B18 /* UserListViewController.swift */; };
-		D69EC37827AA67E100290B18 /* MeTalkViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37727AA67E100290B18 /* MeTalkViewController.swift */; };
 		D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37927AA681100290B18 /* MainTabBarController.swift */; };
 		D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37B27AA85C300290B18 /* loadingView.swift */; };
 		D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37F27AA92F100290B18 /* ProfileViewController.swift */; };
@@ -84,7 +86,6 @@
 		D631EBEA27A581BE00800693 /* MeTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D631EBED27A581BE00800693 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D631EBEF27A581BE00800693 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		D631EBF127A581BE00800693 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		D631EBF427A581BE00800693 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D631EBF627A581BF00800693 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D631EBF927A581BF00800693 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -107,6 +108,10 @@
 		D6543DCF27C4822300444454 /* ModalImageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalImageData.swift; sourceTree = "<group>"; };
 		D6543DD327C500D800444454 /* AreaPickerModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaPickerModalView.swift; sourceTree = "<group>"; };
 		D655504827E3608900C86E34 /* ChatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
+		D655504A27E3630400C86E34 /* Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mock.swift; sourceTree = "<group>"; };
+		D655504C27E4260C00C86E34 /* ChatDataManagedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDataManagedData.swift; sourceTree = "<group>"; };
+		D655504E27EADB7600C86E34 /* ChatUserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatUserListViewController.swift; sourceTree = "<group>"; };
+		D655505027EADC7C00C86E34 /* chatUserListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = chatUserListTableViewCell.swift; sourceTree = "<group>"; };
 		D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sideMenuViewController.swift; sourceTree = "<group>"; };
 		D68FB39327D5C6CC00E57F5A /* GeneralTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralTableView.swift; sourceTree = "<group>"; };
 		D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuTableViewCell.swift; sourceTree = "<group>"; };
@@ -119,7 +124,6 @@
 		D698A0CA27E0BA66002C64DE /* WebViewTempleteController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewTempleteController.swift; sourceTree = "<group>"; };
 		D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D69EC37527AA66D400290B18 /* UserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListViewController.swift; sourceTree = "<group>"; };
-		D69EC37727AA67E100290B18 /* MeTalkViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeTalkViewController.swift; sourceTree = "<group>"; };
 		D69EC37927AA681100290B18 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		D69EC37B27AA85C300290B18 /* loadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = loadingView.swift; sourceTree = "<group>"; };
 		D69EC37F27AA92F100290B18 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
@@ -245,9 +249,7 @@
 			children = (
 				D69EC37527AA66D400290B18 /* UserListViewController.swift */,
 				D69EC37F27AA92F100290B18 /* ProfileViewController.swift */,
-				D69EC37727AA67E100290B18 /* MeTalkViewController.swift */,
 				D696850527D23FBD006D85DC /* showImageViewController.swift */,
-				D631EBF127A581BE00800693 /* ViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -365,6 +367,8 @@
 		D655504527E3604E00C86E34 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				D655504A27E3630400C86E34 /* Mock.swift */,
+				D655504C27E4260C00C86E34 /* ChatDataManagedData.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -372,6 +376,7 @@
 		D655504627E3605500C86E34 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				D655505027EADC7C00C86E34 /* chatUserListTableViewCell.swift */,
 			);
 			name = View;
 			sourceTree = "<group>";
@@ -380,6 +385,7 @@
 			isa = PBXGroup;
 			children = (
 				D655504827E3608900C86E34 /* ChatViewController.swift */,
+				D655504E27EADB7600C86E34 /* ChatUserListViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -694,26 +700,28 @@
 				D631EC2127A582A200800693 /* initialSettingViewcontroller.swift in Sources */,
 				D68FB3AD27D9D65400E57F5A /* BlockListViewController.swift in Sources */,
 				D68FB39427D5C6CC00E57F5A /* GeneralTableView.swift in Sources */,
-				D631EBF227A581BE00800693 /* ViewController.swift in Sources */,
 				D6543DC127B7B61500444454 /* SemiModalViewController.swift in Sources */,
 				D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */,
 				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,
 				D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */,
-				D69EC37827AA67E100290B18 /* MeTalkViewController.swift in Sources */,
 				D655504927E3608900C86E34 /* ChatViewController.swift in Sources */,
 				D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */,
 				D6543DBD27B0DC6E00444454 /* ProfileChildView.swift in Sources */,
 				D68FB3A227D7410800E57F5A /* NotificationViewController.swift in Sources */,
 				D6543DCB27BA7AC200444454 /* UserDataManageData.swift in Sources */,
+				D655504D27E4260C00C86E34 /* ChatDataManagedData.swift in Sources */,
 				D6543DCD27BF6BC900444454 /* AboutMeTextFieldModalView.swift in Sources */,
 				D6543DC927BA268200444454 /* NickNameTextFieldModalView.swift in Sources */,
 				D69EC37627AA66D400290B18 /* UserListViewController.swift in Sources */,
+				D655504F27EADB7600C86E34 /* ChatUserListViewController.swift in Sources */,
 				D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */,
 				D696850827D24100006D85DC /* ShowImageView.swift in Sources */,
+				D655504B27E3630400C86E34 /* Mock.swift in Sources */,
 				D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */,
 				D631EC2527A7E26D00800693 /* InitialSettingData.swift in Sources */,
 				D6543DC527B7F49800444454 /* SemiModalTranslucentView.swift in Sources */,
 				D696850627D23FBD006D85DC /* showImageViewController.swift in Sources */,
+				D655505127EADC7C00C86E34 /* chatUserListTableViewCell.swift in Sources */,
 				D69EC38227AA952000290B18 /* ProfileView.swift in Sources */,
 				D631EC2327A5831400800693 /* initialSettingView.swift in Sources */,
 				D631EBF027A581BE00800693 /* SceneDelegate.swift in Sources */,

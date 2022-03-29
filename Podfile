@@ -16,13 +16,13 @@ target 'MeTalk' do
     # Pods for testing
   end
 
-pod 'Firebase/Core'
-pod 'Firebase/Firestore'
-pod 'Firebase/Auth'
-pod 'Firebase/Database'
-pod 'Firebase/Storage'
-#ここから一般ライブラリ
-pod 'FloatingPanel'
-pod 'SideMenu'
-
-end
+  pod 'Firebase/Core'
+  pod 'Firebase/Firestore'
+  pod 'Firebase/Auth'
+  pod 'Firebase/Database'
+  pod 'Firebase/Storage'
+  #ここから一般ライブラリ
+  pod 'FloatingPanel'
+  pod 'SideMenu'
+  pod 'MessageKit', '>= 1.0.0'
+  end

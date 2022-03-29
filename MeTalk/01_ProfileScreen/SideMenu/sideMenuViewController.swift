@@ -121,7 +121,7 @@ enum menuSectionItem:Int,CaseIterable {
 
 class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewDataSource {
     ///Barボタンの設定(NavigationBar)
-    var backButtonItem: UIBarButtonItem! // 追加ボタン
+    var backButtonItem: UIBarButtonItem! // 戻るボタン
     ///インスタンス化(View)
     let sideMenuTableView = GeneralTableView()
 

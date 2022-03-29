@@ -19,7 +19,7 @@ final class MainTabBarController: UITabBarController {
         let firstViewController = UserListViewController()
         firstViewController.tabBarItem = UITabBarItem(title: "tab1", image: .none, tag: 0)
 
-        let secondViewController = meTalkViewController()
+        let secondViewController = ChatUserListViewController()
         secondViewController.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 0)
         
         let thirdViewController = ProfileViewController()

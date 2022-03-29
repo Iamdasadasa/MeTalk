@@ -153,7 +153,7 @@ struct UserDataManagedData{
     }
     
     //    ///データ取得関数(コレクションは"Users")
-    //    /// - Parameters:
+    //    /// - Parameters:UID　関数呼び出しのとき取得したいデータのUIDを渡す
     //    /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
     //    /// 　　　　　　（ニックネーム、性別等が含まれる）
     //    /// - Returns:
