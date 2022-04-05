@@ -1,7 +1,6 @@
 import MessageKit
 import UIKit
 import InputBarAccessoryView
-import Firebase
 
 struct User: SenderType {
     var senderId: String
@@ -9,29 +8,28 @@ struct User: SenderType {
 }
 
 enum userType {
-    case me
-    case you
+    case me(UID:String,displayName:String)
+    case you(UID:String,displayName:String)
     
     var data: SenderType {
-        let Meuid = Auth.auth().currentUser?.uid
-        var youuid:String?
-        if Meuid == "MyQw4B7Zwr54un8YJsJ"{
-            youuid = "MyQzN6hTobiVUQL2rkI"
-        } else if Meuid == "MyQzN6hTobiVUQL2rkI"{
-            youuid = "MyQw4B7Zwr54un8YJsJ"
-        }
-        guard let Meuid = Meuid else {
-            return User(senderId: "エラー", displayName: "エラー")
-        }
-//        一旦このViewControllerの前に別のViewControllerを用意してそこでユーザーコレクションを取得してこの画面に渡して遷移するようにする
             switch self {
-            case .me:
-                return User(senderId: "Meuid", displayName: "俺")
-            case .you:
-                return User(senderId: "002", displayName: "お前")
+            case let .me(UID,displayName):
+                return User(senderId: UID, displayName: displayName)
+            case let .you(UID,displayName):
+                return User(senderId: UID, displayName: displayName)
             }
-        
     }
+    
+    var meFag: Int {
+        switch self {
+            case .me:
+                return 1
+            case .you:
+                return 0
+        }
+    }
+        
+
 }
 
 struct MockMessage: MessageType {
@@ -48,7 +46,6 @@ struct MockMessage: MessageType {
         self.sentDate = date
     }
 
-    ///
     init(text: String, sender: SenderType, messageId: String, date: Date) {
         self.init(kind: .text(text), sender: sender, messageId: messageId, date: date)
     }
@@ -58,22 +55,21 @@ struct MockMessage: MessageType {
         self.init(kind: .attributedText(attributedText), sender: sender, messageId: messageId, date: date)
     }
 
-    // サンプル用に適当なメッセージ
-    static func getMessages() -> [MockMessage] {
-        return [
-            createMessage(text: "おはよう", user: .me),
-            createMessage(text: "wwwwww", user: .me),
-            createMessage(text: "おはようございます", user: .you),
-            createMessage(text: "wwww", user: .me),
-            createMessage(text: "草", user: .you),
-        ]
-    }
+    static func loadMessage(text: String, user: userType,data:Date) -> MockMessage {
+        if user.meFag == 1 {
+            let attributedText = NSAttributedString(
+                string: text,
+                attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor:UIColor.black]
+            )
+            return MockMessage(attributedText: attributedText, sender: user.data, messageId: UUID().uuidString, date: data)
+        } else {
+            let attributedText = NSAttributedString(
+                string: text,
+                attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor:UIColor.white]
+            )
+            return MockMessage(attributedText: attributedText, sender: user.data, messageId: UUID().uuidString, date:data)
+        }
 
-    static func createMessage(text: String, user: userType) -> MockMessage {
-        let attributedText = NSAttributedString(
-            string: text,
-            attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor: UIColor.black]
-        )
-        return MockMessage(attributedText: attributedText, sender: user.data, messageId: UUID().uuidString, date: Date())
     }
+    
 }

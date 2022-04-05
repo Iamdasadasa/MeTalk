@@ -4,23 +4,18 @@ import InputBarAccessoryView
 
 class ChatViewController: MessagesViewController {
     
-    
-    init(MeUID:String,YouUID:String,meUserName:String,youUserName:String) {
-        self.MeUID = MeUID
-        self.YouUID = YouUID
-        self.MeUserName = meUserName
-        self.YouUserName = youUserName
-        super.init()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
     ///init変数自分のUIDと相手のUID
-    let MeUID:String
-    let MeUserName:String
-    let YouUID:String
-    let YouUserName:String
+    var MeUID:String!
+    var YouUID:String!
+    var MeInfo:[String:Any]!
+    var YouInfo:[String:Any]!
+    ///日付判断用格納(セルの高さとセルのテキストのそれぞれ)
+    var cellheigtDateSorting:[String] = []
+    var cellTextValueDateSorting:[String] = []
+    ///RoomID格納変数
+    var roomID:String!
+    ///Barボタンの設定(NavigationBar)
+    var backButtonItem: UIBarButtonItem! // Backボタン
     
     ///インスタンス化(Model)
     let chatManageData = ChatDataManagedData()
@@ -46,12 +41,8 @@ class ChatViewController: MessagesViewController {
         super.viewDidLoad()
         self.tabBarController?.tabBar.isHidden = true
 
-        DispatchQueue.main.async {
-            // モックデータを取得
-            self.messageList = MockMessage.getMessages()
-            self.becomeFirstResponder()
-        }
-
+        ///ここで初回のメッセージを取得してくる。また、リアルタイム更新もここでやる。
+        self.startingLoadMessageGet(roomID: roomID)
 
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messagesLayoutDelegate = self
@@ -62,13 +53,23 @@ class ChatViewController: MessagesViewController {
         setupInput()
         setupButton()
         // 背景の色を指定
-        messagesCollectionView.backgroundColor = .darkGray
+        messagesCollectionView.backgroundColor = .black
 
         // メッセージ入力時に一番下までスクロール
         scrollsToLastItemOnKeyboardBeginsEditing = true
         ///これをTrueにするとキーボードにメッセージのセルがアクションごとに追従するようになる。
         maintainPositionOnKeyboardFrameChanged = false
+        
+        ///barボタン初期設定
+        backButtonItem = UIBarButtonItem(barButtonSystemItem: .reply, target: self, action: #selector(backButtonPressed(_:)))
+        self.navigationItem.leftBarButtonItem = backButtonItem
+        ///タイトルラベル追加
+        navigationItem.title = "トークリスト"
     }
+    
+    @objc func backButtonPressed(_ sender: UIBarButtonItem) {
+        self.dismiss(animated: true, completion: nil)
+     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -93,13 +94,13 @@ class ChatViewController: MessagesViewController {
 
 // MARK: - MessagesDataSource
 extension ChatViewController: MessagesDataSource {
-    ///使用しない
+    
     func currentSender() -> SenderType {
-        return userType.me.data
+        return userType.me(UID: self.MeUID, displayName: self.MeInfo["nickname"] as! String).data
     }
 
     func otherSender() -> SenderType {
-        return userType.you.data
+        return userType.you(UID: self.YouUID, displayName: self.YouInfo["nickName"] as! String).data
     }
 
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
@@ -112,15 +113,34 @@ extension ChatViewController: MessagesDataSource {
 
     // メッセージの上に文字を表示
     func cellTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
-        if indexPath.section % 3 == 0 {
-            return NSAttributedString(
-                string: MessageKitDateFormatter.shared.string(from: message.sentDate),
-                attributes: [
-                    .font: UIFont.boldSystemFont(ofSize: 10),
-                    .foregroundColor: UIColor.darkGray
-                ]
-            )
+        let stringData = ChatDataManagedData.dateToStringFormatt(date: message.sentDate)
+        var labelValue:Bool
+        labelValue = ChatDataManagedData.sectionDateGroup(dateArray: cellTextValueDateSorting, appendDate: stringData).flg
+        cellTextValueDateSorting = ChatDataManagedData.sectionDateGroup(dateArray: cellTextValueDateSorting, appendDate: stringData).resultArray
+        
+        print("cellTopLabelAttributedText:\(indexPath.section):sentDate\(message.sentDate)")
+        if labelValue {
+            print("cellTopLabelAttributedText【labelValue】:\(indexPath.section):sentDate\(message.sentDate)")
+                return NSAttributedString(
+                    string: chatManageData.string(from: message.sentDate),
+    //                string: MessageKitDateFormatter.shared.string(from: message.sentDate),
+                    attributes: [
+                        .font: UIFont.boldSystemFont(ofSize: 10),
+                        .foregroundColor: UIColor.darkGray
+                    ]
+                )
         }
+
+//        if indexPath.section == 1 {
+//            return NSAttributedString(
+//                string: chatManageData.string(from: message.sentDate),
+////                string: MessageKitDateFormatter.shared.string(from: message.sentDate),
+//                attributes: [
+//                    .font: UIFont.boldSystemFont(ofSize: 10),
+//                    .foregroundColor: UIColor.white
+//                ]
+//            )
+//        }
         return nil
     }
 
@@ -139,19 +159,17 @@ extension ChatViewController: MessagesDataSource {
 
 // MARK: - MessagesDisplayDelegate
 extension ChatViewController: MessagesDisplayDelegate {
-
-    // メッセージの色を変更
-    func textColor(
-        for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView
-    ) -> UIColor {
-        isFromCurrentSender(message: message) ? .white : .darkText
-    }
-
+    //NSAttributedStringを使用している場合はこれは呼ばれない
+//    // メッセージの色を変更（デフォルトは自分：白、相手：黒）
+//    func textColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
+//        return isFromCurrentSender(message: message) ? .white : .darkText
+//    }
+    
     // メッセージの背景色を変更している
     func backgroundColor(
         for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView
     ) -> UIColor {
-        isFromCurrentSender(message: message) ? .darkGray : .cyan
+        isFromCurrentSender(message: message) ? .orange : .darkGray
     }
 
     // メッセージの枠にしっぽを付ける
@@ -176,7 +194,21 @@ extension ChatViewController: MessagesDisplayDelegate {
 extension ChatViewController: MessagesLayoutDelegate {
 
     func cellTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
-        indexPath.section % 3 == 0 ? 10 : 0
+        
+        return 15
+        
+//        let stringData = ChatDataManagedData.dateToStringFormatt(date: message.sentDate)
+//        var labelValue:Bool
+//        labelValue = ChatDataManagedData.sectionDateGroup(dateArray: cellheigtDateSorting, appendDate: stringData).flg
+//        cellheigtDateSorting = ChatDataManagedData.sectionDateGroup(dateArray: cellheigtDateSorting, appendDate: stringData).resultArray
+//        print("cellTopLabelHeight:\(indexPath.section):sentDate\(message.sentDate)")
+//        if labelValue {
+//            print("cellTopLabelHeight:【labelValue】\(indexPath.section):sentDate\(message.sentDate)")
+//            return 15
+//        } else {
+//            return 0
+//        }
+        
     }
 
     func messageTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
@@ -195,8 +227,6 @@ extension ChatViewController: MessageCellDelegate {
     //MARK: - Cellのバックグラウンドをタップした時の処理
     func didTapBackground(in cell: MessageCollectionViewCell) {
         print("バックグラウンドタップ")
-        
-        print(userType.me.data.senderId)
         closeKeyboard()
     }
 
@@ -235,7 +265,7 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
             let message = MockMessage(attributedText: attributedText, sender:currentSender(), messageId: UUID().uuidString, date: Date())
         
             ///FireBaseにデータ書き込み
-            self.chatManageData.writeMassageData(mockMassage: message,text: text)
+            self.chatManageData.writeMassageData(mockMassage: message, text: text, roomID: self.roomID)
             self.messageList.append(message)
             self.messageInputBar.inputTextView.text = String()
             self.messageInputBar.invalidatePlugins()
@@ -250,4 +280,51 @@ extension ChatViewController {
         self.messageInputBar.inputTextView.resignFirstResponder()
         self.messagesCollectionView.scrollToLastItem()
     }
+}
+
+///本当は下記の処理もChatDataManagedDataのModelに書きたかったが、非同期処理内で自身のメッセージリストに投入する方法がなかったためにやむなくextesionで対応
+import Firebase
+extension ChatViewController {
+    func startingLoadMessageGet(roomID:String){
+        let databaseRef: DatabaseReference! = Database.database().reference()
+        // 最新25件のデータをデータベースから取得する
+        // 最新のデータ追加されるたびに最新データを取得する
+        databaseRef.child("Chat").child(roomID).queryLimited(toLast: 50).queryOrdered(byChild: "Date:").observe(.value) { (snapshot: DataSnapshot) in
+            DispatchQueue.main.async {//クロージャの中を同期処理
+                self.snapshotToArray(snapshot: snapshot)//スナップショットを配列(readData)に入れる処理。下に定義
+                
+            }
+        }
+    }
+    
+    //データベースから読み込んだデータを配列(readData)に格納するメソッド
+    func snapshotToArray(snapshot: DataSnapshot){
+        var messageArray:[MockMessage] = []
+        //スナップショットとは、ある時点における特定のデータベース参照にあるデータの全体像を写し取ったもの
+        if snapshot.children.allObjects as? [DataSnapshot] != nil  {
+            let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
+            //snapChildrenの中身の数だけsnapChildをとりだす
+            for snapChild in snapChildren! {
+                if let postDict = snapChild.value as? [String: Any] {
+                    
+                    messageArray.append(MockMessage.loadMessage(text: postDict["message"] as! String, user: userTypeJudge(senderID: postDict["sender"] as! String),data: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String)))
+                }
+            }
+
+            self.messageList = messageArray
+            self.becomeFirstResponder()
+        }
+    }
+    
+    ///自身かどうか判断
+    func userTypeJudge(senderID:String) -> userType{
+        if senderID == Auth.auth().currentUser?.uid{
+            return userType.me(UID: MeUID, displayName: self.MeInfo["nickname"] as! String)
+        } else {
+            return userType.you(UID: YouUID, displayName: self.YouInfo["nickname"] as! String)
+        }
+    }
+    
+
+    
 }
