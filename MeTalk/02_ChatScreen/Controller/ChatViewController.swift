@@ -19,7 +19,8 @@ class ChatViewController: MessagesViewController {
     
     ///インスタンス化(Model)
     let chatManageData = ChatDataManagedData()
-
+    let databaseRef: DatabaseReference! = Database.database().reference()
+    private var handle: DatabaseHandle!    
 
     var messageList: [MockMessage] = [] {
         didSet {
@@ -74,6 +75,12 @@ class ChatViewController: MessagesViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
+    
+    //viewが表示されなくなる直前に呼び出されるメソッド
+    override func viewWillDisappear(_ animated: Bool) {
+        databaseRef.child("chats").removeObserver(withHandle: handle)
+        
+    }
 
     private func setupInput(){
         // プレースホルダーの指定
@@ -82,13 +89,15 @@ class ChatViewController: MessagesViewController {
         messageInputBar.inputTextView.tintColor = .red
         // 入力欄の色を指定
         messageInputBar.inputTextView.backgroundColor = .white
+        //入力欄に入力した文字色を変更
+        messageInputBar.inputTextView.textColor = .black
     }
 
     private func setupButton(){
         // ボタンの変更
         messageInputBar.sendButton.title = "送信"
         // 送信ボタンの色を指定
-        messageInputBar.sendButton.tintColor = .lightGray
+        messageInputBar.sendButton.tintColor = .orange
     }
 }
 
@@ -113,35 +122,14 @@ extension ChatViewController: MessagesDataSource {
 
     // メッセージの上に文字を表示
     func cellTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
-        let stringData = ChatDataManagedData.dateToStringFormatt(date: message.sentDate)
-        var labelValue:Bool
-        labelValue = ChatDataManagedData.sectionDateGroup(dateArray: cellTextValueDateSorting, appendDate: stringData).flg
-        cellTextValueDateSorting = ChatDataManagedData.sectionDateGroup(dateArray: cellTextValueDateSorting, appendDate: stringData).resultArray
-        
-        print("cellTopLabelAttributedText:\(indexPath.section):sentDate\(message.sentDate)")
-        if labelValue {
-            print("cellTopLabelAttributedText【labelValue】:\(indexPath.section):sentDate\(message.sentDate)")
-                return NSAttributedString(
-                    string: chatManageData.string(from: message.sentDate),
-    //                string: MessageKitDateFormatter.shared.string(from: message.sentDate),
-                    attributes: [
-                        .font: UIFont.boldSystemFont(ofSize: 10),
-                        .foregroundColor: UIColor.darkGray
-                    ]
-                )
-        }
-
-//        if indexPath.section == 1 {
-//            return NSAttributedString(
-//                string: chatManageData.string(from: message.sentDate),
-////                string: MessageKitDateFormatter.shared.string(from: message.sentDate),
-//                attributes: [
-//                    .font: UIFont.boldSystemFont(ofSize: 10),
-//                    .foregroundColor: UIColor.white
-//                ]
-//            )
-//        }
-        return nil
+            return NSAttributedString(
+                string: chatManageData.string(from: message.sentDate),
+//                string: MessageKitDateFormatter.shared.string(from: message.sentDate),
+                attributes: [
+                    .font: UIFont.boldSystemFont(ofSize: 10),
+                    .foregroundColor: UIColor.darkGray
+                ]
+            )
     }
 
     // メッセージの上に文字を表示（名前）
@@ -150,9 +138,9 @@ extension ChatViewController: MessagesDataSource {
         return NSAttributedString(string: name, attributes: [.font: UIFont.preferredFont(forTextStyle: .caption1)])
     }
 
-    // メッセージの下に文字を表示（日付）
+    // メッセージの下に文字を表示（時間）
     func messageBottomLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
-        let dateString = formatter.string(from: message.sentDate)
+        let dateString = ChatDataManagedData.dateToStringFormatt(date: message.sentDate, formatFlg: 1)
         return NSAttributedString(string: dateString, attributes: [.font: UIFont.preferredFont(forTextStyle: .caption2)])
     }
 }
@@ -195,19 +183,24 @@ extension ChatViewController: MessagesLayoutDelegate {
 
     func cellTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         
-        return 15
+        ///対象セルのメッセージに格納されているDate情報をStringに変換
+        let stringData = ChatDataManagedData.dateToStringFormatt(date: message.sentDate, formatFlg: 0)
+        ///FireStoreから取得してきているmessageListのメッセージ群にフィルターをかけてその結果を変数に格納
+        let firstMessageList = messageList.filter {
+            ///messageList群ループ開始
+            ///messageListのsentDateを同様にStringに変換
+            let messageListSentDate = ChatDataManagedData.dateToStringFormatt(date: $0.sentDate, formatFlg: 0)
+            ///stringDataがmessageListSentDateの中に年月までで調査して絞り込み
+            return (messageListSentDate as NSString).substring(to: 10) == (stringData as NSString).substring(to:10)
+            ///その中から一番若いものを取得してfirstMessageListに格納
+        }.first
         
-//        let stringData = ChatDataManagedData.dateToStringFormatt(date: message.sentDate)
-//        var labelValue:Bool
-//        labelValue = ChatDataManagedData.sectionDateGroup(dateArray: cellheigtDateSorting, appendDate: stringData).flg
-//        cellheigtDateSorting = ChatDataManagedData.sectionDateGroup(dateArray: cellheigtDateSorting, appendDate: stringData).resultArray
-//        print("cellTopLabelHeight:\(indexPath.section):sentDate\(message.sentDate)")
-//        if labelValue {
-//            print("cellTopLabelHeight:【labelValue】\(indexPath.section):sentDate\(message.sentDate)")
-//            return 15
-//        } else {
-//            return 0
-//        }
+        ///firstMessageListのメッセージIDと現在の対象セルのメッセージIDが比較していれば（一番若ければ）CellのTextに反映
+        if firstMessageList?.messageId == message.messageId {
+            return 10
+        } else {
+            return 0
+        }
         
     }
 
@@ -286,10 +279,10 @@ extension ChatViewController {
 import Firebase
 extension ChatViewController {
     func startingLoadMessageGet(roomID:String){
-        let databaseRef: DatabaseReference! = Database.database().reference()
+
         // 最新25件のデータをデータベースから取得する
         // 最新のデータ追加されるたびに最新データを取得する
-        databaseRef.child("Chat").child(roomID).queryLimited(toLast: 50).queryOrdered(byChild: "Date:").observe(.value) { (snapshot: DataSnapshot) in
+        handle = databaseRef.child("Chat").child(roomID).queryLimited(toLast: 25).queryOrdered(byChild: "Date:").observe(.value) { (snapshot: DataSnapshot) in
             DispatchQueue.main.async {//クロージャの中を同期処理
                 self.snapshotToArray(snapshot: snapshot)//スナップショットを配列(readData)に入れる処理。下に定義
                 

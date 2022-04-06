@@ -19,7 +19,7 @@ struct ChatDataManagedData{
     let cloudDB = Firestore.firestore()
     
     func writeMassageData(mockMassage:MockMessage?,text:String?,roomID:String) {
-        let date = ChatDataManagedData.dateToStringFormatt(date: mockMassage?.sentDate)
+        let date = ChatDataManagedData.dateToStringFormatt(date: mockMassage?.sentDate, formatFlg: 0)
         if let message = text,let messageId = mockMassage?.messageId,let sender = mockMassage?.sender.senderId{
             let messageStructData:[String : Any] = ["message":message,"messageID":messageId,"sender":sender,"Date":date]
             databaseRef.child("Chat").child(roomID).childByAutoId().setValue(messageStructData)
@@ -81,7 +81,7 @@ extension ChatDataManagedData {
     }
     
     ///Date⇨String
-    static func dateToStringFormatt(date:Date?) -> String{
+    static func dateToStringFormatt(date:Date?,formatFlg:Int) -> String{
         guard let date = date else {
             print("日付変換に失敗しました。")
             return "0000/00/00"
@@ -89,7 +89,12 @@ extension ChatDataManagedData {
         let dateFormatter = DateFormatter()
 
         // フォーマット設定
-        dateFormatter.dateFormat = "yyyy/MM/dd/HH:mm:ss"
+        switch formatFlg{
+        case 1:
+            dateFormatter.dateFormat = "HH:mm"
+        default:
+            dateFormatter.dateFormat = "yyyy/MM/dd/HH:mm:ss"
+        }
         //dateFormatter.dateFormat = "yyyyMMddHHmmssSSS" // ミリ秒込み
 
         // ロケール設定（端末の暦設定に引きづられないようにする）
