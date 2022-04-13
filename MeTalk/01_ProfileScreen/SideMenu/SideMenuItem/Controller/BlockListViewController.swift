@@ -72,7 +72,7 @@ extension BlockListViewController:UITableViewDelegate,UITableViewDataSource{
                 print("ブロックリストのユーザー情報が取得できませんでした")
                 return
             }
-            cell.setCell(Item: blockUserInfoDoc["nickname"] as? String ?? "エラー")
+            cell.setCell(Item: blockUserInfoDoc["nickname"] as? String ?? "退会したユーザー")
         }, UID: blockUserID)
         ///取得したIDでユーザー情報の取得を開始(プロフィール画像)
         self.userDataManagedData.contentOfFIRStorageGet(callback: { image in

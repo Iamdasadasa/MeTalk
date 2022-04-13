@@ -239,6 +239,42 @@ struct UserDataManagedData{
             }
         })
     }
+    ///【非同期】トークユーザーリスト及び自身の情報取得関数(コレクションは"Users")
+    /// - Parameters:
+    /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
+    /// 　　　　　　（ニックネーム、性別等が含まれる）
+    /// - Returns:
+    func talkListUsersDataGet(callback01: @escaping  ([String]) -> Void,callback02: @escaping  ([String:Any]) -> Void,UID:String?) {
+        var talkUsersList:[String] = []
+        guard let UID = UID else {
+            print("UIDが確認できませんでした")
+            return
+        }
+        ///ここでデータにアクセスしている（非同期処理）
+        let userDocuments = cloudDB.collection("users").document(UID).collection("TalkUsersList")
+        userDocuments.getDocuments(){ (querySnapshot, err) in
+            if let err = err {
+                print("Error getting documents: \(err)")
+            } else {
+                for talkUserinfo in querySnapshot!.documents {
+                    ///ここでブロックリストのユーザーID一覧を格納
+                    talkUsersList.append(talkUserinfo.documentID)
+                }
+                callback01(talkUsersList)
+            }
+        }
+        ///ここでデータにアクセスしている（非同期処理）
+        let selfUserDocuments = cloudDB.collection("users").document(UID)
+        selfUserDocuments.getDocument{ (documents,err) in
+            if let document = documents, document.exists {
+                ///オブジェクトに対して.dataプロパティを使用して辞書型としてコールバック関数で返す
+                callback02(document.data()!)
+            } else {
+                print(err?.localizedDescription)
+            }
+        }
+    }
+    
     
     ///【非同期】ブロックユーザーリスト取得関数(コレクションは"Users")
     /// - Parameters:
@@ -260,9 +296,8 @@ struct UserDataManagedData{
                 for blockuserinfo in querySnapshot!.documents {
                     ///ここでブロックリストのユーザーID一覧を格納
                     blockUserList.append(blockuserinfo.documentID)
-                    callback(blockUserList)
-//                    print("\(document.documentID) => \(document.data())")
                 }
+                callback(blockUserList)
             }
         }
     }

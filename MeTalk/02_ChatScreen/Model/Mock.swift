@@ -55,19 +55,19 @@ struct MockMessage: MessageType {
         self.init(kind: .attributedText(attributedText), sender: sender, messageId: messageId, date: date)
     }
 
-    static func loadMessage(text: String, user: userType,data:Date) -> MockMessage {
+    static func loadMessage(text: String, user: userType,data:Date,messageID:String) -> MockMessage {
         if user.meFag == 1 {
             let attributedText = NSAttributedString(
                 string: text,
                 attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor:UIColor.black]
             )
-            return MockMessage(attributedText: attributedText, sender: user.data, messageId: UUID().uuidString, date: data)
+            return MockMessage(attributedText: attributedText, sender: user.data, messageId: messageID, date: data)
         } else {
             let attributedText = NSAttributedString(
                 string: text,
                 attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor:UIColor.white]
             )
-            return MockMessage(attributedText: attributedText, sender: user.data, messageId: UUID().uuidString, date:data)
+            return MockMessage(attributedText: attributedText, sender: user.data, messageId: messageID, date:data)
         }
 
     }

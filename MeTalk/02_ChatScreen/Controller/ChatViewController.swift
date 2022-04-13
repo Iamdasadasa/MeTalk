@@ -4,11 +4,14 @@ import InputBarAccessoryView
 
 class ChatViewController: MessagesViewController {
     
-    ///init変数自分のUIDと相手のUID
+    ///init変数　自分のUIDと相手のUID
     var MeUID:String!
     var YouUID:String!
     var MeInfo:[String:Any]!
     var YouInfo:[String:Any]!
+    ///init変数　自分のプロフィール画像と相手のプロフィール画像
+    var meProfileImage:UIImage!
+    var youProfileImage:UIImage!
     ///日付判断用格納(セルの高さとセルのテキストのそれぞれ)
     var cellheigtDateSorting:[String] = []
     var cellTextValueDateSorting:[String] = []
@@ -16,18 +19,36 @@ class ChatViewController: MessagesViewController {
     var roomID:String!
     ///Barボタンの設定(NavigationBar)
     var backButtonItem: UIBarButtonItem! // Backボタン
+    ///追加でロードする際のCount変数
+    var loadToLimitCount:UInt = 25
+    ///重複してメッセージデータを取得しないためのフラグ
+    var loadDataLockFlg:Bool = true
+    ///追加メッセージデータ関数の起動を停止するフラグ
+    var loadDataStopFlg:Bool = false
+    ///最初のメッセージかを判断するフラグ
+    var firstMessageFlg:Bool = false
+    
+    ///時間計測
+    var start:Date?
+    
     
     ///インスタンス化(Model)
     let chatManageData = ChatDataManagedData()
     let databaseRef: DatabaseReference! = Database.database().reference()
-    private var handle: DatabaseHandle!    
+    private var handle: DatabaseHandle!
 
     var messageList: [MockMessage] = [] {
         didSet {
-            // messagesCollectionViewをリロード
-            self.messagesCollectionView.reloadData()
-            // 一番下までスクロールする
-            self.messagesCollectionView.scrollToLastItem()
+
+            if !loadDataLockFlg {
+                self.messagesCollectionView.reloadDataAndKeepOffset()
+            } else {
+                // messagesCollectionViewをリロード
+                self.messagesCollectionView.reloadData()
+                // 一番下までスクロールする
+                self.messagesCollectionView.scrollToLastItem()
+            }
+
         }
     }
 
@@ -43,7 +64,7 @@ class ChatViewController: MessagesViewController {
         self.tabBarController?.tabBar.isHidden = true
 
         ///ここで初回のメッセージを取得してくる。また、リアルタイム更新もここでやる。
-        self.startingLoadMessageGet(roomID: roomID)
+        self.LoadMessageGet(roomID: roomID)
 
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messagesLayoutDelegate = self
@@ -124,7 +145,6 @@ extension ChatViewController: MessagesDataSource {
     func cellTopLabelAttributedText(for message: MessageType, at indexPath: IndexPath) -> NSAttributedString? {
             return NSAttributedString(
                 string: chatManageData.string(from: message.sentDate),
-//                string: MessageKitDateFormatter.shared.string(from: message.sentDate),
                 attributes: [
                     .font: UIFont.boldSystemFont(ofSize: 10),
                     .foregroundColor: UIColor.darkGray
@@ -172,7 +192,7 @@ extension ChatViewController: MessagesDisplayDelegate {
     func configureAvatarView(
         _ avatarView: AvatarView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView
     ) {
-        avatarView.set( avatar: Avatar(initials: message.sender.senderId == "001" ? "😊" : "🥳") )
+        avatarView.set( avatar: Avatar(image: message.sender.senderId == MeUID ? meProfileImage : youProfileImage) )
     }
 }
 
@@ -257,16 +277,47 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
             string: text, attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor: UIColor.white])
             let message = MockMessage(attributedText: attributedText, sender:currentSender(), messageId: UUID().uuidString, date: Date())
         
-            ///FireBaseにデータ書き込み
+            ///FireBaseにデータ書き込み（書き込みした時点で読み込みリロードhandlerが呼ばれる）
             self.chatManageData.writeMassageData(mockMassage: message, text: text, roomID: self.roomID)
-            self.messageList.append(message)
+            ///最初のメッセージが存在していない場合のみそれぞれのAuthにUIDを登録
+            chatManageData.authUIDCreate(UID1: MeUID, UID2: YouUID, firstmessageFlg: firstMessageFlg)
+            ///UIDの登録が完了した場合はもう登録させないためにFalseを設定
+            firstMessageFlg = false
+        
             self.messageInputBar.inputTextView.text = String()
             self.messageInputBar.invalidatePlugins()
-            self.messagesCollectionView.scrollToLastItem()
+//            self.messagesCollectionView.scrollToLastItem()
     }
 
 }
 
+///--追加リロード処理
+extension ChatViewController {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        ///取得しているメッセージリストの内容が25件未満の場合またはデータのロードフラグがTrueは何もしない
+        if messageList.count < 25 || !loadDataLockFlg {
+            return
+        }
+        ///ナビゲーションバーのmaxYの値取得
+        guard let navigationBarMaxY = self.navigationController?.navigationBar.frame.maxY else {
+            return
+        }
+
+        
+        ///一番最初に送ったメッセージまで（全てのメッセージ）を取得してしまったらリターンする処理を追記（多分データ自体にそのフラグ的なものを追加する必要があるかも:それかデータ取得ルールで判定）
+
+        ///ナビゲーションバーの位置にスクロールの位置がドラッグによって来た時（一番上で新しいメッセージをロードする時）
+        if navigationBarMaxY * -1 >= scrollView.contentOffset.y && scrollView.isDragging{
+            print("LoadMessageGet直前。")
+            loadDataLockFlg = false
+            ///取得件数を25件ずつ増加
+            loadToLimitCount = loadToLimitCount + 25
+            ///新しくメッセージをFireStoreから取得してくる。
+            LoadMessageGet(roomID: self.roomID)
+        }
+    }
+}
 
 extension ChatViewController {
     func closeKeyboard(){
@@ -278,11 +329,16 @@ extension ChatViewController {
 ///本当は下記の処理もChatDataManagedDataのModelに書きたかったが、非同期処理内で自身のメッセージリストに投入する方法がなかったためにやむなくextesionで対応
 import Firebase
 extension ChatViewController {
-    func startingLoadMessageGet(roomID:String){
-
+    func LoadMessageGet(roomID:String){
+        ///最初のメッセージまでロードしていたらリターン
+        if loadDataStopFlg == true {
+            return
+        }
+        ///時間計測
+        start = Date()
         // 最新25件のデータをデータベースから取得する
         // 最新のデータ追加されるたびに最新データを取得する
-        handle = databaseRef.child("Chat").child(roomID).queryLimited(toLast: 25).queryOrdered(byChild: "Date:").observe(.value) { (snapshot: DataSnapshot) in
+        handle = databaseRef.child("Chat").child(roomID).queryLimited(toLast: loadToLimitCount).queryOrdered(byChild: "Date:").observe(.value) { (snapshot: DataSnapshot) in
             DispatchQueue.main.async {//クロージャの中を同期処理
                 self.snapshotToArray(snapshot: snapshot)//スナップショットを配列(readData)に入れる処理。下に定義
                 
@@ -296,16 +352,29 @@ extension ChatViewController {
         //スナップショットとは、ある時点における特定のデータベース参照にあるデータの全体像を写し取ったもの
         if snapshot.children.allObjects as? [DataSnapshot] != nil  {
             let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
+            ///メッセージが何もない場合
+            if snapChildren! == [] {
+                ///最初のメッセージを送る場合のフラグとしてTrueを設定
+                firstMessageFlg = true
+            }
             //snapChildrenの中身の数だけsnapChildをとりだす
             for snapChild in snapChildren! {
                 if let postDict = snapChild.value as? [String: Any] {
                     
-                    messageArray.append(MockMessage.loadMessage(text: postDict["message"] as! String, user: userTypeJudge(senderID: postDict["sender"] as! String),data: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String)))
+                    messageArray.append(MockMessage.loadMessage(text: postDict["message"] as! String, user: userTypeJudge(senderID: postDict["sender"] as! String),data: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String))
                 }
             }
-
+            ///一番最初のメッセージまでロードし終えていたらフラグにTrueを設定
+            if messageArray.first?.messageId == messageList.sorted(by: {$0.sentDate < $1.sentDate}).first?.messageId{
+                loadDataStopFlg = true
+            }
+            
             self.messageList = messageArray
+            ///時間計測
+            let elapsed = Date().timeIntervalSince(start!)
+            print(elapsed)
             self.becomeFirstResponder()
+            loadDataLockFlg = true
         }
     }
     

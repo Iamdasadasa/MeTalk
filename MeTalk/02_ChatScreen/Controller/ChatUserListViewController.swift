@@ -16,12 +16,15 @@ class ChatUserListViewController:UIViewController{
     let ChatUserListTableView = GeneralTableView()
     ///インスタンス化(Model)
     let userInfo = UserDataManagedData()
+    let uid = Auth.auth().currentUser?.uid
+    ///自身の画像View
+    var selfProfileImageView = UIImageView()
+    ///トークリストユーザー情報格納配列
+    var talkListUsersUID:[String]? = []
+    ///相手のユーザー情報格納変数
+    var YouInfoData:[String:Any]?
     ///自身のユーザー情報格納変数
     var meInfoData:[String:Any]?
-    ///相手のユーザー情報格納変数(現時点でテスト)
-    var YouInfoData:[String:Any] = {
-        return ["nickName":"うんち"]
-    }()
     
 
     override func viewDidLoad() {
@@ -32,31 +35,43 @@ class ChatUserListViewController:UIViewController{
         ///テーブルビューのデリゲート処理
         ChatUserListTableView.dataSource = self
         ChatUserListTableView.delegate = self
-        ///初期状態はセルを選択できないようにする
-        ChatUserListTableView.allowsSelection = false
+
         ///セルの登録
         ChatUserListTableView.register(chatUserListTableViewCell.self, forCellReuseIdentifier: "chatUserListTableViewCell")
-        ///自身の情報を取得
-        userInfo.userInfoDataGet(callback: { document in
-            guard let document = document else {
-                return
-            }
-            ///自身の情報を格納
+        ///自身のトークリストのユーザー一覧を取得
+        userInfo.talkListUsersDataGet(callback01: { document in
+            self.talkListUsersUID = document
+            self.ChatUserListTableView.reloadData()
+        }, callback02: { document in
+            ///ドキュメントにデータが入るまではセルを選択できないようにする
+            self.ChatUserListTableView.allowsSelection = false
+            ///データ投入
             self.meInfoData = document
-            ///情報が取得できたらセルを選択できるようにする
+            ///セル選択を可能にする
             self.ChatUserListTableView.allowsSelection = true
-        }, UID: Auth.auth().currentUser?.uid)
-        
-        
+        }, UID: uid)
+        ///自分の画像を取得してくる
+        userInfo.contentOfFIRStorageGet(callback: { image in
+            ///ドキュメントにデータが入るまではセルを選択できないようにする
+            self.ChatUserListTableView.allowsSelection = false
+            ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
+            if image != nil {
+                self.selfProfileImageView.image = image
+            ///コールバック関数でNilが返ってきたら初期画像を設定
+            } else {
+                self.selfProfileImageView.image = UIImage(named: "InitIMage")
+            }
+            ///セル選択を可能にする
+            self.ChatUserListTableView.allowsSelection = true
+        }, UID: uid)
+
         
     }
-
 }
 
 extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let menusectionitem = menuSectionItem(rawValue: section) else { return 0 }
-        return menusectionitem.info.numberOfRowsInSection
+        return talkListUsersUID?.count ?? 0
     }
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -65,37 +80,52 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
       let cell = tableView.dequeueReusableCell(withIdentifier: "chatUserListTableViewCell", for: indexPath ) as! chatUserListTableViewCell
+        
+        guard let userUID = talkListUsersUID?[indexPath.row] else {return cell}
+        
+        
+        ///取得したIDでユーザー情報の取得を開始(ユーザーニックネーム)
+        userInfo.userInfoDataGet(callback: { document in
+            guard let document = document else {
+                return
+            }
+            cell.setCell(Item: document["nickname"] as? String ?? "退会したユーザー")
+        }, UID: userUID)
+        ///取得したIDでユーザー情報の取得を開始(プロフィール画像)
+        userInfo.contentOfFIRStorageGet(callback: { image in
+            ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
+            if image != nil {
+                cell.talkListUserProfileImageView.image = image
+            ///コールバック関数でNilが返ってきたら初期画像を設定
+            } else {
+                cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
+            }
+        }, UID: userUID)
+        return cell
 
-      return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        ///本来はここで選んだユーザーの情報を送る
-        ///
-        guard let meInfoData = meInfoData else {
-            return
-        }
+        ///セル情報を取得
+        let cell = tableView.cellForRow(at: indexPath) as! chatUserListTableViewCell
+        
         ///データモデルおよび遷移先のチャット画面のViewcontrollerをインスタンス化
         let chatdatamanage = ChatDataManagedData()
         let chatViewController = ChatViewController()
+        ///選んだセルの相手のUIDを取得
+        guard let YouUID = talkListUsersUID?[indexPath.row] else {return}
         
-        ///テスト
-        let YouUID:String = {
-            if Auth.auth().currentUser?.uid == "708KzmiUBTbZlixgQGh4bOLqQJr2"{
-                return "Yd7MNepBxzSc0p7bpp3LjcwSl1h2"
-            } else {
-                return "708KzmiUBTbZlixgQGh4bOLqQJr2"
-            }
-        }()
-        
+
         userInfo.userInfoDataGet(callback: { document in
             ///UIDから生成したルームIDを値渡しする
             chatViewController.roomID = chatdatamanage.ChatRoomID(UID1: Auth.auth().currentUser!.uid, UID2: YouUID)
             ///それぞれのユーザー情報を渡す
-            chatViewController.MeInfo = meInfoData
-            chatViewController.MeUID = Auth.auth().currentUser?.uid
+            chatViewController.MeInfo = self.meInfoData
+            chatViewController.MeUID = self.uid
             chatViewController.YouInfo = document
             chatViewController.YouUID = YouUID
+            chatViewController.meProfileImage = self.selfProfileImageView.image
+            chatViewController.youProfileImage = cell.talkListUserProfileImageView.image
             ///UINavigationControllerとして遷移
             let UINavigationController = UINavigationController(rootViewController: chatViewController)
             UINavigationController.modalPresentationStyle = .fullScreen

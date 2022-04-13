@@ -17,7 +17,7 @@ struct ChatDataManagedData{
     let MeUID = Auth.auth().currentUser?.uid
     var databaseRef: DatabaseReference! = Database.database().reference()
     let cloudDB = Firestore.firestore()
-    
+    ///データベース書き込み
     func writeMassageData(mockMassage:MockMessage?,text:String?,roomID:String) {
         let date = ChatDataManagedData.dateToStringFormatt(date: mockMassage?.sentDate, formatFlg: 0)
         if let message = text,let messageId = mockMassage?.messageId,let sender = mockMassage?.sender.senderId{
@@ -27,7 +27,53 @@ struct ChatDataManagedData{
             return
         }
     }
-
+    ///相手のユーザー情報内に自分のUIDを投入し自分のユーザー情報内に相手のUIDを投入
+    ///(ここは相手にメッセージを送信したタイミングもしくは相手をトーク一覧から発見して最初のトークを行う際に。。。かな。)
+    func authUIDCreate(UID1:String,UID2:String,firstmessageFlg:Bool){
+        if !firstmessageFlg {
+            return
+        }
+        
+        ///送信ボタンを押したときではなくランダムのユーザーリストから選んだ場合は
+        ///自分のトークリストにのみ相手のUIDを登録するようにする（相手にメッセージを送っていないのに相手側にトークリストの画面に表示されることを防ぐため）
+        ///自分のトークリスト情報に相手のUIDを登録
+        cloudDB.collection("users").document(UID1).collection("TalkUsersList").document(UID2).getDocument(completion: { (document,err) in
+            if let document = document,document.exists {
+                return
+            } else {
+                ///各登録処理（Cloud Firestore）
+                Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData([
+                    "createdAt": FieldValue.serverTimestamp()
+                ], completion: { error in
+                    if let error = error {
+                        ///失敗した場合
+                        print(error.localizedDescription)
+                        return
+                    }
+                })
+            }
+        })
+        ///相手のトークリスト情報に自分のUIDを登録
+        cloudDB.collection("users").document(UID2).collection("TalkUsersList").document(UID1).getDocument(completion: { (document,err) in
+            if let document = document,document.exists {
+                return
+            } else {
+                ///各登録処理（Cloud Firestore）
+                Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData([
+                    "createdAt": FieldValue.serverTimestamp()
+                ], completion: { error in
+                    if let error = error {
+                        ///失敗した場合
+                        print(error.localizedDescription)
+                        return
+                    }
+                })
+            }
+        })
+    }
+    
+    
+    
     //    ///自身のUID返却関数
     //    /// - Parameters:
     //    /// Returns:UID
@@ -38,14 +84,13 @@ struct ChatDataManagedData{
     
 
     
-    
+    ///ChatのルームIDを生成する
     func ChatRoomID(UID1:String,UID2:String) -> String{
         let array = [UID1,UID2]
         let sortArray = array.sorted()
         let roomID:String = sortArray[0] + "_" + sortArray[1]
         return roomID
     }
-    
 }
 
 ///時間管理
@@ -70,10 +115,6 @@ extension ChatDataManagedData {
             formatter.doesRelativeDateFormatting = true
             formatter.dateStyle = .short
             formatter.timeStyle = .none
-//        case Calendar.current.isDate(date, equalTo: Date(), toGranularity: .weekOfYear):
-//            formatter.dateFormat = "EEEE h:mm a"
-//        case Calendar.current.isDate(date, equalTo: Date(), toGranularity: .year):
-//            formatter.dateFormat = "E, d MMM, h:mm a"
         default:
 //            formatter.locale = Locale(identifier: "en_US_POSIX")
             formatter.dateFormat = "yyyy/MM/dd"
@@ -126,18 +167,5 @@ extension ChatDataManagedData {
         let date = dateFormatter.date(from: date)
 
         return date!
-    }
-    ///
-    static func sectionDateGroup(dateArray:[String],appendDate:String) -> (flg:Bool,resultArray:[String]){
-        var trueDate:Bool = false
-        var resultArray:[String] = dateArray
-        let dayStr  = (appendDate as NSString).substring(to: 10)
-        
-        if !dateArray.contains(dayStr) {
-            resultArray += [dayStr]
-            trueDate = true
-        }
-
-        return (trueDate,resultArray)
     }
 }
