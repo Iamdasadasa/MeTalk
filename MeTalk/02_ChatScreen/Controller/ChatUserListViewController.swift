@@ -25,7 +25,6 @@ class ChatUserListViewController:UIViewController{
     var YouInfoData:[String:Any]?
     ///自身のユーザー情報格納変数
     var meInfoData:[String:Any]?
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,9 +39,12 @@ class ChatUserListViewController:UIViewController{
         ChatUserListTableView.register(chatUserListTableViewCell.self, forCellReuseIdentifier: "chatUserListTableViewCell")
         ///自身のトークリストのユーザー一覧を取得
         userInfo.talkListUsersDataGet(callback01: { document in
+            ///Callback01 トークリスト内にいるユーザーID群を取得
             self.talkListUsersUID = document
+            ///取得完了したらテーブルビューを更新
             self.ChatUserListTableView.reloadData()
         }, callback02: { document in
+            ///Callback02 自身の情報を取得
             ///ドキュメントにデータが入るまではセルを選択できないようにする
             self.ChatUserListTableView.allowsSelection = false
             ///データ投入
@@ -64,8 +66,22 @@ class ChatUserListViewController:UIViewController{
             ///セル選択を可能にする
             self.ChatUserListTableView.allowsSelection = true
         }, UID: uid)
-
         
+        ///リスナー用FireStore変数
+        let db = Firestore.firestore()
+        guard let uid = uid else {
+            return
+        }
+        db.collection("users").document(uid).collection("TalkUsersList").addSnapshotListener { (document,err) in
+            guard let documentSnapShot = document else {
+                print(err?.localizedDescription ?? "何らかの原因でトークユーザーリスト内のドキュメントが取得できませんでした")
+                return
+            }
+            for documentData in documentSnapShot.documents {
+                print("documentData.documentID:\(documentData.documentID)")
+            }
+            self.ChatUserListTableView.reloadData()
+        }
     }
 }
 

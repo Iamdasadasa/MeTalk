@@ -27,6 +27,7 @@ class ChatViewController: MessagesViewController {
     var loadDataStopFlg:Bool = false
     ///最初のメッセージかを判断するフラグ
     var firstMessageFlg:Bool = false
+    ///
     
     ///時間計測
     var start:Date?
