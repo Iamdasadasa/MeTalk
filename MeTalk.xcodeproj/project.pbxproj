@@ -54,6 +54,7 @@
 		D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37B27AA85C300290B18 /* loadingView.swift */; };
 		D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37F27AA92F100290B18 /* ProfileViewController.swift */; };
 		D69EC38227AA952000290B18 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC38127AA952000290B18 /* ProfileView.swift */; };
+		D6DE5C1F28085CB4006C6236 /* TalkUsersListMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -128,6 +129,7 @@
 		D69EC37B27AA85C300290B18 /* loadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = loadingView.swift; sourceTree = "<group>"; };
 		D69EC37F27AA92F100290B18 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		D69EC38127AA952000290B18 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkUsersListMock.swift; sourceTree = "<group>"; };
 		DC56F677BBCA503621EE7776 /* Pods-MeTalk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalk.release.xcconfig"; path = "Target Support Files/Pods-MeTalk/Pods-MeTalk.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -368,6 +370,7 @@
 			isa = PBXGroup;
 			children = (
 				D655504A27E3630400C86E34 /* Mock.swift */,
+				D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */,
 				D655504C27E4260C00C86E34 /* ChatDataManagedData.swift */,
 			);
 			path = Model;
@@ -703,6 +706,7 @@
 				D6543DC127B7B61500444454 /* SemiModalViewController.swift in Sources */,
 				D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */,
 				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,
+				D6DE5C1F28085CB4006C6236 /* TalkUsersListMock.swift in Sources */,
 				D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */,
 				D655504927E3608900C86E34 /* ChatViewController.swift in Sources */,
 				D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */,

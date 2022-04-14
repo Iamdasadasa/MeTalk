@@ -25,6 +25,7 @@ class ChatUserListViewController:UIViewController{
     var YouInfoData:[String:Any]?
     ///自身のユーザー情報格納変数
     var meInfoData:[String:Any]?
+    ///トークリストユーザー情報格納配列
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -38,51 +39,19 @@ class ChatUserListViewController:UIViewController{
         ///セルの登録
         ChatUserListTableView.register(chatUserListTableViewCell.self, forCellReuseIdentifier: "chatUserListTableViewCell")
         ///自身のトークリストのユーザー一覧を取得
-        userInfo.talkListUsersDataGet(callback01: { document in
-            ///Callback01 トークリスト内にいるユーザーID群を取得
-            self.talkListUsersUID = document
-            ///取得完了したらテーブルビューを更新
-            self.ChatUserListTableView.reloadData()
-        }, callback02: { document in
-            ///Callback02 自身の情報を取得
-            ///ドキュメントにデータが入るまではセルを選択できないようにする
-            self.ChatUserListTableView.allowsSelection = false
-            ///データ投入
-            self.meInfoData = document
-            ///セル選択を可能にする
-            self.ChatUserListTableView.allowsSelection = true
-        }, UID: uid)
+        talkListUsersDataGet()
+        ///自身の情報を取得
+        userInfoDataGet()
         ///自分の画像を取得してくる
-        userInfo.contentOfFIRStorageGet(callback: { image in
-            ///ドキュメントにデータが入るまではセルを選択できないようにする
-            self.ChatUserListTableView.allowsSelection = false
-            ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-            if image != nil {
-                self.selfProfileImageView.image = image
-            ///コールバック関数でNilが返ってきたら初期画像を設定
-            } else {
-                self.selfProfileImageView.image = UIImage(named: "InitIMage")
-            }
-            ///セル選択を可能にする
-            self.ChatUserListTableView.allowsSelection = true
-        }, UID: uid)
-        
-        ///リスナー用FireStore変数
-        let db = Firestore.firestore()
-        guard let uid = uid else {
-            return
-        }
-        db.collection("users").document(uid).collection("TalkUsersList").addSnapshotListener { (document,err) in
-            guard let documentSnapShot = document else {
-                print(err?.localizedDescription ?? "何らかの原因でトークユーザーリスト内のドキュメントが取得できませんでした")
-                return
-            }
-            for documentData in documentSnapShot.documents {
-                print("documentData.documentID:\(documentData.documentID)")
-            }
-            self.ChatUserListTableView.reloadData()
-        }
+        contentOfFIRStorageGet()
+        ///トークリストリスナー
+        talkListListner()
     }
+    
+    func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
+        print("先頭へのスクロールが完了した際に呼び出されるデリゲートメソッド")
+    }
+    
 }
 
 extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
@@ -98,8 +67,6 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
       let cell = tableView.dequeueReusableCell(withIdentifier: "chatUserListTableViewCell", for: indexPath ) as! chatUserListTableViewCell
         
         guard let userUID = talkListUsersUID?[indexPath.row] else {return cell}
-        
-        
         ///取得したIDでユーザー情報の取得を開始(ユーザーニックネーム)
         userInfo.userInfoDataGet(callback: { document in
             guard let document = document else {
@@ -147,8 +114,64 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             UINavigationController.modalPresentationStyle = .fullScreen
             self.present(UINavigationController, animated: true, completion: nil)
         }, UID: YouUID)
+    }
+}
 
+///Firebase操作関連
+extension ChatUserListViewController {
+    ///自身のトークリストのユーザー一覧を取得
+    func talkListUsersDataGet() {
+        userInfo.talkListUsersDataGet(callback: { document in
+            ///トークリスト内にいるユーザーID群を取得
+            self.talkListUsersUID = document
 
-        
+            ///取得完了したらテーブルビューを更新
+            self.ChatUserListTableView.reloadData()
+        }, UID: uid)
+    }
+    ///自身の情報を取得
+    func userInfoDataGet() {
+        userInfo.userInfoDataGet(callback: { document in
+            ///ドキュメントにデータが入るまではセルを選択できないようにする
+            self.ChatUserListTableView.allowsSelection = false
+            ///データ投入
+            self.meInfoData = document
+            ///セル選択を可能にする
+            self.ChatUserListTableView.allowsSelection = true
+        }, UID: uid)
+    }
+    ///自分の画像を取得してくる
+    func contentOfFIRStorageGet() {
+        userInfo.contentOfFIRStorageGet(callback: { image in
+            ///ドキュメントにデータが入るまではセルを選択できないようにする
+            self.ChatUserListTableView.allowsSelection = false
+            ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
+            if image != nil {
+                self.selfProfileImageView.image = image
+            ///コールバック関数でNilが返ってきたら初期画像を設定
+            } else {
+                self.selfProfileImageView.image = UIImage(named: "InitIMage")
+            }
+            ///セル選択を可能にする
+            self.ChatUserListTableView.allowsSelection = true
+        }, UID: uid)
+    }
+    ///トークリストのリアルタイムリスナー
+    func talkListListner() {
+        ///リスナー用FireStore変数
+        let db = Firestore.firestore()
+        guard let uid = uid else {
+            return
+        }
+        db.collection("users").document(uid).collection("TalkUsersList").addSnapshotListener { (document,err) in
+            guard let documentSnapShot = document else {
+                print(err?.localizedDescription ?? "何らかの原因でトークユーザーリスト内のドキュメントが取得できませんでした")
+                return
+            }
+            for documentData in documentSnapShot.documents {
+                print("documentData.documentID:\(documentData.documentID)")
+            }
+            self.talkListUsersDataGet()
+        }
     }
 }

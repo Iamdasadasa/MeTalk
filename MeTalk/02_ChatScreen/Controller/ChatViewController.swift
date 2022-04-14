@@ -305,9 +305,6 @@ extension ChatViewController {
             return
         }
 
-        
-        ///一番最初に送ったメッセージまで（全てのメッセージ）を取得してしまったらリターンする処理を追記（多分データ自体にそのフラグ的なものを追加する必要があるかも:それかデータ取得ルールで判定）
-
         ///ナビゲーションバーの位置にスクロールの位置がドラッグによって来た時（一番上で新しいメッセージをロードする時）
         if navigationBarMaxY * -1 >= scrollView.contentOffset.y && scrollView.isDragging{
             print("LoadMessageGet直前。")

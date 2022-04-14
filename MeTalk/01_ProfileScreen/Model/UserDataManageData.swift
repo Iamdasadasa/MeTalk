@@ -244,7 +244,7 @@ struct UserDataManagedData{
     /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
     /// 　　　　　　（ニックネーム、性別等が含まれる）
     /// - Returns:
-    func talkListUsersDataGet(callback01: @escaping  ([String]) -> Void,callback02: @escaping  ([String:Any]) -> Void,UID:String?) {
+    func talkListUsersDataGet(callback: @escaping  ([String]) -> Void,UID:String?) {
         var talkUsersList:[String] = []
         guard let UID = UID else {
             print("UIDが確認できませんでした")
@@ -257,20 +257,12 @@ struct UserDataManagedData{
                 print("Error getting documents: \(err)")
             } else {
                 for talkUserinfo in querySnapshot!.documents {
-                    ///ここでブロックリストのユーザーID一覧を格納
-                    talkUsersList.append(talkUserinfo.documentID)
+                    ///なぜか文頭にスペースが入ることがあるのでトリム処理
+                    let UID = talkUserinfo.documentID.trimmingCharacters(in: .whitespaces)
+                    ///ここでトークリストのユーザーID一覧を格納
+                    talkUsersList.append(UID)
                 }
-                callback01(talkUsersList)
-            }
-        }
-        ///ここでデータにアクセスしている（非同期処理）
-        let selfUserDocuments = cloudDB.collection("users").document(UID)
-        selfUserDocuments.getDocument{ (documents,err) in
-            if let document = documents, document.exists {
-                ///オブジェクトに対して.dataプロパティを使用して辞書型としてコールバック関数で返す
-                callback02(document.data()!)
-            } else {
-                print(err?.localizedDescription)
+                callback(talkUsersList)
             }
         }
     }
