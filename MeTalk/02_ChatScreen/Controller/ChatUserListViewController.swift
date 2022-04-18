@@ -25,8 +25,20 @@ class ChatUserListViewController:UIViewController{
     var YouInfoData:[String:Any]?
     ///自身のユーザー情報格納変数
     var meInfoData:[String:Any]?
+    ///追加でロードする際のCount変数
+    var loadToLimitCount:Int = 15
+    ///重複してメッセージデータを取得しないためのフラグ
+    var loadDataLockFlg:Bool = true
+    ///追加メッセージデータ関数の起動を停止するフラグ
+    var loadDataStopFlg:Bool = false
+    
     ///トークリストユーザー情報格納配列
-
+    var talkListUsersMock:[UserInfo] = [] {
+        didSet {
+            
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         ///テーブルビューを適用
@@ -39,7 +51,7 @@ class ChatUserListViewController:UIViewController{
         ///セルの登録
         ChatUserListTableView.register(chatUserListTableViewCell.self, forCellReuseIdentifier: "chatUserListTableViewCell")
         ///自身のトークリストのユーザー一覧を取得
-        talkListUsersDataGet()
+//        talkListUsersDataGet(limitCount: loadToLimitCount)
         ///自身の情報を取得
         userInfoDataGet()
         ///自分の画像を取得してくる
@@ -48,8 +60,31 @@ class ChatUserListViewController:UIViewController{
         talkListListner()
     }
     
-    func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
-        print("先頭へのスクロールが完了した際に呼び出されるデリゲートメソッド")
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        
+        guard let talkListUsersUID = talkListUsersUID else {
+            return
+        }
+        ///取得しているユーザーリストの数が15件未満の場合またはデータのロードフラグがTrueは何もしない
+        if !loadDataLockFlg {
+            return
+        }
+        
+        //ロードストップのフラグが立っていればリターン
+        if loadDataStopFlg {
+            return
+        }
+        
+        if self.ChatUserListTableView.contentOffset.y + self.ChatUserListTableView.frame.size.height > self.ChatUserListTableView.contentSize.height && scrollView.isDragging{
+            print("contentOffset.y:\(self.ChatUserListTableView.contentOffset.y)")
+            print("frame.size.height:\(        self.ChatUserListTableView.frame.size.height)")
+            print("contentSize.height:\(        self.ChatUserListTableView.contentSize.height)")
+            loadDataLockFlg = false
+            loadToLimitCount = loadToLimitCount + 15
+            self.talkListUsersDataGet(limitCount: loadToLimitCount)
+            
+        }
+     
     }
     
 }
@@ -64,9 +99,12 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
       let cell = tableView.dequeueReusableCell(withIdentifier: "chatUserListTableViewCell", for: indexPath ) as! chatUserListTableViewCell
         
-        guard let userUID = talkListUsersUID?[indexPath.row] else {return cell}
+        guard let userUID = talkListUsersUID?[indexPath.row] else {
+            return cell
+        }
         ///取得したIDでユーザー情報の取得を開始(ユーザーニックネーム)
         userInfo.userInfoDataGet(callback: { document in
             guard let document = document else {
@@ -120,14 +158,23 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
 ///Firebase操作関連
 extension ChatUserListViewController {
     ///自身のトークリストのユーザー一覧を取得
-    func talkListUsersDataGet() {
+    func talkListUsersDataGet(limitCount:Int) {
         userInfo.talkListUsersDataGet(callback: { document in
+            
+            ///もしも現在のトークユーザーリストのカウントとDBから取得してきたトークユーザーリストのカウントが等しければロードストップのフラグにTrue
+            if document.count == self.talkListUsersUID?.count {
+                self.loadDataStopFlg = true
+            }
+            
             ///トークリスト内にいるユーザーID群を取得
             self.talkListUsersUID = document
 
             ///取得完了したらテーブルビューを更新
             self.ChatUserListTableView.reloadData()
-        }, UID: uid)
+            ///ロードフラグをTrue
+            self.loadDataLockFlg = true
+            
+        }, UID: uid,limitCount: limitCount)
     }
     ///自身の情報を取得
     func userInfoDataGet() {
@@ -171,7 +218,8 @@ extension ChatUserListViewController {
             for documentData in documentSnapShot.documents {
                 print("documentData.documentID:\(documentData.documentID)")
             }
-            self.talkListUsersDataGet()
+            ///ここは25件にするのではなく一件にしてトークリストの最初にぶち込むようにしないとユーザーがスクロールしている最中にリスナーが入ったら強制的に25件になって使いがってが悪くなる
+            self.talkListUsersDataGet(limitCount: self.loadToLimitCount)
         }
     }
 }

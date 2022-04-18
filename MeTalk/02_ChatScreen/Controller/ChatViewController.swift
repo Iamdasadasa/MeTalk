@@ -279,9 +279,9 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
             let message = MockMessage(attributedText: attributedText, sender:currentSender(), messageId: UUID().uuidString, date: Date())
         
             ///FireBaseにデータ書き込み（書き込みした時点で読み込みリロードhandlerが呼ばれる）
-            self.chatManageData.writeMassageData(mockMassage: message, text: text, roomID: self.roomID)
+            chatManageData.writeMassageData(mockMassage: message, text: text, roomID: self.roomID)
             ///最初のメッセージが存在していない場合のみそれぞれのAuthにUIDを登録
-            chatManageData.authUIDCreate(UID1: MeUID, UID2: YouUID, firstmessageFlg: firstMessageFlg)
+        chatManageData.authUIDCreate(UID1: MeUID, UID2: YouUID, firstmessageFlg: firstMessageFlg)
             ///UIDの登録が完了した場合はもう登録させないためにFalseを設定
             firstMessageFlg = false
         

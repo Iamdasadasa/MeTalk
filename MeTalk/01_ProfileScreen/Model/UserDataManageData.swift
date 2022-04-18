@@ -244,14 +244,14 @@ struct UserDataManagedData{
     /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
     /// 　　　　　　（ニックネーム、性別等が含まれる）
     /// - Returns:
-    func talkListUsersDataGet(callback: @escaping  ([String]) -> Void,UID:String?) {
+    func talkListUsersDataGet(callback: @escaping  ([String]) -> Void,UID:String?,limitCount:Int) {
         var talkUsersList:[String] = []
         guard let UID = UID else {
             print("UIDが確認できませんでした")
             return
         }
         ///ここでデータにアクセスしている（非同期処理）
-        let userDocuments = cloudDB.collection("users").document(UID).collection("TalkUsersList")
+        let userDocuments = cloudDB.collection("users").document(UID).collection("TalkUsersList").limit(to: limitCount)
         userDocuments.getDocuments(){ (querySnapshot, err) in
             if let err = err {
                 print("Error getting documents: \(err)")

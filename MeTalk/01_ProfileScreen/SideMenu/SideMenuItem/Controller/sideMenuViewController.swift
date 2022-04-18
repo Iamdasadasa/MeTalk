@@ -42,6 +42,18 @@ enum menuCellItem:Int,CaseIterable {
                     print("SignOut Error: %@", signOutError)
                 }
         }))
+        //ボタン開発テストデータ大量作成
+        alert.addAction(UIAlertAction(title: "テストデータ大量作成", style: .default, handler: {
+            (action: UIAlertAction!) in
+            
+            let kaihatu = kaihatutouroku()
+            let ramdom = "テストデータ\(Int.random(in: 1..<100000))"
+            kaihatu.tesutotairyou(callback: { document in
+                print(document)
+            }, nickName: ramdom, SexNo: 99, ramdomString: ramdom, jibunUID: Auth.auth().currentUser!.uid)
+            
+            
+        }))
         //ボタン2
         alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
 
