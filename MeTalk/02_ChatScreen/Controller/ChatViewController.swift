@@ -25,9 +25,6 @@ class ChatViewController: MessagesViewController {
     var loadDataLockFlg:Bool = true
     ///追加メッセージデータ関数の起動を停止するフラグ
     var loadDataStopFlg:Bool = false
-    ///最初のメッセージかを判断するフラグ
-    var firstMessageFlg:Bool = false
-    ///
     
     ///時間計測
     var start:Date?
@@ -281,9 +278,7 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
             ///FireBaseにデータ書き込み（書き込みした時点で読み込みリロードhandlerが呼ばれる）
             chatManageData.writeMassageData(mockMassage: message, text: text, roomID: self.roomID)
             ///最初のメッセージが存在していない場合のみそれぞれのAuthにUIDを登録
-        chatManageData.authUIDCreate(UID1: MeUID, UID2: YouUID, firstmessageFlg: firstMessageFlg)
-            ///UIDの登録が完了した場合はもう登録させないためにFalseを設定
-            firstMessageFlg = false
+            chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text)
         
             self.messageInputBar.inputTextView.text = String()
             self.messageInputBar.invalidatePlugins()
@@ -350,11 +345,6 @@ extension ChatViewController {
         //スナップショットとは、ある時点における特定のデータベース参照にあるデータの全体像を写し取ったもの
         if snapshot.children.allObjects as? [DataSnapshot] != nil  {
             let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
-            ///メッセージが何もない場合
-            if snapChildren! == [] {
-                ///最初のメッセージを送る場合のフラグとしてTrueを設定
-                firstMessageFlg = true
-            }
             //snapChildrenの中身の数だけsnapChildをとりだす
             for snapChild in snapChildren! {
                 if let postDict = snapChild.value as? [String: Any] {

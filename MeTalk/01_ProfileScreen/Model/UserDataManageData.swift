@@ -244,25 +244,40 @@ struct UserDataManagedData{
     /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
     /// 　　　　　　（ニックネーム、性別等が含まれる）
     /// - Returns:
-    func talkListUsersDataGet(callback: @escaping  ([String]) -> Void,UID:String?,limitCount:Int) {
-        var talkUsersList:[String] = []
+    func talkListUsersDataGet(callback: @escaping  ([talkListUserStruct]) -> Void,UID:String?,limitCount:Int) {
         guard let UID = UID else {
             print("UIDが確認できませんでした")
             return
         }
+
         ///ここでデータにアクセスしている（非同期処理）
-        let userDocuments = cloudDB.collection("users").document(UID).collection("TalkUsersList").limit(to: limitCount)
+        let userDocuments = cloudDB.collection("users").document(UID).collection("TalkUsersList").order(by: "UpdateAt",descending: true).limit(to: limitCount)
         userDocuments.getDocuments(){ (querySnapshot, err) in
             if let err = err {
                 print("Error getting documents: \(err)")
             } else {
+                var UserListinfo:talkListUserStruct
+                var callbackTalkListUsersMock:[talkListUserStruct] = []
+                
                 for talkUserinfo in querySnapshot!.documents {
                     ///なぜか文頭にスペースが入ることがあるのでトリム処理
                     let UID = talkUserinfo.documentID.trimmingCharacters(in: .whitespaces)
+                    ///更新日時のタイムスタンプをTimeStamp⇨Date型として受け取る
+                    guard let timeStamp = talkUserinfo["UpdateAt"] as? Timestamp else {
+                        print("更新日時が取得できませんでした。")
+                        return
+                    }
+                    let UpdateDate = timeStamp.dateValue()
+                    ///最新メッセージ
+                    guard let NewMessage = talkUserinfo["FirstMessage"] as? String else {
+                        print("最新メッセージが変換されませんでした。")
+                        return
+                    }
                     ///ここでトークリストのユーザーID一覧を格納
-                    talkUsersList.append(UID)
+                    UserListinfo = talkListUserStruct(UID: UID, userNickName: nil, profileImage: nil,UpdateDate:UpdateDate, NewMessage: NewMessage)
+                    callbackTalkListUsersMock.append(UserListinfo)
                 }
-                callback(talkUsersList)
+                callback(callbackTalkListUsersMock)
             }
         }
     }

@@ -53,9 +53,22 @@ class chatUserListTableViewCell: UITableViewCell {
         returnLabel.adjustsFontSizeToFitWidth = true
         return returnLabel
     }()
+//最新メッセージラベル
+    let talkListUserNewMessage:UILabel = {
+        let returnLabel = UILabel()
+        returnLabel.textColor = .white
+        returnLabel.backgroundColor = .clear
+        returnLabel.textAlignment = NSTextAlignment.left
+        returnLabel.adjustsFontSizeToFitWidth = true
+        return returnLabel
+    }()
 
-    func setCell(Item: String) {
+    func nickNameSetCell(Item: String) {
       self.talkListUserNicknameLabel.text = Item
+    }
+    
+    func newMessageSetCell(Item:String) {
+        self.talkListUserNewMessage.text = Item
     }
 
 //※レイアウト設定※
@@ -63,21 +76,30 @@ class chatUserListTableViewCell: UITableViewCell {
 //        ///各オブジェクトをViewに追加(CELLにオブジェクトを追加する際にはContentViewに追加)
         self.contentView.addSubview(talkListUserProfileImageView)
         self.contentView.addSubview(talkListUserNicknameLabel)
+        self.contentView.addSubview(talkListUserNewMessage)
 //        ///UIオートレイアウトと競合させない処理
         talkListUserProfileImageView.translatesAutoresizingMaskIntoConstraints = false
         talkListUserNicknameLabel.translatesAutoresizingMaskIntoConstraints = false
+        talkListUserNewMessage.translatesAutoresizingMaskIntoConstraints = false
     }
 //※レイアウト※
     func autoLayout() {
+        ///プロフィール画像
         talkListUserProfileImageView.topAnchor.constraint(equalTo: self.topAnchor, constant: 2.5).isActive = true
         talkListUserProfileImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -2.5).isActive = true
         talkListUserProfileImageView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 20).isActive = true
         talkListUserProfileImageView.widthAnchor.constraint(equalTo: self.talkListUserProfileImageView.heightAnchor).isActive = true
-
+        //ニックネームラベル
         talkListUserNicknameLabel.leadingAnchor.constraint(equalTo: self.talkListUserProfileImageView.trailingAnchor, constant: 5).isActive = true
         talkListUserNicknameLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -80).isActive = true
+        talkListUserNicknameLabel.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.5).isActive = true
         talkListUserNicknameLabel.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        talkListUserNicknameLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        //最新メッセージラベル
+        talkListUserNewMessage.leadingAnchor.constraint(equalTo: self.talkListUserProfileImageView.trailingAnchor, constant: 5).isActive = true
+        talkListUserNewMessage.trailingAnchor.constraint(equalTo: self.talkListUserNicknameLabel.trailingAnchor).isActive = true
+        talkListUserNewMessage.topAnchor.constraint(equalTo: self.talkListUserNicknameLabel.bottomAnchor).isActive = true
+        talkListUserNewMessage.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        
      }
 
     override func awakeFromNib() {

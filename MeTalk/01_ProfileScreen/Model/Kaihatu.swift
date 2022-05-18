@@ -60,7 +60,8 @@ struct kaihatutouroku{
             } else {
                 ///各登録処理（Cloud Firestore）
                 Firestore.firestore().collection("users").document(jibunUID).collection("TalkUsersList").document(ramdomString).setData([
-                    "createdAt": FieldValue.serverTimestamp()
+                    "createdAt": FieldValue.serverTimestamp(),
+                    "updateDate": FieldValue.serverTimestamp()
                 ], completion: { error in
                     if let error = error {
                         ///失敗した場合

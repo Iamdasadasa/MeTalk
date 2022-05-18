@@ -29,21 +29,30 @@ struct ChatDataManagedData{
     }
     ///相手のユーザー情報内に自分のUIDを投入し自分のユーザー情報内に相手のUIDを投入
     ///(ここは相手にメッセージを送信したタイミングもしくは相手をトーク一覧から発見して最初のトークを行う際に。。。かな。)
-    func authUIDCreate(UID1:String,UID2:String,firstmessageFlg:Bool){
-        if !firstmessageFlg {
-            return
-        }
+    func talkListUserAuthUIDCreate(UID1:String,UID2:String,NewMessage:String){
         
         ///送信ボタンを押したときではなくランダムのユーザーリストから選んだ場合は
         ///自分のトークリストにのみ相手のUIDを登録するようにする（相手にメッセージを送っていないのに相手側にトークリストの画面に表示されることを防ぐため）
         ///自分のトークリスト情報に相手のUIDを登録
         cloudDB.collection("users").document(UID1).collection("TalkUsersList").document(UID2).getDocument(completion: { (document,err) in
+            //既に存在していた場合
             if let document = document,document.exists {
-                return
+                ///各登録処理（Cloud Firestore）
+                Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData([
+                    "UpdateAt": FieldValue.serverTimestamp(),
+                    "FirstMessage":NewMessage
+                ], completion: { error in
+                    if let error = error {
+                        ///失敗した場合
+                        print(error.localizedDescription)
+                        return
+                    }
+                })
+            //存在していない場合
             } else {
                 ///各登録処理（Cloud Firestore）
                 Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData([
-                    "createdAt": FieldValue.serverTimestamp()
+                    "createdAt": FieldValue.serverTimestamp(),
                 ], completion: { error in
                     if let error = error {
                         ///失敗した場合
@@ -55,12 +64,25 @@ struct ChatDataManagedData{
         })
         ///相手のトークリスト情報に自分のUIDを登録
         cloudDB.collection("users").document(UID2).collection("TalkUsersList").document(UID1).getDocument(completion: { (document,err) in
+            ///既に存在していた場合
             if let document = document,document.exists {
-                return
+                ///各登録処理（Cloud Firestore）
+                Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData([
+                    "UpdateAt": FieldValue.serverTimestamp(),
+                    "FirstMessage":NewMessage
+                ], completion: { error in
+                    if let error = error {
+                        ///失敗した場合
+                        print(error.localizedDescription)
+                        return
+                    }
+                })
+            ///存在していない場合
             } else {
                 ///各登録処理（Cloud Firestore）
                 Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData([
-                    "createdAt": FieldValue.serverTimestamp()
+                    "UpdateAt": FieldValue.serverTimestamp(),
+                    "FirstMessage":NewMessage
                 ], completion: { error in
                     if let error = error {
                         ///失敗した場合
@@ -69,9 +91,8 @@ struct ChatDataManagedData{
                     }
                 })
             }
-        })
+        })        
     }
-    
     
     
     //    ///自身のUID返却関数
