@@ -17,6 +17,7 @@ class ChatUserListViewController:UIViewController{
     ///インスタンス化(Model)
     let userInfo = UserDataManagedData()
     let uid = Auth.auth().currentUser?.uid
+    let databaseRef: DatabaseReference! = Database.database().reference()
     ///自身の画像View
     var selfProfileImageView = UIImageView()
     ///トークリストユーザー情報格納配列
@@ -91,10 +92,11 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
       let cell = tableView.dequeueReusableCell(withIdentifier: "chatUserListTableViewCell", for: indexPath ) as! chatUserListTableViewCell
-        
+
         let userInfoData = self.talkListUsersMock[indexPath.row]
         ///画像に関してはCell生成の一番最初は問答無用でInitイメージを適用
         cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
+        ///ユーザーネーム設定処理
         if let nickName = userInfoData.userNickName {
             cell.nickNameSetCell(Item: nickName)
         } else {
@@ -109,11 +111,31 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             }, UID: userInfoData.UID)
         }
 
-        //最新メッセージをセルに反映する処理
+        //最新メッセージをセルに反映する処理※1
         let newMessage = userInfoData.NewMessage
         cell.newMessageSetCell(Item: newMessage)
         
+        ///トーク対象者との最新のメーセージ情報を取得（※1とは別DB）
+        let talkRoomID = ChatDataManagedData().ChatRoomID(UID1: Auth.auth().currentUser!.uid, UID2: userInfoData.UID)
         
+        databaseRef.child("Chat").child(talkRoomID).queryLimited(toLast: 1).queryOrdered(byChild: "Date").observe(.childAdded) { (snapshot) in
+            if let postDict = snapshot.value as? [String: Any] {
+
+                let message = postDict["message"] as? String
+                let senderID = postDict["sender"] as? String
+                let date = postDict["Date"] as? String
+                let messageID = postDict["messageID"] as? String
+                let listend = postDict["listend"] as? Bool ?? false
+                
+                ///もしも送信者IDが自分のIDではなく、listendの値がFalseの時新着ベルアイコンを表示
+                if !listend && senderID != self.uid {
+                    print(indexPath.row)
+                    cell.nortificationImageSetting()
+                }
+            }
+        }
+        
+        ///プロファイルイメージをセルに反映
         if let profilaImage = userInfoData.profileImage {
             cell.talkListUserProfileImageView.image = profilaImage
         } else {
@@ -146,7 +168,8 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
 
         userInfo.userInfoDataGet(callback: { document in
             ///UIDから生成したルームIDを値渡しする
-            chatViewController.roomID = chatdatamanage.ChatRoomID(UID1: Auth.auth().currentUser!.uid, UID2: YouUID)
+            let roomID = chatdatamanage.ChatRoomID(UID1: Auth.auth().currentUser!.uid, UID2: YouUID)
+            chatViewController.roomID = roomID
             ///それぞれのユーザー情報を渡す
             chatViewController.MeInfo = self.meInfoData
             chatViewController.MeUID = self.uid
@@ -154,6 +177,9 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             chatViewController.YouUID = YouUID
             chatViewController.meProfileImage = self.selfProfileImageView.image
             chatViewController.youProfileImage = cell.talkListUserProfileImageView.image
+            ///新着ベルアイコンを非表示にする＆最新メッセージのlisntendをFalseに設定
+            cell.nortificationImageRemove()
+
             ///UINavigationControllerとして遷移
             let UINavigationController = UINavigationController(rootViewController: chatViewController)
             UINavigationController.modalPresentationStyle = .fullScreen

@@ -334,7 +334,6 @@ extension ChatViewController {
         handle = databaseRef.child("Chat").child(roomID).queryLimited(toLast: loadToLimitCount).queryOrdered(byChild: "Date:").observe(.value) { (snapshot: DataSnapshot) in
             DispatchQueue.main.async {//クロージャの中を同期処理
                 self.snapshotToArray(snapshot: snapshot)//スナップショットを配列(readData)に入れる処理。下に定義
-                
             }
         }
     }
@@ -347,8 +346,12 @@ extension ChatViewController {
             let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
             //snapChildrenの中身の数だけsnapChildをとりだす
             for snapChild in snapChildren! {
+                ///読み込んだメッセージのlistendは全てtruenに更新
+                databaseRef.child("Chat").child(roomID).child(snapChild.key).updateChildValues(["listend":true])
+                ///それぞれのValue配列を取得
                 if let postDict = snapChild.value as? [String: Any] {
-                    
+                    print(postDict)
+                    ///メッセージ配列に適用
                     messageArray.append(MockMessage.loadMessage(text: postDict["message"] as! String, user: userTypeJudge(senderID: postDict["sender"] as! String),data: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String))
                 }
             }

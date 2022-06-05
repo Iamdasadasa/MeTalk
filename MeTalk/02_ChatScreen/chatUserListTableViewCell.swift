@@ -53,7 +53,7 @@ class chatUserListTableViewCell: UITableViewCell {
         returnLabel.adjustsFontSizeToFitWidth = true
         return returnLabel
     }()
-//最新メッセージラベル
+    ///最新メッセージラベル
     let talkListUserNewMessage:UILabel = {
         let returnLabel = UILabel()
         returnLabel.textColor = .white
@@ -62,6 +62,20 @@ class chatUserListTableViewCell: UITableViewCell {
         returnLabel.adjustsFontSizeToFitWidth = true
         return returnLabel
     }()
+    ///新着通知ベルイメージ
+    let nortificationImage:UIImageView = {
+        let returnImageView = UIImageView()
+        returnImageView.backgroundColor = .clear
+        return returnImageView
+    }()
+    
+    func nortificationImageSetting(){
+        self.nortificationImage.image = UIImage(named: "NotificationIcon")
+    }
+    
+    func nortificationImageRemove() {
+        self.nortificationImage.image = nil
+    }
 
     func nickNameSetCell(Item: String) {
       self.talkListUserNicknameLabel.text = Item
@@ -77,10 +91,12 @@ class chatUserListTableViewCell: UITableViewCell {
         self.contentView.addSubview(talkListUserProfileImageView)
         self.contentView.addSubview(talkListUserNicknameLabel)
         self.contentView.addSubview(talkListUserNewMessage)
+        self.contentView.addSubview(nortificationImage)
 //        ///UIオートレイアウトと競合させない処理
         talkListUserProfileImageView.translatesAutoresizingMaskIntoConstraints = false
         talkListUserNicknameLabel.translatesAutoresizingMaskIntoConstraints = false
         talkListUserNewMessage.translatesAutoresizingMaskIntoConstraints = false
+        nortificationImage.translatesAutoresizingMaskIntoConstraints = false
     }
 //※レイアウト※
     func autoLayout() {
@@ -99,7 +115,11 @@ class chatUserListTableViewCell: UITableViewCell {
         talkListUserNewMessage.trailingAnchor.constraint(equalTo: self.talkListUserNicknameLabel.trailingAnchor).isActive = true
         talkListUserNewMessage.topAnchor.constraint(equalTo: self.talkListUserNicknameLabel.bottomAnchor).isActive = true
         talkListUserNewMessage.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
-        
+        ///新着通知ベルイメージ
+        nortificationImage.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        nortificationImage.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.25).isActive = true
+        nortificationImage.widthAnchor.constraint(equalTo: nortificationImage.heightAnchor).isActive = true
+        nortificationImage.leadingAnchor.constraint(equalTo: talkListUserNewMessage.trailingAnchor).isActive = true
      }
 
     override func awakeFromNib() {
