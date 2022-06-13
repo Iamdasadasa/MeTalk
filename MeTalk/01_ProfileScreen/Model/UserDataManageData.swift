@@ -274,7 +274,7 @@ struct UserDataManagedData{
                         return
                     }
                     ///ここでトークリストのユーザーID一覧を格納
-                    UserListinfo = talkListUserStruct(UID: UID, userNickName: nil, profileImage: nil,UpdateDate:UpdateDate, NewMessage: NewMessage)
+                    UserListinfo = talkListUserStruct(UID: UID, userNickName: nil, profileImage: nil,UpdateDate:UpdateDate, NewMessage: NewMessage, listend: false)
                     callbackTalkListUsersMock.append(UserListinfo)
                 }
                 callback(callbackTalkListUsersMock)

@@ -93,7 +93,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         
       let cell = tableView.dequeueReusableCell(withIdentifier: "chatUserListTableViewCell", for: indexPath ) as! chatUserListTableViewCell
 
-        let userInfoData = self.talkListUsersMock[indexPath.row]
+        var userInfoData = self.talkListUsersMock[indexPath.row]
         ///画像に関してはCell生成の一番最初は問答無用でInitイメージを適用
         cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
         ///ユーザーネーム設定処理
@@ -115,25 +115,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         let newMessage = userInfoData.NewMessage
         cell.newMessageSetCell(Item: newMessage)
         
-        ///トーク対象者との最新のメーセージ情報を取得（※1とは別DB）
-        let talkRoomID = ChatDataManagedData().ChatRoomID(UID1: Auth.auth().currentUser!.uid, UID2: userInfoData.UID)
-        
-        databaseRef.child("Chat").child(talkRoomID).queryLimited(toLast: 1).queryOrdered(byChild: "Date").observe(.childAdded) { (snapshot) in
-            if let postDict = snapshot.value as? [String: Any] {
 
-                let message = postDict["message"] as? String
-                let senderID = postDict["sender"] as? String
-                let date = postDict["Date"] as? String
-                let messageID = postDict["messageID"] as? String
-                let listend = postDict["listend"] as? Bool ?? false
-                
-                ///もしも送信者IDが自分のIDではなく、listendの値がFalseの時新着ベルアイコンを表示
-                if !listend && senderID != self.uid {
-                    print(indexPath.row)
-                    cell.nortificationImageSetting()
-                }
-            }
-        }
         
         ///プロファイルイメージをセルに反映
         if let profilaImage = userInfoData.profileImage {
@@ -153,6 +135,16 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             }, UID: userInfoData.UID)
         }
 
+        ///もしもセルの再利用によってベルアイコンが存在してしまっていたら初期化
+        if cell.nortificationImage.image != nil {
+            cell.nortificationImage.image = nil
+        }
+        ///ベルアイコンを表示()
+        print("\(userInfoData.listend):\(indexPath.row)")
+        if userInfoData.listend {
+            cell.nortificationImageSetting()
+        }
+        
         return cell
     }
 
@@ -177,8 +169,9 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             chatViewController.YouUID = YouUID
             chatViewController.meProfileImage = self.selfProfileImageView.image
             chatViewController.youProfileImage = cell.talkListUserProfileImageView.image
-            ///新着ベルアイコンを非表示にする＆最新メッセージのlisntendをFalseに設定
+            ///新着ベルアイコンを非表示にする＆該当ユーザーのlisntendをFalseに設定
             cell.nortificationImageRemove()
+            self.talkListUsersMock[indexPath.row].listend = false
 
             ///UINavigationControllerとして遷移
             let UINavigationController = UINavigationController(rootViewController: chatViewController)
@@ -240,6 +233,7 @@ extension ChatUserListViewController {
     func talkListListner() {
         ///初回インスタンス時にここでトークリストを更新
         self.talkListUsersDataGet(limitCount: 25)
+        var triggerFlgCount:Int = 0
         ///リスナー用FireStore変数
         let db = Firestore.firestore()
         guard let uid = uid else {
@@ -248,38 +242,75 @@ extension ChatUserListViewController {
 
 
         db.collection("users").document(uid).collection("TalkUsersList").order(by: "UpdateAt",descending: true).limit(to: 1).addSnapshotListener { (document,err) in
+            ///初回起動時でない場合のみ既読バッジオン
+            var listend:Bool = true
+            if triggerFlgCount == 0 {
+                listend = false
+            }
+
+            ///エラー処理
             guard let documentSnapShot = document else {
                 print(err?.localizedDescription ?? "何らかの原因でトークユーザーリスト内のドキュメントが取得できませんでした")
                 return
             }
-            
+            ///ドキュメント内の処理
             for documentData in documentSnapShot.documents {
-                print("documentData.documentID:\(documentData.documentID)")
                 ///更新日時のタイムスタンプをTimeStamp⇨Date型として受け取る
                 guard let timeStamp = documentData["UpdateAt"] as? Timestamp else {
                     return
                 }
                 let UpdateDate = timeStamp.dateValue()
                 
+                ///ユーザー配列の名からリスナーで取得されたIDと一致している配列番号を取得
                 let indexNo = self.talkListUsersMock.firstIndex(where: {$0.UID == documentData.documentID})
-                
+
                 ///最新メッセージ
                 guard let NewMessage = documentData["FirstMessage"] as? String else {
                     print("最新メッセージが変換されませんでした。")
                     return
                 }
                 
-                guard let indexNo = indexNo else {
-                    self.talkListUsersMock.insert(talkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage:NewMessage), at: 0)
-                    self.ChatUserListTableView.reloadData()
-                    return
-                }
+                    guard let indexNo = indexNo else {
+                        self.talkListUsersMock.insert(talkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage:NewMessage, listend: listend), at: 0)
+                        self.ChatUserListTableView.reloadData()
+                        triggerFlgCount = 1
+                        return
+                    }
 
-                self.talkListUsersMock.remove(at: indexNo)
-                self.talkListUsersMock.insert(talkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage: NewMessage), at: 0)
-                self.ChatUserListTableView.reloadData()
+                    self.talkListUsersMock.remove(at: indexNo)
+                    self.talkListUsersMock.insert(talkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage: NewMessage, listend: listend), at: 0)
+                    self.ChatUserListTableView.reloadData()
+                    triggerFlgCount = 1
+                
+                
+                
+                結局これを生き返らせてこの上にあるguarg let からの文言をpost dict内のブロックに入れないと送信者によって新着アイコン表示、非表示がままならないか、、、
+//                ///トーク対象者との最新のメーセージ情報を取得（※1とは別DB）
+//                let talkRoomID = ChatDataManagedData().ChatRoomID(UID1: Auth.auth().currentUser!.uid, UID2: documentData.documentID)
+//
+//                self.databaseRef.child("Chat").child(talkRoomID).queryLimited(toLast: 1).queryOrdered(byChild: "Date").getData(completion: { error, snapshot in
+//
+//                    guard let error = error {
+//                        print(err)
+//                    }
+//
+//                    if let postDict = snapshot.value as? [String: Any] {
+//
+//                        let message = postDict["message"] as? String
+//                        let senderID = postDict["sender"] as? String
+//                        let date = postDict["Date"] as? String
+//                        let messageID = postDict["messageID"] as? String
+//                        let listend = postDict["listend"] as? Bool ?? false
+//
+//                        ///
+//
+//                    }
+//                })
+
             }
 
         }
     }
 }
+
+

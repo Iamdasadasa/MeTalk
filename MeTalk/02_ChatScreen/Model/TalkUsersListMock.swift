@@ -9,12 +9,14 @@ struct talkListUserStruct{
     var profileImage: UIImage?
     var NewMessage: String
     var upDateDate:Date
+    var listend:Bool
 
-    init(UID:String,userNickName:String?,profileImage:UIImage?,UpdateDate:Date,NewMessage:String){
+    init(UID:String,userNickName:String?,profileImage:UIImage?,UpdateDate:Date,NewMessage:String,listend:Bool){
         self.UID = UID
         self.userNickName = userNickName
         self.profileImage = profileImage
         self.upDateDate = UpdateDate
         self.NewMessage = NewMessage
+        self.listend = listend
     }
 }
