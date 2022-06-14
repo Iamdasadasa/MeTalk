@@ -10,9 +10,9 @@ import UIKit
 import FloatingPanel
 import Firebase
 
-画面バック遷移用のプロトコルを作成　詳細はSafari
 
-class ChatUserListViewController:UIViewController{
+
+class ChatUserListViewController:UIViewController, UINavigationControllerDelegate{
     ///インスタンス化(View)
     let ChatUserListTableView = GeneralTableView()
     ///インスタンス化(Model)
@@ -33,6 +33,8 @@ class ChatUserListViewController:UIViewController{
     var loadDataLockFlg:Bool = true
     ///追加メッセージデータ関数の起動を停止するフラグ
     var loadDataStopFlg:Bool = false
+    ///バックボタンで戻ってきた時に格納してあるUID
+    var backButtonUID:String?
     
     ///トークリストユーザー情報格納配列
     var talkListUsersMock:[talkListUserStruct] = []
@@ -135,7 +137,9 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
                 }
             }, UID: userInfoData.UID)
         }
-
+        
+        
+        
         ///もしもセルの再利用によってベルアイコンが存在してしまっていたら初期化
         if cell.nortificationImage.image != nil {
             cell.nortificationImage.image = nil
@@ -144,6 +148,16 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         if userInfoData.listend && userInfoData.sendUID != uid {
             cell.nortificationImageSetting()
         }
+        
+        ///バックボタンで戻ってきた際のUIDがCellのUIDと合致していたらベルアイコンは非表示
+        if let backButtonUID = backButtonUID {
+            if backButtonUID == userInfoData.UID {
+                cell.nortificationImage.image = nil
+
+            }
+        }
+        backButtonUID = nil
+        
         
         return cell
     }
@@ -176,7 +190,10 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             ///UINavigationControllerとして遷移
             let UINavigationController = UINavigationController(rootViewController: chatViewController)
             UINavigationController.modalPresentationStyle = .fullScreen
+            chatViewController.delegate = self
             self.present(UINavigationController, animated: true, completion: nil)
+            
+            
         }, UID: YouUID)
     }
 }
@@ -239,7 +256,6 @@ extension ChatUserListViewController {
         guard let uid = uid else {
             return
         }
-
 
         db.collection("users").document(uid).collection("TalkUsersList").order(by: "UpdateAt",descending: true).limit(to: 1).addSnapshotListener { (document,err) in
             ///初回起動時でない場合のみ既読バッジオン
@@ -316,4 +332,9 @@ extension ChatUserListViewController {
     }
 }
 
+extension ChatUserListViewController:backButtonTappedProtcol{
+    func buckButtonDelegate(CellUID: String) {
+        backButtonUID = CellUID
+    }
+}
 

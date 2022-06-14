@@ -2,6 +2,11 @@ import UIKit
 import MessageKit
 import InputBarAccessoryView
 
+///画面Back時に使用するDelegate用Protcol
+protocol backButtonTappedProtcol:AnyObject{
+    func buckButtonDelegate(CellUID:String)
+}
+
 class ChatViewController: MessagesViewController {
     
     ///init変数　自分のUIDと相手のUID
@@ -25,9 +30,10 @@ class ChatViewController: MessagesViewController {
     var loadDataLockFlg:Bool = true
     ///追加メッセージデータ関数の起動を停止するフラグ
     var loadDataStopFlg:Bool = false
-    
     ///時間計測
     var start:Date?
+    ///Delegate
+    weak var delegate:backButtonTappedProtcol?
     
     
     ///インスタンス化(Model)
@@ -88,6 +94,9 @@ class ChatViewController: MessagesViewController {
     }
     
     @objc func backButtonPressed(_ sender: UIBarButtonItem) {
+        if let delegate = delegate {
+            delegate.buckButtonDelegate(CellUID: YouUID)
+        }
         self.dismiss(animated: true, completion: nil)
      }
 
@@ -378,6 +387,18 @@ extension ChatViewController {
         }
     }
     
-
-    
 }
+
+/////NavigationController用のDelegateを実装
+//extension ChatViewController:UINavigationControllerDelegate{
+//    func navigationController(
+//        _ navigationController: UINavigationController,
+//        willShow viewController: UIViewController,
+//        animated: Bool
+//    ) {
+//        if let viewController = viewController as? ChatUserListViewController {
+//            // delegateメソッドを呼び出し
+//            delegate?.buckButtonDelegate(CellUID: YouUID)
+//        }
+//    }
+//}
