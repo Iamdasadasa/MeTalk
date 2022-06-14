@@ -10,6 +10,7 @@ import UIKit
 import FloatingPanel
 import Firebase
 
+画面バック遷移用のプロトコルを作成　詳細はSafari
 
 class ChatUserListViewController:UIViewController{
     ///インスタンス化(View)
@@ -139,9 +140,8 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         if cell.nortificationImage.image != nil {
             cell.nortificationImage.image = nil
         }
-        ///ベルアイコンを表示()
-        print("\(userInfoData.listend):\(indexPath.row)")
-        if userInfoData.listend {
+        ///listendがTrue且つ送信者IDが自分でない場合はベルアイコンを表示()
+        if userInfoData.listend && userInfoData.sendUID != uid {
             cell.nortificationImageSetting()
         }
         
@@ -269,22 +269,25 @@ extension ChatUserListViewController {
                     print("最新メッセージが変換されませんでした。")
                     return
                 }
+                ///送信者のUIDを確認
+                guard let sendUID = documentData["SendID"] as? String else {
+                    print("送信者UID情報が取得できませんでした")
+                    return
+                }
                 
-                    guard let indexNo = indexNo else {
-                        self.talkListUsersMock.insert(talkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage:NewMessage, listend: listend), at: 0)
-                        self.ChatUserListTableView.reloadData()
-                        triggerFlgCount = 1
-                        return
-                    }
-
-                    self.talkListUsersMock.remove(at: indexNo)
-                    self.talkListUsersMock.insert(talkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage: NewMessage, listend: listend), at: 0)
+                guard let indexNo = indexNo else {
+                    self.talkListUsersMock.insert(talkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage:NewMessage, listend: listend, sendUID: sendUID), at: 0)
                     self.ChatUserListTableView.reloadData()
                     triggerFlgCount = 1
+                    return
+                }
+
+                self.talkListUsersMock.remove(at: indexNo)
+                self.talkListUsersMock.insert(talkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage: NewMessage, listend: listend, sendUID: sendUID), at: 0)
+                self.ChatUserListTableView.reloadData()
+                triggerFlgCount = 1
                 
                 
-                
-                結局これを生き返らせてこの上にあるguarg let からの文言をpost dict内のブロックに入れないと送信者によって新着アイコン表示、非表示がままならないか、、、
 //                ///トーク対象者との最新のメーセージ情報を取得（※1とは別DB）
 //                let talkRoomID = ChatDataManagedData().ChatRoomID(UID1: Auth.auth().currentUser!.uid, UID2: documentData.documentID)
 //

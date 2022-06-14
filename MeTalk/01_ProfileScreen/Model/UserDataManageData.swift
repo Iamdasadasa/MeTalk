@@ -273,8 +273,13 @@ struct UserDataManagedData{
                         print("最新メッセージが変換されませんでした。")
                         return
                     }
+                    ///送信者のUIDを確認
+                    guard let sendUID = talkUserinfo["SendID"] as? String else {
+                        print("送信者UID情報が取得できませんでした")
+                        return
+                    }
                     ///ここでトークリストのユーザーID一覧を格納
-                    UserListinfo = talkListUserStruct(UID: UID, userNickName: nil, profileImage: nil,UpdateDate:UpdateDate, NewMessage: NewMessage, listend: false)
+                    UserListinfo = talkListUserStruct(UID: UID, userNickName: nil, profileImage: nil,UpdateDate:UpdateDate, NewMessage: NewMessage, listend: false, sendUID: sendUID)
                     callbackTalkListUsersMock.append(UserListinfo)
                 }
                 callback(callbackTalkListUsersMock)

@@ -33,14 +33,16 @@ struct ChatDataManagedData{
         
         ///送信ボタンを押したときではなくランダムのユーザーリストから選んだ場合は
         ///自分のトークリストにのみ相手のUIDを登録するようにする（相手にメッセージを送っていないのに相手側にトークリストの画面に表示されることを防ぐため）
-        ///自分のトークリスト情報に相手のUIDを登録
+        ///自分のトークリスト情報に相手のUID情報を登録。
         cloudDB.collection("users").document(UID1).collection("TalkUsersList").document(UID2).getDocument(completion: { (document,err) in
             //既に存在していた場合
             if let document = document,document.exists {
-                ///各登録処理（Cloud Firestore）
+                ///
+                ///登録処理（Cloud Firestore）自分が送信したメッセージ情報を登録
                 Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData([
                     "UpdateAt": FieldValue.serverTimestamp(),
-                    "FirstMessage":NewMessage
+                    "FirstMessage":NewMessage,
+                    "SendID":UID1
                 ], completion: { error in
                     if let error = error {
                         ///失敗した場合
@@ -53,6 +55,8 @@ struct ChatDataManagedData{
                 ///各登録処理（Cloud Firestore）
                 Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData([
                     "createdAt": FieldValue.serverTimestamp(),
+                    "FirstMessage":NewMessage,
+                    "SendID":UID1
                 ], completion: { error in
                     if let error = error {
                         ///失敗した場合
@@ -66,10 +70,11 @@ struct ChatDataManagedData{
         cloudDB.collection("users").document(UID2).collection("TalkUsersList").document(UID1).getDocument(completion: { (document,err) in
             ///既に存在していた場合
             if let document = document,document.exists {
-                ///各登録処理（Cloud Firestore）
+                ///各登録処理（Cloud Firestore）登録処理（Cloud Firestore）自分が送信したメッセージ情報を登録
                 Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData([
                     "UpdateAt": FieldValue.serverTimestamp(),
-                    "FirstMessage":NewMessage
+                    "FirstMessage":NewMessage,
+                    "SendID":UID1
                 ], completion: { error in
                     if let error = error {
                         ///失敗した場合
@@ -82,7 +87,8 @@ struct ChatDataManagedData{
                 ///各登録処理（Cloud Firestore）
                 Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData([
                     "UpdateAt": FieldValue.serverTimestamp(),
-                    "FirstMessage":NewMessage
+                    "FirstMessage":NewMessage,
+                    "SendID":UID1
                 ], completion: { error in
                     if let error = error {
                         ///失敗した場合
