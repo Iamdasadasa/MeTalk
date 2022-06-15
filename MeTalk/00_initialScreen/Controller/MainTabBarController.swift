@@ -20,12 +20,14 @@ final class MainTabBarController: UITabBarController {
         firstViewController.tabBarItem = UITabBarItem(title: "tab1", image: .none, tag: 0)
 
         let secondViewController = ChatUserListViewController()
-        secondViewController.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 0)
+        let UINavigationController = UINavigationController(rootViewController: secondViewController)
+        UINavigationController.modalPresentationStyle = .fullScreen
+        UINavigationController.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 0)
         
         let thirdViewController = ProfileViewController()
         thirdViewController.tabBarItem = UITabBarItem(tabBarSystemItem: .favorites, tag: 0)
 
-        viewControllers = [firstViewController, secondViewController, thirdViewController]
+        viewControllers = [firstViewController, UINavigationController, thirdViewController]
     }
 
 }

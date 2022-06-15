@@ -36,6 +36,9 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
     ///バックボタンで戻ってきた時に格納してあるUID
     var backButtonUID:String?
     
+    ///Barボタンの設定(NavigationBar)
+    var editItem: UIBarButtonItem! // Backボタン
+    
     ///トークリストユーザー情報格納配列
     var talkListUsersMock:[talkListUserStruct] = []
     
@@ -58,7 +61,18 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
         contentOfFIRStorageGet()
         ///トークリストリスナー
         talkListListner()
+        ///ナビゲーションバーの設定
+        ///barボタン初期設定
+        editItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editItemButtonPressed(_:)))
+        self.navigationItem.leftBarButtonItem = editItem
+        ///タイトルラベル追加
+        navigationItem.title = "トークリスト"
+        
     }
+    
+    @objc func editItemButtonPressed(_ sender: UIBarButtonItem) {
+        print("編集ボタンが押下されました")
+     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
 
