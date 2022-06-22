@@ -63,16 +63,11 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
         talkListListner()
         ///ナビゲーションバーの設定
         ///barボタン初期設定
-        editItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editItemButtonPressed(_:)))
-        self.navigationItem.leftBarButtonItem = editItem
+//        editItem = UIBarButtonItem(title: "編集", style: .plain, target: self, action: #selector(editItemButtonPressed(_:)))
         ///タイトルラベル追加
         navigationItem.title = "トークリスト"
         
     }
-    
-    @objc func editItemButtonPressed(_ sender: UIBarButtonItem) {
-        print("編集ボタンが押下されました")
-     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
 
@@ -210,6 +205,30 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             
         }, UID: YouUID)
     }
+    
+    ///横スワイプした際の処理
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let editAction = UIContextualAction(style: .normal, title: "Edit") { (action, view, completionHandler) in
+          // 編集処理を記述
+          print("Editがタップされた")
+
+        // 実行結果に関わらず記述
+        completionHandler(true)
+        }
+    
+        // 削除処理
+         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { (action, view, completionHandler) in
+           //削除処理を記述
+           print("Deleteがタップされた")
+
+           // 実行結果に関わらず記述
+           completionHandler(true)
+         }
+
+         // 定義したアクションをセット
+         return UISwipeActionsConfiguration(actions: [deleteAction, editAction])
+    }
+    
 }
 
 ///Firebase操作関連
