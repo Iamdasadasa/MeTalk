@@ -17,8 +17,6 @@ class ChatViewController: MessagesViewController {
     var cellTextValueDateSorting:[String] = []
     ///RoomID格納変数
     var roomID:String!
-    ///Barボタンの設定(NavigationBar)
-    var backButtonItem: UIBarButtonItem! // Backボタン
     ///追加でロードする際のCount変数
     var loadToLimitCount:UInt = 25
     ///重複してメッセージデータを取得しないためのフラグ
@@ -58,7 +56,6 @@ class ChatViewController: MessagesViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.tabBarController?.tabBar.isHidden = true
 
         ///ここで初回のメッセージを取得してくる。また、リアルタイム更新もここでやる。
         self.LoadMessageGet(roomID: roomID)
@@ -80,10 +77,8 @@ class ChatViewController: MessagesViewController {
         maintainPositionOnKeyboardFrameChanged = false
         
         ///タイトルラベル追加
-        navigationItem.title = "トークリスト"
+        navigationItem.title = "\(YouInfo["nickname"] as! String)"
     }
-    
-
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

@@ -68,7 +68,6 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
 //        editItem = UIBarButtonItem(title: "編集", style: .plain, target: self, action: #selector(editItemButtonPressed(_:)))
         ///タイトルラベル追加
         navigationItem.title = "トークリスト"
-        
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -109,9 +108,15 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
 
         var userInfoData = self.talkListUsersMock[indexPath.row]
         
-        
-        ///ローカルDBにUser情報を保存
-        chatUserListInfoLocalDataRegist(UID: userInfoData.UID, usernickname: userInfoData.userNickName, newMessage: userInfoData.NewMessage, updateDate: userInfoData.upDateDate, listend: userInfoData.listend, SendUID: userInfoData.sendUID)
+        ///ローカルDBに存在しているUIDを検知
+        let realm = try! Realm()
+        ///存在していた場合は追加で情報を上書き
+        let extraFlg = chatUserListInfoLocalExstraRegist(Realm: realm, UID: userInfoData.UID, usernickname: userInfoData.userNickName, newMessage: userInfoData.NewMessage, updateDate: userInfoData.upDateDate, listend: userInfoData.listend, SendUID: userInfoData.sendUID)
+        ///存在していない場合はUIDを含め新規で作成
+        if !extraFlg {
+            chatUserListInfoLocalDataRegist(Realm: realm, UID: userInfoData.UID, usernickname: userInfoData.userNickName, newMessage: userInfoData.NewMessage, updateDate: userInfoData.upDateDate, listend: userInfoData.listend, SendUID: userInfoData.sendUID)
+        }
+
         
         ///画像に関してはCell生成の一番最初は問答無用でInitイメージを適用
         cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
@@ -208,9 +213,8 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             self.talkListUsersMock[indexPath.row].listend = false
 
             ///UINavigationControllerとして遷移
-            let UINavigationController = UINavigationController(rootViewController: chatViewController)
-            UINavigationController.modalPresentationStyle = .fullScreen
-            self.present(UINavigationController, animated: true, completion: nil)
+            let UIViewController = chatViewController
+            self.navigationController?.pushViewController(UIViewController, animated: true)
             
             
         }, UID: YouUID)
@@ -295,7 +299,11 @@ extension ChatUserListViewController {
         self.talkListUsersDataGet(limitCount: 25)
         var triggerFlgCount:Int = 0
         
+        ///ローカルDBに対して情報検索
+        let realm = try! Realm()
         
+        let localDBGetData = realm.objects(ListUsersInfoLocal.self)
+        print(localDBGetData)
         
         ///リスナー用FireStore変数
         let db = Firestore.firestore()
@@ -378,10 +386,11 @@ extension ChatUserListViewController {
     }
 }
 
-///ローカルDBへのデータ登録
+
 extension ChatUserListViewController {
-    func chatUserListInfoLocalDataRegist(UID:String,usernickname:String?,newMessage:String,updateDate:Date,listend:Bool,SendUID:String){
-        let realm = try! Realm()
+    ///ローカルDBへの新規データ登録
+    func chatUserListInfoLocalDataRegist(Realm:Realm,UID:String,usernickname:String?,newMessage:String,updateDate:Date,listend:Bool,SendUID:String){
+        let realm = Realm
 
         let UserListLocalObject = ListUsersInfoLocal()
         
@@ -390,10 +399,39 @@ extension ChatUserListViewController {
         UserListLocalObject.NewMessage = newMessage
         UserListLocalObject.upDateDate = updateDate
         UserListLocalObject.listend = listend
-        UserListLocalObject.sendUID
+        UserListLocalObject.sendUID = SendUID
         
         try! realm.write {
              realm.add(UserListLocalObject)
         }
+    }
+    
+    ///ローカルDBから検索して追加データ登録
+    
+    func chatUserListInfoLocalExstraRegist(Realm:Realm,UID:String,usernickname:String?,newMessage:String,updateDate:Date,listend:Bool,SendUID:String) -> Bool{
+        let realm = Realm
+        
+        let localDBGetData = realm.objects(ListUsersInfoLocal.self)
+        
+        // UIDで検索
+        let UID = UID
+        let predicate = NSPredicate(format: "UID == %@", UID)
+        
+        guard let user = localDBGetData.filter(predicate).first else {
+            return false
+        }
+        // UID以外のデータを更新する
+        do{
+          try realm.write{
+              user.userNickName = usernickname
+              user.NewMessage = newMessage
+              user.upDateDate = updateDate
+              user.listend = listend
+              user.sendUID = SendUID
+          }
+        }catch {
+          print("Error \(error)")
+        }
+        return true
     }
 }

@@ -10,7 +10,11 @@ import Realm
 import RealmSwift
 
 class ListUsersInfoLocal: Object{
+    ///UIDはプライマリーキー
     @objc dynamic var UID:String?
+    override static func primaryKey() -> String? {
+        return "UID"
+    }
     @objc dynamic var userNickName: String?
     @objc dynamic var NewMessage: String?
     @objc dynamic var upDateDate:Date?
