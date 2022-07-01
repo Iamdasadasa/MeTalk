@@ -25,4 +25,5 @@ target 'MeTalk' do
   pod 'FloatingPanel'
   pod 'SideMenu'
   pod 'MessageKit', '>= 1.0.0'
+  pod 'RealmSwift'
   end

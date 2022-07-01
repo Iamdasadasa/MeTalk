@@ -54,6 +54,7 @@
 		D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37B27AA85C300290B18 /* loadingView.swift */; };
 		D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37F27AA92F100290B18 /* ProfileViewController.swift */; };
 		D69EC38227AA952000290B18 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC38127AA952000290B18 /* ProfileView.swift */; };
+		D6A8C0D8286345AD0017171A /* UserListLocalModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */; };
 		D6DE5C1F28085CB4006C6236 /* TalkUsersListMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */; };
 		D6DE5C22280D3BAC006C6236 /* Kaihatu.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DE5C21280D3BAC006C6236 /* Kaihatu.swift */; };
 /* End PBXBuildFile section */
@@ -130,6 +131,7 @@
 		D69EC37B27AA85C300290B18 /* loadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = loadingView.swift; sourceTree = "<group>"; };
 		D69EC37F27AA92F100290B18 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		D69EC38127AA952000290B18 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListLocalModel.swift; sourceTree = "<group>"; };
 		D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkUsersListMock.swift; sourceTree = "<group>"; };
 		D6DE5C21280D3BAC006C6236 /* Kaihatu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Kaihatu.swift; sourceTree = "<group>"; };
 		DC56F677BBCA503621EE7776 /* Pods-MeTalk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalk.release.xcconfig"; path = "Target Support Files/Pods-MeTalk/Pods-MeTalk.release.xcconfig"; sourceTree = "<group>"; };
@@ -375,6 +377,7 @@
 				D655504A27E3630400C86E34 /* Mock.swift */,
 				D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */,
 				D655504C27E4260C00C86E34 /* ChatDataManagedData.swift */,
+				D6A8C0D5286345610017171A /* RealM */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -440,6 +443,14 @@
 				D68FB39327D5C6CC00E57F5A /* GeneralTableView.swift */,
 			);
 			path = TableViewTemplete;
+			sourceTree = "<group>";
+		};
+		D6A8C0D5286345610017171A /* RealM */ = {
+			isa = PBXGroup;
+			children = (
+				D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */,
+			);
+			path = RealM;
 			sourceTree = "<group>";
 		};
 		EA1B404FC81B12ED36056CCA /* Frameworks */ = {
@@ -735,6 +746,7 @@
 				D6DE5C22280D3BAC006C6236 /* Kaihatu.swift in Sources */,
 				D698A0CB27E0BA66002C64DE /* WebViewTempleteController.swift in Sources */,
 				D6543DD027C4822300444454 /* ModalImageData.swift in Sources */,
+				D6A8C0D8286345AD0017171A /* UserListLocalModel.swift in Sources */,
 				D68FB3A927D884F700E57F5A /* NotificationTableViewCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

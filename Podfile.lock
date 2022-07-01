@@ -498,6 +498,11 @@ PODS:
   - nanopb/decode (2.30908.0)
   - nanopb/encode (2.30908.0)
   - PromisesObjC (2.0.0)
+  - Realm (10.28.1):
+    - Realm/Headers (= 10.28.1)
+  - Realm/Headers (10.28.1)
+  - RealmSwift (10.28.1):
+    - Realm (= 10.28.1)
   - SideMenu (6.5.0)
 
 DEPENDENCIES:
@@ -508,6 +513,7 @@ DEPENDENCIES:
   - Firebase/Storage
   - FloatingPanel
   - MessageKit (>= 1.0.0)
+  - RealmSwift
   - SideMenu
 
 SPEC REPOS:
@@ -535,6 +541,8 @@ SPEC REPOS:
     - MessageKit
     - nanopb
     - PromisesObjC
+    - Realm
+    - RealmSwift
     - SideMenu
 
 SPEC CHECKSUMS:
@@ -561,8 +569,10 @@ SPEC CHECKSUMS:
   MessageKit: 8e76dd8d65ad44b49e1651c673497146416461e9
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
+  Realm: f4674e0e7ee537f67a78d79bd8319bc777d61d06
+  RealmSwift: 0e0e4786685c4442bf56d3831dfefb5fa05d6fd6
   SideMenu: f583187d21c5b1dd04c72002be544b555a2627a2
 
-PODFILE CHECKSUM: 4a97d6845ef75907e15578cd657fe13628e4ae32
+PODFILE CHECKSUM: bfb9c3016b9691eea7159e1d696f5446bc9b6879
 
 COCOAPODS: 1.11.2

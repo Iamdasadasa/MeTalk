@@ -2,11 +2,6 @@ import UIKit
 import MessageKit
 import InputBarAccessoryView
 
-///画面Back時に使用するDelegate用Protcol
-protocol backButtonTappedProtcol:AnyObject{
-    func buckButtonDelegate(CellUID:String)
-}
-
 class ChatViewController: MessagesViewController {
     
     ///init変数　自分のUIDと相手のUID
@@ -32,9 +27,7 @@ class ChatViewController: MessagesViewController {
     var loadDataStopFlg:Bool = false
     ///時間計測
     var start:Date?
-    ///Delegate
-    weak var delegate:backButtonTappedProtcol?
-    
+
     
     ///インスタンス化(Model)
     let chatManageData = ChatDataManagedData()
@@ -86,19 +79,11 @@ class ChatViewController: MessagesViewController {
         ///これをTrueにするとキーボードにメッセージのセルがアクションごとに追従するようになる。
         maintainPositionOnKeyboardFrameChanged = false
         
-        ///barボタン初期設定
-        backButtonItem = UIBarButtonItem(barButtonSystemItem: .reply, target: self, action: #selector(backButtonPressed(_:)))
-        self.navigationItem.leftBarButtonItem = backButtonItem
         ///タイトルラベル追加
         navigationItem.title = "トークリスト"
     }
     
-    @objc func backButtonPressed(_ sender: UIBarButtonItem) {
-        if let delegate = delegate {
-            delegate.buckButtonDelegate(CellUID: YouUID)
-        }
-        self.dismiss(animated: true, completion: nil)
-     }
+
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()

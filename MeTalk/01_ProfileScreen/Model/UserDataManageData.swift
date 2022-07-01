@@ -8,7 +8,7 @@
 import Foundation
 import Firebase
 import FirebaseStorage
-
+import RealmSwift
 
 struct UserDataManagedData{
     let uid = Auth.auth().currentUser?.uid
@@ -278,6 +278,7 @@ struct UserDataManagedData{
                         print("送信者UID情報が取得できませんでした")
                         return
                     }
+                    
                     ///ここでトークリストのユーザーID一覧を格納
                     UserListinfo = talkListUserStruct(UID: UID, userNickName: nil, profileImage: nil,UpdateDate:UpdateDate, NewMessage: NewMessage, listend: false, sendUID: sendUID)
                     callbackTalkListUsersMock.append(UserListinfo)
@@ -314,7 +315,8 @@ struct UserDataManagedData{
         }
     }
     
+    
+
+    ///
 }
-
-
 

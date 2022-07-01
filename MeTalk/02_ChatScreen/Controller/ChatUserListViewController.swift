@@ -9,12 +9,14 @@ import Foundation
 import UIKit
 import FloatingPanel
 import Firebase
-
+import RealmSwift
 
 
 class ChatUserListViewController:UIViewController, UINavigationControllerDelegate{
     ///インスタンス化(View)
     let ChatUserListTableView = GeneralTableView()
+    ///RealMからデータを受け取るようの変数
+    var itemList: Results<ListUsersInfoLocal>!
     ///インスタンス化(Model)
     let userInfo = UserDataManagedData()
     let uid = Auth.auth().currentUser?.uid
@@ -106,23 +108,32 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
       let cell = tableView.dequeueReusableCell(withIdentifier: "chatUserListTableViewCell", for: indexPath ) as! chatUserListTableViewCell
 
         var userInfoData = self.talkListUsersMock[indexPath.row]
+        
+        
+        ///ローカルDBにUser情報を保存
+        chatUserListInfoLocalDataRegist(UID: userInfoData.UID, usernickname: userInfoData.userNickName, newMessage: userInfoData.NewMessage, updateDate: userInfoData.upDateDate, listend: userInfoData.listend, SendUID: userInfoData.sendUID)
+        
         ///画像に関してはCell生成の一番最初は問答無用でInitイメージを適用
         cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
         ///ユーザーネーム設定処理
-        if let nickName = userInfoData.userNickName {
-            cell.nickNameSetCell(Item: nickName)
+        if let nickname = userInfoData.userNickName {
+            cell.nickNameSetCell(Item: nickname)
         } else {
-            ///取得したIDでユーザー情報の取得を開始(ユーザーニックネーム)
+            ///nicknameを取得
             userInfo.userInfoDataGet(callback: { document in
                 guard let document = document else {
-                    cell.nickNameSetCell(Item: "退会したユーザー")
                     return
                 }
-                cell.nickNameSetCell(Item: document["nickname"] as? String ?? "退会したユーザー")
-                self.talkListUsersMock[indexPath.row].userNickName = document["nickname"] as? String ?? "退会したユーザー"
+                guard let nickname = document["nickname"] as? String else {
+                    return
+                }
+                
+                cell.nickNameSetCell(Item: nickname)
+                
             }, UID: userInfoData.UID)
         }
-
+        
+        
         //最新メッセージをセルに反映する処理※1
         let newMessage = userInfoData.NewMessage
         cell.newMessageSetCell(Item: newMessage)
@@ -199,7 +210,6 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             ///UINavigationControllerとして遷移
             let UINavigationController = UINavigationController(rootViewController: chatViewController)
             UINavigationController.modalPresentationStyle = .fullScreen
-            chatViewController.delegate = self
             self.present(UINavigationController, animated: true, completion: nil)
             
             
@@ -284,6 +294,9 @@ extension ChatUserListViewController {
         ///初回インスタンス時にここでトークリストを更新
         self.talkListUsersDataGet(limitCount: 25)
         var triggerFlgCount:Int = 0
+        
+        
+        
         ///リスナー用FireStore変数
         let db = Firestore.firestore()
         guard let uid = uid else {
@@ -365,9 +378,22 @@ extension ChatUserListViewController {
     }
 }
 
-extension ChatUserListViewController:backButtonTappedProtcol{
-    func buckButtonDelegate(CellUID: String) {
-        backButtonUID = CellUID
+///ローカルDBへのデータ登録
+extension ChatUserListViewController {
+    func chatUserListInfoLocalDataRegist(UID:String,usernickname:String?,newMessage:String,updateDate:Date,listend:Bool,SendUID:String){
+        let realm = try! Realm()
+
+        let UserListLocalObject = ListUsersInfoLocal()
+        
+        UserListLocalObject.UID = UID
+        UserListLocalObject.userNickName = usernickname
+        UserListLocalObject.NewMessage = newMessage
+        UserListLocalObject.upDateDate = updateDate
+        UserListLocalObject.listend = listend
+        UserListLocalObject.sendUID
+        
+        try! realm.write {
+             realm.add(UserListLocalObject)
+        }
     }
 }
-
