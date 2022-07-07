@@ -244,21 +244,30 @@ struct UserDataManagedData{
     /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
     /// 　　　　　　（ニックネーム、性別等が含まれる）
     /// - Returns:
-    func talkListUsersDataGet(callback: @escaping  ([talkListUserStruct]) -> Void,UID:String?,limitCount:Int) {
+    func talkListUsersDataGet(callback: @escaping  ([talkListUserStruct]) -> Void,UID:String?,argLatestTime:Date?,limitCount:Int) {
+        var latestTime:Date
+        
+        if let argLatestTime = argLatestTime {
+            latestTime = argLatestTime
+        } else {
+            latestTime = Date()
+        }
+        
         guard let UID = UID else {
             print("UIDが確認できませんでした")
             return
         }
 
         ///ここでデータにアクセスしている（非同期処理）
-        let userDocuments = cloudDB.collection("users").document(UID).collection("TalkUsersList").order(by: "UpdateAt",descending: true).limit(to: limitCount)
+//        let userDocuments = cloudDB.collection("users").document(UID).collection("TalkUsersList").order(by: "UpdateAt",descending: true).limit(to: limitCount)
+        let userDocuments = cloudDB.collection("users").document(UID).collection("TalkUsersList").whereField("UpdateAt", isGreaterThanOrEqualTo: latestTime)
         userDocuments.getDocuments(){ (querySnapshot, err) in
             if let err = err {
                 print("Error getting documents: \(err)")
             } else {
                 var UserListinfo:talkListUserStruct
                 var callbackTalkListUsersMock:[talkListUserStruct] = []
-                
+                print(querySnapshot!.documents.count)
                 for talkUserinfo in querySnapshot!.documents {
                     ///なぜか文頭にスペースが入ることがあるのでトリム処理
                     let UID = talkUserinfo.documentID.trimmingCharacters(in: .whitespaces)

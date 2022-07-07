@@ -23,4 +23,9 @@ class ListUsersInfoLocal: Object{
     
 }
 
+class ListUsersImageLocal: Object{
+    ///UIDはプライマリーキー
+    @objc dynamic var profileImageURL: String = "sanpleURL"
+}
+
 

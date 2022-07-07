@@ -85,7 +85,7 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
         if self.ChatUserListTableView.contentOffset.y + self.ChatUserListTableView.frame.size.height > self.ChatUserListTableView.contentSize.height && scrollView.isDragging{
             loadDataLockFlg = false
             loadToLimitCount = loadToLimitCount + 15
-            self.talkListUsersDataGet(limitCount: loadToLimitCount)
+//            self.talkListUsersDataGet(limitCount: loadToLimitCount)
             
         }
      
@@ -144,21 +144,26 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         cell.newMessageSetCell(Item: newMessage)
         
 
+        画像データのRealmに最終更新日を持たせる
+        次の部分はここ。画像データをRealmからURLベースで取得してくる。もしもInitだった場合最終更新日をもとにクエリを投げて後だったら画像更新
         
         ///プロファイルイメージをセルに反映
         if let profilaImage = userInfoData.profileImage {
             cell.talkListUserProfileImageView.image = profilaImage
         } else {
+
             ///取得したIDでユーザー情報の取得を開始(プロフィール画像)
             userInfo.contentOfFIRStorageGet(callback: { image in
                 ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
                 if image != nil {
                     cell.talkListUserProfileImageView.image = image
-                    self.talkListUsersMock[indexPath.row].profileImage = image
+//                    self.talkListUsersMock[indexPath.row].profileImage = image
+                    self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: image!)
                 ///コールバック関数でNilが返ってきたら初期画像を設定
                 } else {
+                    print("mock:\(self.talkListUsersMock.count)_indexpath:\(indexPath.row)")
                     cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
-                    self.talkListUsersMock[indexPath.row].profileImage = UIImage(named: "InitIMage")
+//                    self.talkListUsersMock[indexPath.row].profileImage = UIImage(named: "InitIMage")
                 }
             }, UID: userInfoData.UID)
         }
@@ -248,7 +253,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
 ///Firebase操作関連
 extension ChatUserListViewController {
     ///自身のトークリストのユーザー一覧を取得
-    func talkListUsersDataGet(limitCount:Int) {
+    func talkListUsersDataGet(limitCount:Int,argLastetTime:Date) {
         userInfo.talkListUsersDataGet(callback: { UserUIDUserListMock in
 
             ///もしも現在のトークユーザーリストのカウントとDBから取得してきたトークユーザーリストのカウントが等しければロードストップのフラグにTrue
@@ -256,14 +261,17 @@ extension ChatUserListViewController {
                 self.loadDataStopFlg = true
             }
             
-            self.talkListUsersMock = UserUIDUserListMock
+            for data in UserUIDUserListMock {
+                print(data.NewMessage)
+                self.talkListUsersMock.append(talkListUserStruct(UID: data.UID, userNickName: data.userNickName, profileImage: nil,UpdateDate:data.upDateDate, NewMessage: data.NewMessage, listend: false, sendUID: data.sendUID))
+            }
             
             ///ロードフラグをTrue
             self.loadDataLockFlg = true
             
             self.ChatUserListTableView.reloadData()
             
-        }, UID: uid,limitCount: limitCount)
+        }, UID: uid, argLatestTime: argLastetTime,limitCount: limitCount)
     }
     ///自身の情報を取得
     func userInfoDataGet() {
@@ -296,14 +304,22 @@ extension ChatUserListViewController {
     
     func talkListListner() {
         ///初回インスタンス時にここでトークリストを更新
-        self.talkListUsersDataGet(limitCount: 25)
-        var triggerFlgCount:Int = 0
-        
-        ///ローカルDBに対して情報検索
+        ///ローカルDBにデータが入っている場合はデータをユーザー配列に投入する
         let realm = try! Realm()
         
         let localDBGetData = realm.objects(ListUsersInfoLocal.self)
-        print(localDBGetData)
+
+        for data in localDBGetData {
+            print(data.UID,data.userNickName,data.upDateDate,data.NewMessage,data.listend,data.sendUID)
+            self.talkListUsersMock.append(talkListUserStruct(UID: data.UID!, userNickName: data.userNickName, profileImage: nil,UpdateDate:data.upDateDate!, NewMessage: data.NewMessage!, listend: false, sendUID: data.sendUID!))
+        }
+        
+
+        
+        self.talkListUsersDataGet(limitCount: 25, argLastetTime: chatUserListInfoLocalLastestTimeGet(Realm: realm))
+        var triggerFlgCount:Int = 0
+        
+
         
         ///リスナー用FireStore変数
         let db = Firestore.firestore()
@@ -346,7 +362,8 @@ extension ChatUserListViewController {
                 }
                 
                 guard let indexNo = indexNo else {
-                    self.talkListUsersMock.insert(talkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage:NewMessage, listend: listend, sendUID: sendUID), at: 0)
+                    let realm = try! Realm()
+                    self.chatUserListInfoLocalExstraRegist(Realm: realm, UID: documentData.documentID, usernickname: nil, newMessage: NewMessage, updateDate: UpdateDate, listend: false, SendUID: sendUID)
                     self.ChatUserListTableView.reloadData()
                     triggerFlgCount = 1
                     return
@@ -433,5 +450,66 @@ extension ChatUserListViewController {
           print("Error \(error)")
         }
         return true
+    }
+    
+    ///ローカルDBに保存してあるデータの中で最新の時間を取得して返す
+    func chatUserListInfoLocalLastestTimeGet(Realm:Realm) -> Date{
+        let realm = Realm
+        
+        let localDBGetData = realm.objects(ListUsersInfoLocal.self).sorted(byKeyPath: "upDateDate", ascending: false)
+        let result = localDBGetData.first
+        guard let result = result?.upDateDate else {
+            return Date()
+        }
+        return result
+    }
+    
+    ///ローカルDBにイメージを保存
+    func chatUserListLocalImageRegist(Realm:Realm,UID:String,profileImage:UIImage){
+        let realm = Realm
+        
+        //UserDefaults のインスタンス生成
+        let userDefaults = UserDefaults.standard
+        
+        // ドキュメントディレクトリの「ファイルURL」（URL型）定義
+        var documentDirectoryFileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+
+        // ドキュメントディレクトリの「パス」（String型）定義
+        let filePath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        
+        //②保存するためのパスを作成する
+         func createLocalDataFile() {
+             // 作成するテキストファイルの名前
+             let fileName = "\(UID)_profileimage.png"
+
+             // DocumentディレクトリのfileURLを取得
+             if documentDirectoryFileURL != nil {
+                 // ディレクトリのパスにファイル名をつなげてファイルのフルパスを作る
+                 let path = documentDirectoryFileURL.appendingPathComponent(fileName)
+                 documentDirectoryFileURL = path
+             }
+         }
+
+        //Realmのテーブルをインスタンス化
+        let  listUsersImageLocal = ListUsersImageLocal()
+        
+        do{
+            try listUsersImageLocal.profileImageURL = documentDirectoryFileURL.absoluteString
+        }catch{
+            print("画像の保存に失敗しました")
+        }
+        try! realm.write{realm.add(listUsersImageLocal)}
+        
+        createLocalDataFile()
+         //pngで保存する場合
+        let pngImageData = profileImage.pngData()
+         do {
+             try pngImageData!.write(to: documentDirectoryFileURL)
+             //②「Documents下のパス情報をUserDefaultsに保存する」
+             userDefaults.set(documentDirectoryFileURL, forKey: "\(UID)_profileimage")
+         } catch {
+             //エラー処理
+             print("エラー")
+         }
     }
 }
