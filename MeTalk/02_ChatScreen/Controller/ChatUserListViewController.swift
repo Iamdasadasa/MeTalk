@@ -143,9 +143,6 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         let newMessage = userInfoData.NewMessage
         cell.newMessageSetCell(Item: newMessage)
         
-
-        画像データのRealmに最終更新日を持たせる
-        次の部分はここ。画像データをRealmからURLベースで取得してくる。もしもInitだった場合最終更新日をもとにクエリを投げて後だったら画像更新
         
         ///プロファイルイメージをセルに反映
         if let profilaImage = userInfoData.profileImage {
@@ -153,12 +150,18 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         } else {
 
             ///取得したIDでユーザー情報の取得を開始(プロフィール画像)
-            userInfo.contentOfFIRStorageGet(callback: { image in
+            userInfo.contentOfFIRStorageGet(callback: { imageStruct in
                 ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-                if image != nil {
-                    cell.talkListUserProfileImageView.image = image
+                if imageStruct.image != nil {
+                    cell.talkListUserProfileImageView.image = imageStruct.image
 //                    self.talkListUsersMock[indexPath.row].profileImage = image
-                    self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: image!)
+//                    self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: imageStruct.image!, updataDate: imageStruct.updataDate!)
+                    if let updateDate = imageStruct.updataDate{
+                        self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: imageStruct.image!, updataDate: updateDate)
+                    } else {
+                        self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: imageStruct.image!, updataDate: Date())
+                    }
+
                 ///コールバック関数でNilが返ってきたら初期画像を設定
                 } else {
                     print("mock:\(self.talkListUsersMock.count)_indexpath:\(indexPath.row)")
@@ -286,12 +289,12 @@ extension ChatUserListViewController {
     }
     ///自分の画像を取得してくる
     func contentOfFIRStorageGet() {
-        userInfo.contentOfFIRStorageGet(callback: { image in
+        userInfo.contentOfFIRStorageGet(callback: { imageStruct in
             ///ドキュメントにデータが入るまではセルを選択できないようにする
             self.ChatUserListTableView.allowsSelection = false
             ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-            if image != nil {
-                self.selfProfileImageView.image = image
+            if imageStruct.image != nil {
+                self.selfProfileImageView.image = imageStruct.image
             ///コールバック関数でNilが返ってきたら初期画像を設定
             } else {
                 self.selfProfileImageView.image = UIImage(named: "InitIMage")
@@ -310,17 +313,14 @@ extension ChatUserListViewController {
         let localDBGetData = realm.objects(ListUsersInfoLocal.self)
 
         for data in localDBGetData {
-            print(data.UID,data.userNickName,data.upDateDate,data.NewMessage,data.listend,data.sendUID)
+            print(data.UID)
+//            print(data.UID,data.userNickName,data.upDateDate,data.NewMessage,data.listend,data.sendUID)
             self.talkListUsersMock.append(talkListUserStruct(UID: data.UID!, userNickName: data.userNickName, profileImage: nil,UpdateDate:data.upDateDate!, NewMessage: data.NewMessage!, listend: false, sendUID: data.sendUID!))
         }
         
-
-        
         self.talkListUsersDataGet(limitCount: 25, argLastetTime: chatUserListInfoLocalLastestTimeGet(Realm: realm))
         var triggerFlgCount:Int = 0
-        
-
-        
+    
         ///リスナー用FireStore変数
         let db = Firestore.firestore()
         guard let uid = uid else {
@@ -459,13 +459,20 @@ extension ChatUserListViewController {
         let localDBGetData = realm.objects(ListUsersInfoLocal.self).sorted(byKeyPath: "upDateDate", ascending: false)
         let result = localDBGetData.first
         guard let result = result?.upDateDate else {
-            return Date()
+            let calendar = Calendar(identifier: .gregorian)
+            let date = Date()
+            let modifiedDate = calendar.date(byAdding: .day, value: -10000, to: date)!
+            
+            return modifiedDate
+                
+//            ローカルデータを一件も取得できなかったときに（初期状態）に現在時刻を返しているために何も取ってこれなかった。
+//            　　　　ここをすごい過去の時間にして全てのデータを取ってくるようにする。またここが完成したら画像データのmetadataが取得できているかを確認する。
         }
         return result
     }
     
     ///ローカルDBにイメージを保存
-    func chatUserListLocalImageRegist(Realm:Realm,UID:String,profileImage:UIImage){
+    func chatUserListLocalImageRegist(Realm:Realm,UID:String,profileImage:UIImage,updataDate:Date){
         let realm = Realm
         
         //UserDefaults のインスタンス生成
@@ -495,6 +502,7 @@ extension ChatUserListViewController {
         
         do{
             try listUsersImageLocal.profileImageURL = documentDirectoryFileURL.absoluteString
+                listUsersImageLocal.updataDate = updataDate
         }catch{
             print("画像の保存に失敗しました")
         }

@@ -75,10 +75,10 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         super.viewWillAppear(animated)
         
             ///自身のプロフィール画像を取ってくる
-            self.userDataManagedData.contentOfFIRStorageGet(callback: { image in
+        self.userDataManagedData.contentOfFIRStorageGet(callback: { imageStruct in
                 ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-                if image != nil {
-                    self.profileView.profileImageButton.setImage(image, for: .normal)
+            if imageStruct.image != nil {
+                self.profileView.profileImageButton.setImage(imageStruct.image, for: .normal)
                 ///コールバック関数でNilが返ってきたら初期画像を設定
                 } else {
                     self.profileView.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)

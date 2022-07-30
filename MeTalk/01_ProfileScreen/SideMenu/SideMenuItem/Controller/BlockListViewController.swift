@@ -75,10 +75,11 @@ extension BlockListViewController:UITableViewDelegate,UITableViewDataSource{
             cell.setCell(Item: blockUserInfoDoc["nickname"] as? String ?? "退会したユーザー")
         }, UID: blockUserID)
         ///取得したIDでユーザー情報の取得を開始(プロフィール画像)
-        self.userDataManagedData.contentOfFIRStorageGet(callback: { image in
+        self.userDataManagedData.contentOfFIRStorageGet(callback: { imageStruct in
             ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-            if image != nil {
-                cell.blockUserProfileImageView.image = image
+            if imageStruct.image != nil {
+                cell.blockUserProfileImageView.image = imageStruct.image
+                
             ///コールバック関数でNilが返ってきたら初期画像を設定
             } else {
                 cell.blockUserProfileImageView.image = UIImage(named: "InitIMage")

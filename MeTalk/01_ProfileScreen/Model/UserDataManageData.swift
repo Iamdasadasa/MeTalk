@@ -59,7 +59,7 @@ struct UserDataManagedData{
     /// - callback:ユーザーIDを基に取得できるImage
     /// - Returns:
     ///- callback: Fire Baseから取得したイメージデータ
-    func contentOfFIRStorageGet(callback: @escaping (UIImage?) -> Void,UID:String?) {
+    func contentOfFIRStorageGet(callback: @escaping (ProfileImageStruct) -> Void,UID:String?) {
         guard let UID = UID else {
             print("UIDが確認できませんでした")
             return
@@ -70,13 +70,30 @@ struct UserDataManagedData{
             .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
             ///ユーザーIDのプロフィール画像が取得できなかったらnilを返す
             if error != nil {
-                callback(nil)
+                let profileImageStruct = ProfileImageStruct.init(image: nil, updataDate: nil)
+                callback(profileImageStruct)
                 print(error?.localizedDescription)
             }
             ///ユーザーIDのプロフィール画像を設定していたらその画像を取得してリターン
             if let imageData = data {
+                
                 let image = UIImage(data: imageData)
-                callback(image)
+                
+                ///さらにメタデータを取得
+                storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg").getMetadata { metadata, error in
+                    if error != nil {
+                        print(error?.localizedDescription)
+                    } else {
+                        print("metaデータを取得できませんでした。")
+                    }
+                    
+                    if let metadata = metadata {
+                        let profileImageStruct = ProfileImageStruct(image: image, updataDate: metadata.updated)
+                        callback(profileImageStruct)
+                    }
+                    
+                }
+
             }
         }
     }
@@ -132,10 +149,12 @@ struct UserDataManagedData{
             //画像を圧縮
             ProfileImageData = (UIimagedata.image?.jpegData(compressionQuality: 0.01))!
         }
-        
+        ///imagedataに対してメタデータを付与する
+        let metadata = StorageMetadata()
+        metadata.contentType = "image/jpeg"
         //storageに画像を送信
 
-        imageRef.putData(ProfileImageData, metadata: nil) { (metaData, error) in
+        imageRef.putData(ProfileImageData, metadata: metadata) { (metaData, error) in
             ///画像送信に失敗したら
             if let error = error {
                 //エラーであれば
@@ -267,7 +286,7 @@ struct UserDataManagedData{
             } else {
                 var UserListinfo:talkListUserStruct
                 var callbackTalkListUsersMock:[talkListUserStruct] = []
-                print(querySnapshot!.documents.count)
+
                 for talkUserinfo in querySnapshot!.documents {
                     ///なぜか文頭にスペースが入ることがあるのでトリム処理
                     let UID = talkUserinfo.documentID.trimmingCharacters(in: .whitespaces)

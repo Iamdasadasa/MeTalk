@@ -29,10 +29,10 @@ class ShowImageViewController:UIViewController{
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         ///自身のプロフィール画像を取ってくる
-        self.userDataManagedData.contentOfFIRStorageGet(callback: { image in
+        self.userDataManagedData.contentOfFIRStorageGet(callback: { imageStruct in
             ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-            if image != nil {
-                self.showImageView.imageView.image = image
+            if imageStruct.image != nil {
+                self.showImageView.imageView.image = imageStruct.image
             ///コールバック関数でNilが返ってきたら初期画像を設定
             } else {
                 self.showImageView.imageView.image = UIImage(named: "InitIMage")
