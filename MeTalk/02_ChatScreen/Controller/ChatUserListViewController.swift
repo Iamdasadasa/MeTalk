@@ -145,6 +145,9 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         
         
         ///プロファイルイメージをセルに反映
+        次はここ。ファイルイメージからMetadataはおそらく取得できているのでそれを基準に取ってくるようにする
+        ///
+        ///
         if let profilaImage = userInfoData.profileImage {
             cell.talkListUserProfileImageView.image = profilaImage
         } else {
@@ -265,7 +268,13 @@ extension ChatUserListViewController {
             }
             
             for data in UserUIDUserListMock {
-                print(data.NewMessage)
+//                現在のトークリスト配列にサーバーから取得したユーザーのUIDがあったらそのIndexNoを取得
+                let indexNo = self.talkListUsersMock.firstIndex(where: { $0.UID == data.UID })
+                
+                if let indexNo = indexNo{
+                    self.talkListUsersMock.remove(at: indexNo)
+                }
+                
                 self.talkListUsersMock.append(talkListUserStruct(UID: data.UID, userNickName: data.userNickName, profileImage: nil,UpdateDate:data.upDateDate, NewMessage: data.NewMessage, listend: false, sendUID: data.sendUID))
             }
             
@@ -314,6 +323,7 @@ extension ChatUserListViewController {
 
         for data in localDBGetData {
             print(data.UID)
+            
 //            print(data.UID,data.userNickName,data.upDateDate,data.NewMessage,data.listend,data.sendUID)
             self.talkListUsersMock.append(talkListUserStruct(UID: data.UID!, userNickName: data.userNickName, profileImage: nil,UpdateDate:data.upDateDate!, NewMessage: data.NewMessage!, listend: false, sendUID: data.sendUID!))
         }
@@ -457,6 +467,7 @@ extension ChatUserListViewController {
         let realm = Realm
         
         let localDBGetData = realm.objects(ListUsersInfoLocal.self).sorted(byKeyPath: "upDateDate", ascending: false)
+
         let result = localDBGetData.first
         guard let result = result?.upDateDate else {
             let calendar = Calendar(identifier: .gregorian)
