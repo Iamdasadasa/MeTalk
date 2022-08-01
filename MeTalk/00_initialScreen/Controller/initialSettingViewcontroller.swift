@@ -21,6 +21,7 @@ class initialSettingViewcontroller:UIViewController{
     ///性別タグNo格納
     var SexNo:Int? = nil
     
+    test
     
     override func viewDidLoad() {
         self.view = initialSettingView
@@ -40,9 +41,6 @@ class initialSettingViewcontroller:UIViewController{
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-    
-    
-    
 }
 
 //※文字制限を行うオブザーバー処理及び、ボタン活性化処理※
