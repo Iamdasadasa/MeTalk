@@ -21,8 +21,6 @@ class initialSettingViewcontroller:UIViewController{
     ///性別タグNo格納
     var SexNo:Int? = nil
     
-    test
-    
     override func viewDidLoad() {
         self.view = initialSettingView
         ///デリゲート委譲

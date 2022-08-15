@@ -99,7 +99,7 @@ class  InitialSettingView:UIView{
     let maleUIImage:UIImage = {
         let returnImage = UIImage()
         return returnImage
-    }()
+    }() 
     let femaleUIImage:UIImage = {
         let returnImage = UIImage()
         return returnImage
