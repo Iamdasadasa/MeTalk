@@ -143,11 +143,11 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         let newMessage = userInfoData.NewMessage
         cell.newMessageSetCell(Item: newMessage)
         
+
+        ///プロファイルイメージをセルに反映(ローカルDB)
         
-        ///プロファイルイメージをセルに反映
-        次はここ。ファイルイメージからMetadataはおそらく取得できているのでそれを基準に取ってくるようにする
-        ///
-        ///
+        
+        ///プロファイルイメージをセルに反映（Firebaseアクセス）
         if let profilaImage = userInfoData.profileImage {
             cell.talkListUserProfileImageView.image = profilaImage
         } else {
@@ -157,8 +157,6 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
                 ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
                 if imageStruct.image != nil {
                     cell.talkListUserProfileImageView.image = imageStruct.image
-//                    self.talkListUsersMock[indexPath.row].profileImage = image
-//                    self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: imageStruct.image!, updataDate: imageStruct.updataDate!)
                     if let updateDate = imageStruct.updataDate{
                         self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: imageStruct.image!, updataDate: updateDate)
                     } else {
@@ -173,9 +171,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
                 }
             }, UID: userInfoData.UID)
         }
-        
-        
-        
+         
         ///もしもセルの再利用によってベルアイコンが存在してしまっていたら初期化
         if cell.nortificationImage.image != nil {
             cell.nortificationImage.image = nil
@@ -323,8 +319,7 @@ extension ChatUserListViewController {
 
         for data in localDBGetData {
             print(data.UID)
-            
-//            print(data.UID,data.userNickName,data.upDateDate,data.NewMessage,data.listend,data.sendUID)
+
             self.talkListUsersMock.append(talkListUserStruct(UID: data.UID!, userNickName: data.userNickName, profileImage: nil,UpdateDate:data.upDateDate!, NewMessage: data.NewMessage!, listend: false, sendUID: data.sendUID!))
         }
         
@@ -434,7 +429,6 @@ extension ChatUserListViewController {
     }
     
     ///ローカルDBから検索して追加データ登録
-    
     func chatUserListInfoLocalExstraRegist(Realm:Realm,UID:String,usernickname:String?,newMessage:String,updateDate:Date,listend:Bool,SendUID:String) -> Bool{
         let realm = Realm
         
@@ -469,15 +463,13 @@ extension ChatUserListViewController {
         let localDBGetData = realm.objects(ListUsersInfoLocal.self).sorted(byKeyPath: "upDateDate", ascending: false)
 
         let result = localDBGetData.first
+//        もしも一件もローカルにデータが入っていなかった時はものすごい前の時間を設定して値を返す
         guard let result = result?.upDateDate else {
             let calendar = Calendar(identifier: .gregorian)
             let date = Date()
             let modifiedDate = calendar.date(byAdding: .day, value: -10000, to: date)!
             
             return modifiedDate
-                
-//            ローカルデータを一件も取得できなかったときに（初期状態）に現在時刻を返しているために何も取ってこれなかった。
-//            　　　　ここをすごい過去の時間にして全てのデータを取ってくるようにする。またここが完成したら画像データのmetadataが取得できているかを確認する。
         }
         return result
     }
@@ -530,5 +522,11 @@ extension ChatUserListViewController {
              //エラー処理
              print("エラー")
          }
+    }
+    
+    ///ローカルDBの画像を取得してくる
+    func chatUserListLocalImageGet(Realm:Realm,UID:String){
+        
+        
     }
 }

@@ -83,8 +83,6 @@ struct UserDataManagedData{
                 storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg").getMetadata { metadata, error in
                     if error != nil {
                         print(error?.localizedDescription)
-                    } else {
-                        print("metaデータを取得できませんでした。")
                     }
                     
                     if let metadata = metadata {
