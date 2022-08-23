@@ -23,8 +23,11 @@ class ListUsersInfoLocal: Object{
     
 }
 
-class ListUsersImageLocal: Object{
-
+class ListUsersImageLocal: Object{    ///UIDはプライマリーキー
+    @objc dynamic var UID:String?
+    override static func primaryKey() -> String? {
+        return "UID"
+    }
     @objc dynamic var profileImageURL: String = "sanpleURL"
     @objc dynamic var updataDate:Date?
 }

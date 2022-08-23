@@ -17,6 +17,8 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
     let ChatUserListTableView = GeneralTableView()
     ///RealMからデータを受け取るようの変数
     var itemList: Results<ListUsersInfoLocal>!
+    //Realmのテーブルをインスタンス化
+    let  listUsersImageLocal = ListUsersImageLocal()
     ///インスタンス化(Model)
     let userInfo = UserDataManagedData()
     let uid = Auth.auth().currentUser?.uid
@@ -500,12 +502,12 @@ extension ChatUserListViewController {
              }
          }
 
-        //Realmのテーブルをインスタンス化
-        let  listUsersImageLocal = ListUsersImageLocal()
+
         
         do{
             try listUsersImageLocal.profileImageURL = documentDirectoryFileURL.absoluteString
                 listUsersImageLocal.updataDate = updataDate
+                listUsersImageLocal.UID = UID
         }catch{
             print("画像の保存に失敗しました")
         }
@@ -526,7 +528,22 @@ extension ChatUserListViewController {
     
     ///ローカルDBの画像を取得してくる
     func chatUserListLocalImageGet(Realm:Realm,UID:String){
+        let realm = Realm
+        let localDBGetData = realm.objects(ListUsersImageLocal.self)
         
+        // UIDで検索
+        let UID = UID
+        let predicate = NSPredicate(format: "UID == %@", UID)
+        
+        guard let imageData = localDBGetData.filter(predicate).first else {
+            return
+        }
+        
+        ///URL型にキャスト
+        let fileURL = URL(string: imageData.profileImageURL)
+        ///パス型に変換
+        let filePath = fileURL?.path
+        print(UIImage(contentsOfFile: filePath!))
         
     }
 }
