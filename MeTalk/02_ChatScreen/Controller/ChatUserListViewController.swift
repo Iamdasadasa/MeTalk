@@ -10,6 +10,7 @@ import UIKit
 import FloatingPanel
 import Firebase
 import RealmSwift
+import CoreAudio
 
 
 class ChatUserListViewController:UIViewController, UINavigationControllerDelegate{
@@ -147,7 +148,11 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         
 
         ///プロファイルイメージをセルに反映(ローカルDB)
+        let imageLocalDataStruct = chatUserListLocalImageInfoGet(Realm: realm, UID: userInfoData.UID)
         
+        if let localImage = imageLocalDataStruct.image {
+            cell.talkListUserProfileImageView.image = localImage
+        }
         
         ///プロファイルイメージをセルに反映（Firebaseアクセス）
         if let profilaImage = userInfoData.profileImage {
@@ -502,17 +507,38 @@ extension ChatUserListViewController {
              }
          }
 
-
+        let localDBGetData = realm.objects(ListUsersImageLocal.self)
         
-        do{
-            try listUsersImageLocal.profileImageURL = documentDirectoryFileURL.absoluteString
-                listUsersImageLocal.updataDate = updataDate
-                listUsersImageLocal.UID = UID
-        }catch{
-            print("画像の保存に失敗しました")
+        // UIDで検索
+        let UID = UID
+        let predicate = NSPredicate(format: "UID == %@", UID)
+        
+        ///もしも既にUIDがローカルDBの存在していたらUID以外の情報を更新保存
+        if let imageData = localDBGetData.filter(predicate).first{
+            // UID以外のデータを更新する
+            do{
+              try realm.write{
+                  imageData.profileImageURL  = documentDirectoryFileURL.absoluteString
+                  imageData.updataDate = updataDate
+              }
+            }catch {
+              print("Error \(error)")
+            }
+        ///存在していない場合新規なのでUIDも含め新規保存
+        } else {
+            
+            do{
+                try listUsersImageLocal.profileImageURL = documentDirectoryFileURL.absoluteString
+                    listUsersImageLocal.updataDate = updataDate
+                    listUsersImageLocal.UID = UID
+            }catch{
+                print("画像の保存に失敗しました")
+            }
+            try! realm.write{realm.add(listUsersImageLocal)}
+            
         }
-        try! realm.write{realm.add(listUsersImageLocal)}
         
+        ///UserDefaults保存処理
         createLocalDataFile()
          //pngで保存する場合
         let pngImageData = profileImage.pngData()
@@ -526,8 +552,9 @@ extension ChatUserListViewController {
          }
     }
     
-    ///ローカルDBの画像を取得してくる
-    func chatUserListLocalImageGet(Realm:Realm,UID:String){
+    ///ローカルDBの画像情報を取得してくる
+    func chatUserListLocalImageInfoGet(Realm:Realm,UID:String) -> listUserImageStruct{
+
         let realm = Realm
         let localDBGetData = realm.objects(ListUsersImageLocal.self)
         
@@ -536,14 +563,22 @@ extension ChatUserListViewController {
         let predicate = NSPredicate(format: "UID == %@", UID)
         
         guard let imageData = localDBGetData.filter(predicate).first else {
-            return
+            let newUserimageStruct = listUserImageStruct(UID: UID, UpdateDate: Date(), UIimage: nil)
+            return newUserimageStruct
         }
         
         ///URL型にキャスト
         let fileURL = URL(string: imageData.profileImageURL)
         ///パス型に変換
         let filePath = fileURL?.path
-        print(UIImage(contentsOfFile: filePath!))
+        ///画像返却
+        guard let image = UIImage(contentsOfFile: filePath!) else {
+            let newUserimageStruct = listUserImageStruct(UID: UID, UpdateDate: imageData.updataDate!, UIimage: nil)
+            return newUserimageStruct
+        }
+        let imageStrcut = listUserImageStruct(UID: UID, UpdateDate: imageData.updataDate!, UIimage: image)
+        
+        return imageStrcut
         
     }
 }

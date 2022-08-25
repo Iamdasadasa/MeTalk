@@ -23,3 +23,19 @@ struct talkListUserStruct{
         self.sendUID = sendUID
     }
 }
+
+struct listUserImageStruct{
+
+    ///最初のメッセージを取得する部分を実装したら解放
+//    var firstMessage: String
+    var UID:String
+    var upDateDate:Date
+    var image:UIImage?
+    
+    init(UID:String,UpdateDate:Date,UIimage:UIImage?){
+        self.UID = UID
+        self.upDateDate = UpdateDate
+        self.image = UIimage
+
+    }
+}

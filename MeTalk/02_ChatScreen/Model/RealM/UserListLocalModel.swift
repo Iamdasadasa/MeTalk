@@ -8,7 +8,7 @@
 import Foundation
 import Realm
 import RealmSwift
-
+//ユーザーの情報を保存するローカルオブジェクト
 class ListUsersInfoLocal: Object{
     ///UIDはプライマリーキー
     @objc dynamic var UID:String?
@@ -22,7 +22,7 @@ class ListUsersInfoLocal: Object{
     @objc dynamic var sendUID:String?
     
 }
-
+//ユーザーの画像情報を保存するローカルオブジェクト
 class ListUsersImageLocal: Object{    ///UIDはプライマリーキー
     @objc dynamic var UID:String?
     override static func primaryKey() -> String? {
@@ -31,5 +31,8 @@ class ListUsersImageLocal: Object{    ///UIDはプライマリーキー
     @objc dynamic var profileImageURL: String = "sanpleURL"
     @objc dynamic var updataDate:Date?
 }
+
+
+
 
 
