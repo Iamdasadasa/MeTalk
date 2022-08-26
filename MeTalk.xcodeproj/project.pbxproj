@@ -10,7 +10,6 @@
 		333D0CDDC86CADB990AFCBAB /* Pods_MeTalk_MeTalkUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C97C79AF021687F4CB77D1C /* Pods_MeTalk_MeTalkUITests.framework */; };
 		829D4F8A452FB3A80C9EC528 /* Pods_MeTalkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4525AD4AD3C475377C4AB64A /* Pods_MeTalkTests.framework */; };
 		B4C33AA386E40690D6FFDF5F /* Pods_MeTalk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 659AD8E54966BD0CAAA7A8ED /* Pods_MeTalk.framework */; };
-		D612574E2876C359003619C7 /* ProfileImageStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = D612574D2876C359003619C7 /* ProfileImageStruct.swift */; };
 		D62FBE1327CDFBE500EE7768 /* AgePickerModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D62FBE1227CDFBE500EE7768 /* AgePickerModalView.swift */; };
 		D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBED27A581BE00800693 /* AppDelegate.swift */; };
 		D631EBF027A581BE00800693 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBEF27A581BE00800693 /* SceneDelegate.swift */; };
@@ -86,7 +85,6 @@
 		4525AD4AD3C475377C4AB64A /* Pods_MeTalkTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MeTalkTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		659AD8E54966BD0CAAA7A8ED /* Pods_MeTalk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MeTalk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		796431D3D1E22AE1E4A2F1E9 /* Pods-MeTalkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalkTests.debug.xcconfig"; path = "Target Support Files/Pods-MeTalkTests/Pods-MeTalkTests.debug.xcconfig"; sourceTree = "<group>"; };
-		D612574D2876C359003619C7 /* ProfileImageStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileImageStruct.swift; sourceTree = "<group>"; };
 		D62FBE1227CDFBE500EE7768 /* AgePickerModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgePickerModalView.swift; sourceTree = "<group>"; };
 		D631EBEA27A581BE00800693 /* MeTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D631EBED27A581BE00800693 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -238,7 +236,6 @@
 			children = (
 				D6543DCA27BA7AC200444454 /* UserDataManageData.swift */,
 				D6DE5C21280D3BAC006C6236 /* Kaihatu.swift */,
-				D612574D2876C359003619C7 /* ProfileImageStruct.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -725,7 +722,6 @@
 				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,
 				D6DE5C1F28085CB4006C6236 /* TalkUsersListMock.swift in Sources */,
 				D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */,
-				D612574E2876C359003619C7 /* ProfileImageStruct.swift in Sources */,
 				D655504927E3608900C86E34 /* ChatViewController.swift in Sources */,
 				D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */,
 				D6543DBD27B0DC6E00444454 /* ProfileChildView.swift in Sources */,
