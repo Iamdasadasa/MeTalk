@@ -170,6 +170,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             userInfo.contentOfFIRStorageGet(callback: { imageStruct in
                 ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
                 if imageStruct.image != nil{
+                    print(<#T##items: Any...##Any#>)
                     cell.talkListUserProfileImageView.image = imageStruct.image
                     ///ローカルDBに取得したデータを上書き保存
                     self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
