@@ -106,10 +106,15 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
+     print("呼ばれました")
       let cell = tableView.dequeueReusableCell(withIdentifier: "chatUserListTableViewCell", for: indexPath ) as! chatUserListTableViewCell
 
+        
         var userInfoData = self.talkListUsersMock[indexPath.row]
+        
+        if userInfoData.UID == "Vid4pizue0Z1vV7uU5uP6oNE0882" {
+            print(userInfoData.UID)
+        }
         
         ///ローカルDBに存在しているUIDを検知
         let realm = try! Realm()
@@ -152,23 +157,22 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         
         if let localImage = imageLocalDataStruct.image {
             cell.talkListUserProfileImageView.image = localImage
+        } else {
+            cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
         }
         
         ///プロファイルイメージをセルに反映（Firebaseアクセス）
         if let profilaImage = userInfoData.profileImage {
-            cell.talkListUserProfileImageView.image = profilaImage
+//            cell.talkListUserProfileImageView.image = profilaImage
         } else {
 
             ///取得したIDでユーザー情報の取得を開始(プロフィール画像)
             userInfo.contentOfFIRStorageGet(callback: { imageStruct in
                 ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-                if imageStruct.image != nil {
+                if imageStruct.image != nil{
                     cell.talkListUserProfileImageView.image = imageStruct.image
-                    if let updateDate = imageStruct.updataDate{
-                        self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: imageStruct.image!, updataDate: updateDate)
-                    } else {
-                        self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: imageStruct.image!, updataDate: Date())
-                    }
+                    ///ローカルDBに取得したデータを上書き保存
+                    self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
 
                 ///コールバック関数でNilが返ってきたら初期画像を設定
                 } else {
@@ -385,29 +389,6 @@ extension ChatUserListViewController {
                 self.talkListUsersMock.insert(talkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage: NewMessage, listend: listend, sendUID: sendUID), at: 0)
                 self.ChatUserListTableView.reloadData()
                 triggerFlgCount = 1
-                
-                
-//                ///トーク対象者との最新のメーセージ情報を取得（※1とは別DB）
-//                let talkRoomID = ChatDataManagedData().ChatRoomID(UID1: Auth.auth().currentUser!.uid, UID2: documentData.documentID)
-//
-//                self.databaseRef.child("Chat").child(talkRoomID).queryLimited(toLast: 1).queryOrdered(byChild: "Date").getData(completion: { error, snapshot in
-//
-//                    guard let error = error {
-//                        print(err)
-//                    }
-//
-//                    if let postDict = snapshot.value as? [String: Any] {
-//
-//                        let message = postDict["message"] as? String
-//                        let senderID = postDict["sender"] as? String
-//                        let date = postDict["Date"] as? String
-//                        let messageID = postDict["messageID"] as? String
-//                        let listend = postDict["listend"] as? Bool ?? false
-//
-//                        ///
-//
-//                    }
-//                })
 
             }
 

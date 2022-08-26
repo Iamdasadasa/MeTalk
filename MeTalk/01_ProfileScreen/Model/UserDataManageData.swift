@@ -59,7 +59,7 @@ struct UserDataManagedData{
     /// - callback:ユーザーIDを基に取得できるImage
     /// - Returns:
     ///- callback: Fire Baseから取得したイメージデータ
-    func contentOfFIRStorageGet(callback: @escaping (ProfileImageStruct) -> Void,UID:String?) {
+    func contentOfFIRStorageGet(callback: @escaping (listUserImageStruct) -> Void,UID:String?) {
         guard let UID = UID else {
             print("UIDが確認できませんでした")
             return
@@ -70,7 +70,7 @@ struct UserDataManagedData{
             .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
             ///ユーザーIDのプロフィール画像が取得できなかったらnilを返す
             if error != nil {
-                let profileImageStruct = ProfileImageStruct.init(image: nil, updataDate: nil)
+                let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: Date(), UIimage: nil)
                 callback(profileImageStruct)
                 print(error?.localizedDescription)
             }
@@ -86,7 +86,7 @@ struct UserDataManagedData{
                     }
                     
                     if let metadata = metadata {
-                        let profileImageStruct = ProfileImageStruct(image: image, updataDate: metadata.updated)
+                        let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: metadata.updated!, UIimage: image)
                         callback(profileImageStruct)
                     }
                     
