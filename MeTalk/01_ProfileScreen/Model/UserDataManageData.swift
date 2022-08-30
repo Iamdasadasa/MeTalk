@@ -176,7 +176,7 @@ struct UserDataManagedData{
     //    /// - Returns:
         func userInfoDataGet(callback: @escaping  ([String:Any]?) -> Void,UID:String?) {
             guard let UID = UID else {
-                print("UIDが確認できませんでした")
+                print("UIDを確認できませんでした")
                 return
             }
             ///ここでデータにアクセスしている（非同期処理）
@@ -187,7 +187,10 @@ struct UserDataManagedData{
                     ///オブジェクトに対して.dataプロパティを使用して辞書型としてコールバック関数で返す
                     callback(document.data())
                 } else {
-                    print(err?.localizedDescription)
+                    ///相手のトークリストに何らかの理由で存在しないORブロック変数がTrueはここにくる
+                    var failedUserInfo = ["UID":"Block"]
+                    callback(failedUserInfo)
+                    
                 }
             }
         }

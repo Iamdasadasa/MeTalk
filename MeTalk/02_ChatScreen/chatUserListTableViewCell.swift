@@ -9,6 +9,10 @@ import UIKit
 
 class chatUserListTableViewCell: UITableViewCell {
 
+    
+    ///セル自体が持つUID定数（画面には表示させない nillを初期値にしているがControllerから値は代入される）
+    var cellUID:String?
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: "chatUserListTableViewCell")
         self.backgroundColor = UIColor.black
@@ -34,7 +38,7 @@ class chatUserListTableViewCell: UITableViewCell {
 
     }
 //
-//
+    
     ///プロフィール画像ボタン
     let talkListUserProfileImageView:UIImageView = {
         let returnUIImageView = UIImageView()

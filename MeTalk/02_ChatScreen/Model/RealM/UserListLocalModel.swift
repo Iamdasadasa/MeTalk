@@ -28,11 +28,23 @@ class ListUsersImageLocal: Object{    ///UIDはプライマリーキー
     override static func primaryKey() -> String? {
         return "UID"
     }
-    @objc dynamic var profileImageURL: String = "sanpleURL"
+    @objc dynamic var profileImageURL:String?
     @objc dynamic var updataDate:Date?
 }
 
-
+///どこからでも呼び出し可能なUserDefaultsの画像パス生成関数
+func userDefaultsImageDataPathCreate(UID:String) -> URL {
+    ///受け取ったUIDで一意のファイルパスを生成
+    let fileName = "\(UID)_profileimage.png"
+    
+    // ドキュメントディレクトリの「ファイルURL」（URL型）定義
+    var documentDirectoryFileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    ///一意のファイルパスを含んだUserDefaultsパスを生成
+    documentDirectoryFileURL = documentDirectoryFileURL.appendingPathComponent(fileName)
+    ///URL型のファイルパスを返す
+    return documentDirectoryFileURL
+    
+}
 
 
 
