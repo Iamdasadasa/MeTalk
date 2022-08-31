@@ -83,7 +83,7 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
                 } else {
                     self.profileView.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
                 }
-            }, UID: uid)
+        }, UID: uid, UpdateTime: ChatDataManagedData.pastTimeGet())
     }
     
     override func viewWillDisappear(_ animated: Bool) {

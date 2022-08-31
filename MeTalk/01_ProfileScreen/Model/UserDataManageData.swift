@@ -59,41 +59,74 @@ struct UserDataManagedData{
     /// - callback:ユーザーIDを基に取得できるImage
     /// - Returns:
     ///- callback: Fire Baseから取得したイメージデータ
-    func contentOfFIRStorageGet(callback: @escaping (listUserImageStruct) -> Void,UID:String?) {
+    func contentOfFIRStorageGet(callback: @escaping (listUserImageStruct) -> Void,UID:String?,UpdateTime:Date) {
         guard let UID = UID else {
             print("UIDが確認できませんでした")
             return
         }
-
-        ///Firebaseのストレージアクセス
-        storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg")
-            .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
-            ///ユーザーIDのプロフィール画像が取得できなかったらnilを返す
+        
+        storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg").getMetadata {metadata, error in
+            
             if error != nil {
-                let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: Date(), UIimage: nil)
-                callback(profileImageStruct)
-                print(error?.localizedDescription)
+                print("StorageのProfile画像取得の際にMetadataが取得できませんでした:\(error?.localizedDescription)")
             }
-            ///ユーザーIDのプロフィール画像を設定していたらその画像を取得してリターン
-            if let imageData = data {
-                
-                let image = UIImage(data: imageData)
-                
-                ///さらにメタデータを取得
-                storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg").getMetadata { metadata, error in
+            
+            guard let metadata = metadata else {
+                let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: ChatDataManagedData.pastTimeGet(), UIimage: nil)
+                callback(profileImageStruct)
+                return
+            }
+            
+            if metadata.updated! > UpdateTime {
+                storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg")
+                    .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
+                    ///ユーザーIDのプロフィール画像が取得できなかったらnilを返す
                     if error != nil {
+                        let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: ChatDataManagedData.pastTimeGet(), UIimage: nil)
+                        callback(profileImageStruct)
                         print(error?.localizedDescription)
                     }
-                    
-                    if let metadata = metadata {
+                    ///ユーザーIDのプロフィール画像を設定していたらその画像を取得してリターン
+                    if let imageData = data {
+        
+                        let image = UIImage(data: imageData)
                         let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: metadata.updated!, UIimage: image)
                         callback(profileImageStruct)
                     }
-                    
                 }
-
             }
         }
+
+        ///Firebaseのストレージアクセス
+//        storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg")
+//            .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
+//            ///ユーザーIDのプロフィール画像が取得できなかったらnilを返す
+//            if error != nil {
+//                let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: Date(), UIimage: nil)
+//                callback(profileImageStruct)
+//                print(error?.localizedDescription)
+//            }
+//            ///ユーザーIDのプロフィール画像を設定していたらその画像を取得してリターン
+//            if let imageData = data {
+//
+//                let image = UIImage(data: imageData)
+//
+//                ///さらにメタデータを取得
+//                storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg").getMetadata { metadata, error in
+//                    if error != nil {
+//                        print(error?.localizedDescription)
+//                    }
+//
+//                    if let metadata = metadata {
+//                        metadata
+//                        let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: metadata.updated!, UIimage: image)
+//                        callback(profileImageStruct)
+//                    }
+//
+//                }
+//
+//            }
+//        }
     }
     
     ///自分ではないUser IDを基にイメージデータを取得してくる処理

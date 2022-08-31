@@ -154,35 +154,29 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         cell.newMessageSetCell(Item: newMessage)
         
 
-        ///プロファイルイメージをセルに反映(ローカルDB)
+        ///ローカルDBインスンス化
         let imageLocalDataStruct = chatUserListLocalImageInfoGet(Realm: realm, UID: userInfoData.UID)
-        
-        if let localImage = imageLocalDataStruct.image {
-            cell.talkListUserProfileImageView.image = localImage
-        } else {
-            cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
-        }
+        ///プロファイルイメージをセルに反映(ローカルDB)
+        cell.talkListUserProfileImageView.image = imageLocalDataStruct.image ?? UIImage(named: "InitIMage")
         
         ///プロファイルイメージをセルに反映（Firebaseアクセス）
-        if let profilaImage = userInfoData.profileImage {
+        if userInfoData.profileImage != nil {
 //            cell.talkListUserProfileImageView.image = profilaImage
         } else {
-
+            ///test
+            print(imageLocalDataStruct.upDateDate)
+            ///
             ///取得したIDでユーザー情報の取得を開始(プロフィール画像)
             userInfo.contentOfFIRStorageGet(callback: { imageStruct in
                 ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
                 if imageStruct.image != nil,cell.cellUID == userInfoData.UID{
-                    cell.talkListUserProfileImageView.image = imageStruct.image
+                    cell.talkListUserProfileImageView.image = imageStruct.image ?? UIImage(named: "InitIMage")
                     ///ローカルDBに取得したデータを上書き保存
                     self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
 
-                ///コールバック関数でNilが返ってきたら初期画像を設定
-                } else {
-                    print("mock:\(self.talkListUsersMock.count)_indexpath:\(indexPath.row)")
-                    cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
-//                    self.talkListUsersMock[indexPath.row].profileImage = UIImage(named: "InitIMage")
+                ///コールバック関数でNilが返ってきたらローカルデータ画像もしくは初期画像を設定
                 }
-            }, UID: userInfoData.UID)
+            }, UID: userInfoData.UID, UpdateTime: imageLocalDataStruct.upDateDate)
         }
          
         ///もしもセルの再利用によってベルアイコンが存在してしまっていたら初期化
@@ -336,7 +330,7 @@ extension ChatUserListViewController {
             }
             ///セル選択を可能にする
             self.ChatUserListTableView.allowsSelection = true
-        }, UID: uid)
+        }, UID: uid, UpdateTime: ChatDataManagedData.pastTimeGet())
     }
     ///トークリストのリアルタイムリスナー
     
