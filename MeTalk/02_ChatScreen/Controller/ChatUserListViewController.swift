@@ -109,8 +109,10 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
      print("呼ばれました")
       let cell = tableView.dequeueReusableCell(withIdentifier: "chatUserListTableViewCell", for: indexPath ) as! chatUserListTableViewCell
 
-        
+        ///Mockのインデックス番号の中身を取得
         var userInfoData = self.talkListUsersMock[indexPath.row]
+        ///セルUID変数に対してUIDを代入
+        cell.cellUID = userInfoData.UID
         
         if userInfoData.UID == "Vid4pizue0Z1vV7uU5uP6oNE0882" {
             print(userInfoData.UID)
@@ -152,35 +154,29 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         cell.newMessageSetCell(Item: newMessage)
         
 
-        ///プロファイルイメージをセルに反映(ローカルDB)
+        ///ローカルDBインスンス化
         let imageLocalDataStruct = chatUserListLocalImageInfoGet(Realm: realm, UID: userInfoData.UID)
-        
-        if let localImage = imageLocalDataStruct.image {
-            cell.talkListUserProfileImageView.image = localImage
-        } else {
-            cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
-        }
+        ///プロファイルイメージをセルに反映(ローカルDB)
+        cell.talkListUserProfileImageView.image = imageLocalDataStruct.image ?? UIImage(named: "InitIMage")
         
         ///プロファイルイメージをセルに反映（Firebaseアクセス）
-        if let profilaImage = userInfoData.profileImage {
+        if userInfoData.profileImage != nil {
 //            cell.talkListUserProfileImageView.image = profilaImage
         } else {
-
+            ///test
+            print(imageLocalDataStruct.upDateDate)
+            ///
             ///取得したIDでユーザー情報の取得を開始(プロフィール画像)
             userInfo.contentOfFIRStorageGet(callback: { imageStruct in
                 ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-                if imageStruct.image != nil{
-                    cell.talkListUserProfileImageView.image = imageStruct.image
+                if imageStruct.image != nil,cell.cellUID == userInfoData.UID{
+                    cell.talkListUserProfileImageView.image = imageStruct.image ?? UIImage(named: "InitIMage")
                     ///ローカルDBに取得したデータを上書き保存
                     self.chatUserListLocalImageRegist(Realm: realm, UID: userInfoData.UID, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
 
-                ///コールバック関数でNilが返ってきたら初期画像を設定
-                } else {
-                    print("mock:\(self.talkListUsersMock.count)_indexpath:\(indexPath.row)")
-                    cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
-//                    self.talkListUsersMock[indexPath.row].profileImage = UIImage(named: "InitIMage")
+                ///コールバック関数でNilが返ってきたらローカルデータ画像もしくは初期画像を設定
                 }
-            }, UID: userInfoData.UID)
+            }, UID: userInfoData.UID, UpdateTime: imageLocalDataStruct.upDateDate)
         }
          
         ///もしもセルの再利用によってベルアイコンが存在してしまっていたら初期化
@@ -216,6 +212,23 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         let YouUID = self.talkListUsersMock[indexPath.row].UID
 
         userInfo.userInfoDataGet(callback: { document in
+            ///ブロックもしくは退会していた場合
+            if let block = document?["UID"] as? String {
+                ///アラート用の表示を出す。
+                var alertController: UIAlertController!
+                alertController = UIAlertController(title: "申し訳ありません",
+                                           message: "既にこのユーザーは退会しております",
+                                           preferredStyle: .alert)
+                alertController.addAction(UIAlertAction(title: "OK",
+                                               style: .default,
+                                               handler: nil))
+                self.present(alertController, animated: true)
+                ///セル情報の書き換え
+                cell.talkListUserNicknameLabel.text = "退会したユーザー"
+                cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
+                cell.talkListUserNewMessage.text = ""
+            }
+            
             ///UIDから生成したルームIDを値渡しする
             let roomID = chatdatamanage.ChatRoomID(UID1: Auth.auth().currentUser!.uid, UID2: YouUID)
             chatViewController.roomID = roomID
@@ -317,7 +330,7 @@ extension ChatUserListViewController {
             }
             ///セル選択を可能にする
             self.ChatUserListTableView.allowsSelection = true
-        }, UID: uid)
+        }, UID: uid, UpdateTime: ChatDataManagedData.pastTimeGet())
     }
     ///トークリストのリアルタイムリスナー
     
@@ -329,7 +342,6 @@ extension ChatUserListViewController {
         let localDBGetData = realm.objects(ListUsersInfoLocal.self)
 
         for data in localDBGetData {
-            print(data.UID)
 
             self.talkListUsersMock.append(talkListUserStruct(UID: data.UID!, userNickName: data.userNickName, profileImage: nil,UpdateDate:data.upDateDate!, NewMessage: data.NewMessage!, listend: false, sendUID: data.sendUID!))
         }
@@ -453,11 +465,7 @@ extension ChatUserListViewController {
         let result = localDBGetData.first
 //        もしも一件もローカルにデータが入っていなかった時はものすごい前の時間を設定して値を返す
         guard let result = result?.upDateDate else {
-            let calendar = Calendar(identifier: .gregorian)
-            let date = Date()
-            let modifiedDate = calendar.date(byAdding: .day, value: -10000, to: date)!
-            
-            return modifiedDate
+            return ChatDataManagedData.pastTimeGet()
         }
         return result
     }
@@ -469,32 +477,16 @@ extension ChatUserListViewController {
         //UserDefaults のインスタンス生成
         let userDefaults = UserDefaults.standard
         
-        // ドキュメントディレクトリの「ファイルURL」（URL型）定義
-        var documentDirectoryFileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-
-        // ドキュメントディレクトリの「パス」（String型）定義
-        let filePath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-        
         //②保存するためのパスを作成する
-         func createLocalDataFile() {
-             // 作成するテキストファイルの名前
-             let fileName = "\(UID)_profileimage.png"
-
-             // DocumentディレクトリのfileURLを取得
-             if documentDirectoryFileURL != nil {
-                 // ディレクトリのパスにファイル名をつなげてファイルのフルパスを作る
-                 let path = documentDirectoryFileURL.appendingPathComponent(fileName)
-                 documentDirectoryFileURL = path
-             }
-         }
-
+        let documentDirectoryFileURL = userDefaultsImageDataPathCreate(UID: UID)
+        
         let localDBGetData = realm.objects(ListUsersImageLocal.self)
         
         // UIDで検索
         let UID = UID
         let predicate = NSPredicate(format: "UID == %@", UID)
         
-        ///もしも既にUIDがローカルDBの存在していたらUID以外の情報を更新保存
+        ///もしも既にUIDがローカルDBに存在していたらUID以外の情報を更新保存
         if let imageData = localDBGetData.filter(predicate).first{
             // UID以外のデータを更新する
             do{
@@ -509,9 +501,11 @@ extension ChatUserListViewController {
         } else {
             
             do{
-                try listUsersImageLocal.profileImageURL = documentDirectoryFileURL.absoluteString
+                try realm.write{
+                    listUsersImageLocal.profileImageURL = documentDirectoryFileURL.absoluteString
                     listUsersImageLocal.updataDate = updataDate
                     listUsersImageLocal.UID = UID
+                }
             }catch{
                 print("画像の保存に失敗しました")
             }
@@ -519,8 +513,7 @@ extension ChatUserListViewController {
             
         }
         
-        ///UserDefaults保存処理
-        createLocalDataFile()
+
          //pngで保存する場合
         let pngImageData = profileImage.pngData()
          do {
@@ -544,20 +537,27 @@ extension ChatUserListViewController {
         let predicate = NSPredicate(format: "UID == %@", UID)
         
         guard let imageData = localDBGetData.filter(predicate).first else {
-            let newUserimageStruct = listUserImageStruct(UID: UID, UpdateDate: Date(), UIimage: nil)
+            ///ローカルデータに入っていなかったら初期時間及び画像をNilで返却
+            let newUserimageStruct = listUserImageStruct(UID: UID, UpdateDate: ChatDataManagedData.pastTimeGet(), UIimage: nil)
             return newUserimageStruct
         }
+
         
         ///URL型にキャスト
-        let fileURL = URL(string: imageData.profileImageURL)
+        let fileURL = userDefaultsImageDataPathCreate(UID: UID)
         ///パス型に変換
-        let filePath = fileURL?.path
-        ///画像返却
-        guard let image = UIImage(contentsOfFile: filePath!) else {
-            let newUserimageStruct = listUserImageStruct(UID: UID, UpdateDate: imageData.updataDate!, UIimage: nil)
-            return newUserimageStruct
+        let filePath = fileURL.path
+        
+        if FileManager.default.fileExists(atPath: filePath) {
+           print(filePath)
         }
-        let imageStrcut = listUserImageStruct(UID: UID, UpdateDate: imageData.updataDate!, UIimage: image)
+        
+        ///画像返却
+//        guard let filePathExist = filePath else {
+//            let newUserimageStruct = listUserImageStruct(UID: UID, UpdateDate: imageData.updataDate!, UIimage: nil)
+//            return newUserimageStruct
+//        }
+        let imageStrcut = listUserImageStruct(UID: UID, UpdateDate: imageData.updataDate!, UIimage: UIImage(contentsOfFile: filePath))
         
         return imageStrcut
         

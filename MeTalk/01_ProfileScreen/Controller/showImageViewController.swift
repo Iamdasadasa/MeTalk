@@ -37,7 +37,7 @@ class ShowImageViewController:UIViewController{
             } else {
                 self.showImageView.imageView.image = UIImage(named: "InitIMage")
             }
-        }, UID: uid)
+        }, UID: uid, UpdateTime: ChatDataManagedData.pastTimeGet())
     }
     
     override func viewDidLoad() {

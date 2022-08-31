@@ -122,6 +122,17 @@ struct ChatDataManagedData{
 
 ///時間管理
 extension ChatDataManagedData {
+    
+    ///過去時間を持ってくる関数(インスタンス化なしで呼び出し可能)
+    static func pastTimeGet() -> Date{
+        
+        let calendar = Calendar(identifier: .gregorian)
+        let date = Date()
+        let modifiedDate = calendar.date(byAdding: .day, value: -10000, to: date)!
+        
+        return modifiedDate
+        
+    }
 
     // MARK: - Methods
 

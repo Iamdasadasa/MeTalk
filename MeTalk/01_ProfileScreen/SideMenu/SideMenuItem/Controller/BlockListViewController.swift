@@ -84,7 +84,7 @@ extension BlockListViewController:UITableViewDelegate,UITableViewDataSource{
             } else {
                 cell.blockUserProfileImageView.image = UIImage(named: "InitIMage")
             }
-        }, UID: blockUserID)
+        }, UID: blockUserID, UpdateTime: ChatDataManagedData.pastTimeGet())
         return cell
     }
     
