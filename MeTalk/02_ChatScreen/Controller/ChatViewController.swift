@@ -335,7 +335,7 @@ extension ChatViewController {
             let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
             //snapChildrenの中身の数だけsnapChildをとりだす
             for snapChild in snapChildren! {
-                ///読み込んだメッセージのlistendは全てtruenに更新
+                ///読み込んだメッセージのlistendは全てtrueに更新
                 databaseRef.child("Chat").child(roomID).child(snapChild.key).updateChildValues(["listend":true])
                 ///それぞれのValue配列を取得
                 if let postDict = snapChild.value as? [String: Any] {
@@ -368,17 +368,3 @@ extension ChatViewController {
     }
     
 }
-
-/////NavigationController用のDelegateを実装
-//extension ChatViewController:UINavigationControllerDelegate{
-//    func navigationController(
-//        _ navigationController: UINavigationController,
-//        willShow viewController: UIViewController,
-//        animated: Bool
-//    ) {
-//        if let viewController = viewController as? ChatUserListViewController {
-//            // delegateメソッドを呼び出し
-//            delegate?.buckButtonDelegate(CellUID: YouUID)
-//        }
-//    }
-//}

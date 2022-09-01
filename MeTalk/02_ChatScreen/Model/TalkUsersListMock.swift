@@ -3,7 +3,6 @@ import UIKit
 struct talkListUserStruct{
 
     ///最初のメッセージを取得する部分を実装したら解放
-//    var firstMessage: String
     var UID:String
     var userNickName: String?
     var profileImage: UIImage?
@@ -26,8 +25,6 @@ struct talkListUserStruct{
 
 struct listUserImageStruct{
 
-    ///最初のメッセージを取得する部分を実装したら解放
-//    var firstMessage: String
     var UID:String
     var upDateDate:Date
     var image:UIImage?
