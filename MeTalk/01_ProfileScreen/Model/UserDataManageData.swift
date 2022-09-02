@@ -54,11 +54,12 @@ struct UserDataManage{
         }
     }
     
-    ///ユーザーIDを基にイメージデータを取得してくる処理
+    ///サーバーに対して画像取得要求
     /// - Parameters:
-    /// - callback:ユーザーIDを基に取得できるImage
+    ///- UID: 自身のUID
+    ///- ChatDataManagedData.pastTimeGet() :初期時間
     /// - Returns:
-    ///- callback: Fire Baseから取得したイメージデータ
+    /// -imageStruct:取得したイメージ情報
     func contentOfFIRStorageGet(callback: @escaping (listUserImageStruct) -> Void,UID:String?,UpdateTime:Date) {
         guard let UID = UID else {
             print("UIDが確認できませんでした")
@@ -170,12 +171,11 @@ struct UserDataManage{
     func userInfoDataDBRegister() {
         
     }
-    
-    //    ///データ取得関数(コレクションは"Users")
-    //    /// - Parameters:UID　関数呼び出しのとき取得したいデータのUIDを渡す
-    //    /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
-    //    /// 　　　　　　（ニックネーム、性別等が含まれる）
-    //    /// - Returns:
+        ///サーバーに対してユーザーの情報取得
+        /// - Parameters:
+        ///- USERINFODATA.UID: 取得するユーザーUID
+        /// - Returns:
+        /// -document:取得したユーザー情報
         func userInfoDataGet(callback: @escaping  ([String:Any]?) -> Void,UID:String?) {
             guard let UID = UID else {
                 print("UIDを確認できませんでした")
