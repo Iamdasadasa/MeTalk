@@ -10,7 +10,7 @@ import Firebase
 import FirebaseStorage
 import RealmSwift
 
-struct UserDataManagedData{
+struct UserDataManage{
     let uid = Auth.auth().currentUser?.uid
     let cloudDB = Firestore.firestore()
     let storage = Storage.storage()
@@ -96,37 +96,6 @@ struct UserDataManagedData{
                 }
             }
         }
-
-        ///Firebaseのストレージアクセス
-//        storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg")
-//            .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
-//            ///ユーザーIDのプロフィール画像が取得できなかったらnilを返す
-//            if error != nil {
-//                let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: Date(), UIimage: nil)
-//                callback(profileImageStruct)
-//                print(error?.localizedDescription)
-//            }
-//            ///ユーザーIDのプロフィール画像を設定していたらその画像を取得してリターン
-//            if let imageData = data {
-//
-//                let image = UIImage(data: imageData)
-//
-//                ///さらにメタデータを取得
-//                storage.reference(forURL: host).child("profileImage").child("\(UID).jpeg").getMetadata { metadata, error in
-//                    if error != nil {
-//                        print(error?.localizedDescription)
-//                    }
-//
-//                    if let metadata = metadata {
-//                        metadata
-//                        let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: metadata.updated!, UIimage: image)
-//                        callback(profileImageStruct)
-//                    }
-//
-//                }
-//
-//            }
-//        }
     }
     
     ///自分ではないUser IDを基にイメージデータを取得してくる処理
@@ -297,7 +266,7 @@ struct UserDataManagedData{
     /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
     /// 　　　　　　（ニックネーム、性別等が含まれる）
     /// - Returns:
-    func talkListUsersDataGet(callback: @escaping  ([talkListUserStruct]) -> Void,UID:String?,argLatestTime:Date?,limitCount:Int) {
+    func talkListUsersDataGet(callback: @escaping  ([TalkListUserStruct]) -> Void,UID:String?,argLatestTime:Date?,limitCount:Int) {
         var latestTime:Date
         
         if let argLatestTime = argLatestTime {
@@ -312,14 +281,13 @@ struct UserDataManagedData{
         }
 
         ///ここでデータにアクセスしている（非同期処理）
-//        let userDocuments = cloudDB.collection("users").document(UID).collection("TalkUsersList").order(by: "UpdateAt",descending: true).limit(to: limitCount)
         let userDocuments = cloudDB.collection("users").document(UID).collection("TalkUsersList").whereField("UpdateAt", isGreaterThanOrEqualTo: latestTime)
         userDocuments.getDocuments(){ (querySnapshot, err) in
             if let err = err {
                 print("Error getting documents: \(err)")
             } else {
-                var UserListinfo:talkListUserStruct
-                var callbackTalkListUsersMock:[talkListUserStruct] = []
+                var UserListinfo:TalkListUserStruct
+                var callbackTalkListUsersMock:[TalkListUserStruct] = []
 
                 for talkUserinfo in querySnapshot!.documents {
                     ///なぜか文頭にスペースが入ることがあるのでトリム処理
@@ -342,7 +310,7 @@ struct UserDataManagedData{
                     }
                     
                     ///ここでトークリストのユーザーID一覧を格納
-                    UserListinfo = talkListUserStruct(UID: UID, userNickName: nil, profileImage: nil,UpdateDate:UpdateDate, NewMessage: NewMessage, listend: false, sendUID: sendUID)
+                    UserListinfo = TalkListUserStruct(UID: UID, userNickName: nil, profileImage: nil,UpdateDate:UpdateDate, NewMessage: NewMessage, listend: false, sendUID: sendUID)
                     callbackTalkListUsersMock.append(UserListinfo)
                 }
                 callback(callbackTalkListUsersMock)
@@ -376,9 +344,5 @@ struct UserDataManagedData{
             }
         }
     }
-    
-    
-
-    ///
 }
 

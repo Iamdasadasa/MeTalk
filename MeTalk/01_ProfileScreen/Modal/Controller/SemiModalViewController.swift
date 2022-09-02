@@ -20,7 +20,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
     let areaPickerModalView = AreaPickerModalView()
     let agePickerModalView = AgePickerModalView()
     ///インスタンス化(Model)
-    let userDataManageData = UserDataManagedData()
+    let userDataManageData = UserDataManage()
     let modalImageData = ModalImageData()
     let uid = Auth.auth().currentUser?.uid
     ///Viewフラグ判断変数

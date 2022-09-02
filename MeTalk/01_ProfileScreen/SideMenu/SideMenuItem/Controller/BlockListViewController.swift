@@ -17,7 +17,7 @@ class BlockListViewController:UIViewController{
     ///インスタンス化（View）
     let blockListTableView = GeneralTableView()
     ///インスタンス化（Model）
-    let userDataManagedData = UserDataManagedData()
+    let userDataManagedData = UserDataManage()
     let uid = Auth.auth().currentUser?.uid
     ///ブロックリストユーザーID格納配列
     var blockUsersID:[String]? = []

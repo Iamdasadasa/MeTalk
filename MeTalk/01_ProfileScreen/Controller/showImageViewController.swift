@@ -21,7 +21,7 @@ class ShowImageViewController:UIViewController{
     ///インスタンス化（View）
     let showImageView = ShowImageView()
     ///インスタンス化（Model）
-    let userDataManagedData = UserDataManagedData()
+    let userDataManagedData = UserDataManage()
     let storage = Storage.storage()
     let host = "gs://metalk-f132e.appspot.com"
     let uid = Auth.auth().currentUser?.uid

@@ -1,6 +1,6 @@
 import UIKit
 
-struct talkListUserStruct{
+struct TalkListUserStruct{
 
     ///最初のメッセージを取得する部分を実装したら解放
     var UID:String

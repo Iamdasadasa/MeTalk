@@ -15,7 +15,7 @@ class initialSettingViewcontroller:UIViewController{
     let loadingView = LoadingView()
     ///インスタンス化（Model）
     let initialSettingData = InitialSettingData()
-    let userDataManagedData = UserDataManagedData()
+    let userDataManagedData = UserDataManage()
     ///ボタン押下中フラグ
     var buttonPushingFlg:Int? = nil
     ///性別タグNo格納

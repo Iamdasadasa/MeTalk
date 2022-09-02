@@ -7,7 +7,7 @@
 
 import UIKit
 
-class chatUserListTableViewCell: UITableViewCell {
+class ChatUserListTableViewCell: UITableViewCell {
 
     
     ///セル自体が持つUID定数（画面には表示させない nillを初期値にしているがControllerから値は代入される）
