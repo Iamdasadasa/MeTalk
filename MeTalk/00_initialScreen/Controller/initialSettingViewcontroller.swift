@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import Firebase
+import RealmSwift
 
 class initialSettingViewcontroller:UIViewController{
     ///インスタンス化（View）
@@ -186,6 +187,10 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
                 mainTabBarController.modalPresentationStyle = .fullScreen
                 ///3秒後に execute のコードが実行されるようにする。
                 DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3), execute: {
+                    ///ローカルデータ保存
+                    let REALM = try! Realm()
+                    userProfileLocalDataRegist(Realm: REALM, UID: Auth.auth().currentUser!.uid, nickname: self.initialSettingView.nicknameTextField.text!, sex: self.SexNo!, aboutMassage: "よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃", age: 0, area: "未設定", createdAt: Date(), updatedAt: Date())
+                    
                     self.present(mainTabBarController, animated: true, completion: nil)
                 })
             } else {

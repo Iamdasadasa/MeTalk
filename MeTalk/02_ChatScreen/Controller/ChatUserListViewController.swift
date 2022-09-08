@@ -18,8 +18,6 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
     let CHATUSERLISTTABLEVIEW = GeneralTableView()
     ///RealMからデータを受け取るようの変数
     var itemList: Results<ListUsersInfoLocal>!
-    //Realmのテーブルをインスタンス化
-    let LISTUSERSIMAGELOCAL = ListUsersImageLocal()
     ///インスタンス化(Model)
     let USERDATAMANAGE = UserDataManage()
     let UID = Auth.auth().currentUser?.uid
@@ -147,7 +145,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             if imageStruct.image != nil,cell.cellUID == USERINFODATA.UID{
                 cell.talkListUserProfileImageView.image = imageStruct.image ?? UIImage(named: "InitIMage")
                 ///ローカルDBに取得したデータを上書き保存
-                self.chatUserListLocalImageRegist(Realm: REALM, UID: USERINFODATA.UID, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
+                chatUserListLocalImageRegist(Realm: REALM, UID: USERINFODATA.UID, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
             }
         }, UID: USERINFODATA.UID, UpdateTime: IMAGELOCALDATASTRUCT.upDateDate)
          
@@ -376,176 +374,5 @@ extension ChatUserListViewController {
             }
 
         }
-    }
-}
-
-///↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-///↓↓↓◆◆◆　LOCALDB【REALM】 ◆◆◆↓↓↓↓
-///↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓↓
-
-extension ChatUserListViewController {
-    ///ローカルDBへの新規データ保存
-    /// - Parameters:
-    ///- Realm: RealMインスタンス用実体
-    ///- UID: ローカルDBに保存するUID
-    ///- usernickname:ローカルDBに保存するニックネーム
-    ///- newMessage: ローカルDBに新規メッセージ
-    ///- updateDate: ローカルDBに更新日時
-    ///- listend: ローカルDBに保存する既読フラグ
-    ///- SendUID: ローカルDBに送信者UID
-    func chatUserListInfoLocalDataRegist(Realm:Realm,UID:String,usernickname:String?,newMessage:String,updateDate:Date,listend:Bool,SendUID:String){
-        ///REALMにてローカルDB生成（新規）
-        let realm = Realm
-        let UserListLocalObject = ListUsersInfoLocal()
-        ///構造体に合わせて各項目を入力
-        UserListLocalObject.UID = UID
-        UserListLocalObject.userNickName = usernickname
-        UserListLocalObject.NewMessage = newMessage
-        UserListLocalObject.upDateDate = updateDate
-        UserListLocalObject.listend = listend
-        UserListLocalObject.sendUID = SendUID
-        ///ローカルDBに登録
-        try! realm.write {
-             realm.add(UserListLocalObject)
-        }
-    }
-    ///ローカルDBへの更新データ保存
-    /// - Parameters:
-    /// - 新規と同様なので略
-    func chatUserListInfoLocalExstraRegist(Realm:Realm,UID:String,usernickname:String?,newMessage:String,updateDate:Date,listend:Bool,SendUID:String) -> Bool{
-        ///REALMにてローカルDB生成
-        let realm = Realm
-        let localDBGetData = realm.objects(ListUsersInfoLocal.self)
-        // UIDで検索
-        let UID = UID
-        let predicate = NSPredicate(format: "UID == %@", UID)
-        ///ローカルDB内に渡されたUIDが存在していなければfalseを返す
-        guard let user = localDBGetData.filter(predicate).first else {
-            return false
-        }
-        // UID以外のデータを更新する
-        do{
-          try realm.write{
-              user.userNickName = usernickname
-              user.NewMessage = newMessage
-              user.upDateDate = updateDate
-              user.listend = listend
-              user.sendUID = SendUID
-          }
-        }catch {
-          print("Error \(error)")
-        }
-        ///登録後はTrueを返す
-        return true
-    }
-    ///ローカルDBに保存してあるトークリストユーザーデータの中で最新の時間を取得して返す
-    /// - Parameters:None
-    /// - RealM: ローカルDBの実体化
-    /// - Returns: None
-    /// - Date: 返却する時間
-    func chatUserListInfoLocalLastestTimeGet(Realm:Realm) -> Date{
-        ///REALMにてローカルDB生成
-        let realm = Realm
-        let localDBGetData = realm.objects(ListUsersInfoLocal.self).sorted(byKeyPath: "upDateDate", ascending: false)
-
-        let result = localDBGetData.first
-//        もしも一件もローカルにデータが入っていなかった時はものすごい前の時間を設定して値を返す
-        guard let result = result?.upDateDate else {
-            return ChatDataManagedData.pastTimeGet()
-        }
-        return result
-    }
-    
-    ///ローカルDBにイメージを保存
-    /// - Parameters:None
-    /// - RealM: ローカルDBの実体化
-    /// - Returns: None
-    /// - Date: 返却する時間
-    func chatUserListLocalImageRegist(Realm:Realm,UID:String,profileImage:UIImage,updataDate:Date){
-        ///REALMにてローカルDB生成
-        let realm = Realm
-        let localDBGetData = realm.objects(ListUsersImageLocal.self)
-        //UserDefaults のインスタンス生成
-        let userDefaults = UserDefaults.standard
-        //②保存するためのパスを作成する
-        let documentDirectoryFileURL = userDefaultsImageDataPathCreate(UID: UID)
-        // UIDで検索
-        let UID = UID
-        let predicate = NSPredicate(format: "UID == %@", UID)
-        
-        ///もしも既にUIDがローカルDBに存在していたらUID以外の情報を更新保存
-        if let imageData = localDBGetData.filter(predicate).first{
-            // UID以外のデータを更新する
-            do{
-              try realm.write{
-                  imageData.profileImageURL  = documentDirectoryFileURL.absoluteString
-                  imageData.updataDate = updataDate
-              }
-            }catch {
-              print("Error \(error)")
-            }
-        ///存在していない場合新規なのでUIDも含め新規保存
-        } else {
-            
-            do{
-                try realm.write{
-                    LISTUSERSIMAGELOCAL.profileImageURL = documentDirectoryFileURL.absoluteString
-                    LISTUSERSIMAGELOCAL.updataDate = updataDate
-                    LISTUSERSIMAGELOCAL.UID = UID
-                }
-            }catch{
-                print("画像の保存に失敗しました")
-            }
-            try! realm.write{realm.add(LISTUSERSIMAGELOCAL)}
-            
-        }
-        
-
-         //pngで保存する場合
-        let pngImageData = profileImage.pngData()
-         do {
-             try pngImageData!.write(to: documentDirectoryFileURL)
-             //②「Documents下のパス情報をUserDefaultsに保存する」
-             userDefaults.set(documentDirectoryFileURL, forKey: "\(UID)_profileimage")
-         } catch {
-             //エラー処理
-             print("エラー")
-         }
-    }
-    
-    ///ローカルDBの画像情報取得
-    /// - Parameters:
-    /// - RealM: ローカルDBの実体化
-    /// - UID: 画像取得する対象のUID
-    /// - Returns:
-    /// - listUserImageStruct: 返却される画像情報
-    func chatUserListLocalImageInfoGet(Realm:Realm,UID:String) -> listUserImageStruct{
-
-        let realm = Realm
-        let localDBGetData = realm.objects(ListUsersImageLocal.self)
-        
-        // UIDで検索
-        let UID = UID
-        let predicate = NSPredicate(format: "UID == %@", UID)
-        
-        guard let imageData = localDBGetData.filter(predicate).first else {
-            ///ローカルデータに入っていなかったら初期時間及び画像をNilで返却
-            let newUserimageStruct = listUserImageStruct(UID: UID, UpdateDate: ChatDataManagedData.pastTimeGet(), UIimage: nil)
-            return newUserimageStruct
-        }
-
-        ///URL型にキャスト
-        let fileURL = userDefaultsImageDataPathCreate(UID: UID)
-        ///パス型に変換
-        let filePath = fileURL.path
-        
-        if FileManager.default.fileExists(atPath: filePath) {
-           print(filePath)
-        }
-        
-        let imageStrcut = listUserImageStruct(UID: UID, UpdateDate: imageData.updataDate!, UIimage: UIImage(contentsOfFile: filePath))
-        
-        return imageStrcut
-        
     }
 }

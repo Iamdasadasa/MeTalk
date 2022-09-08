@@ -13,61 +13,81 @@ import Photos
 import FloatingPanel
 import CropViewController
 import SideMenu
+import RealmSwift
 
 class ProfileViewController:UIViewController, CropViewControllerDelegate{
 
-    
     ///認証状態をリッスンする変数定義
     var handle:AuthStateDidChangeListenerHandle?
-    ///UID格納変数
-    var UID:String?
     ///カメラピッカーの定義
-    let picker = UIImagePickerController()
+    let PICKER = UIImagePickerController()
     ///インスタンス化(Controller)
     var contentVC:UIViewController?
-    var showImageViewController = ShowImageViewController()
-    var sideMenuViewController = SideMenuViewcontroller()
+    let SHOWIMAGEVIEWCONTROLLER = ShowImageViewController()
+    let SIDEMENUVIEWCONTROLLER = SideMenuViewcontroller()
     ///インスタンス化（View）
-    let profileView = ProfileView()
+    let PROFILEVIEW = ProfileView()
     ///インスタンス化（Model）
-    let userDataManagedData = UserDataManage()
-    let storage = Storage.storage()
-    let host = "gs://metalk-f132e.appspot.com"
-    let uid = Auth.auth().currentUser?.uid
+    let USERDATAMANAGE = UserDataManage()
+    let UID = Auth.auth().currentUser?.uid
+    ///プロフィール情報を保存する辞書型変数
+    var profileData:[String:Any] = [:]
     
     ///ライブラリのハンモーダルインスタンス
-    var fpc = FloatingPanelController()
+    let FPC = FloatingPanelController()
     ///後ろにいるビューコントローラー（このビューコントローラー）をタップできないようにするためのView
-    let semiModalTranslucentView = SemiModalTranslucentView()
+    let SEMIMODALTRANSLUCENTVIEW = SemiModalTranslucentView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         ///デリゲート委譲
-        profileView.delegate = self
-        profileView.nickNameItemView.delegate = self
-        profileView.AboutMeItemView.delegate = self
-        profileView.ageItemView.delegate = self
-        profileView.areaItemView.delegate = self
-        sideMenuViewController.delegate = self
+        PROFILEVIEW.delegate = self
+        PROFILEVIEW.nickNameItemView.delegate = self
+        PROFILEVIEW.AboutMeItemView.delegate = self
+        PROFILEVIEW.ageItemView.delegate = self
+        PROFILEVIEW.areaItemView.delegate = self
+        SIDEMENUVIEWCONTROLLER.delegate = self
         
 //        ///半モーダルの初期設定
-        fpc.delegate = self
-        fpc.layout = CustomFloatingPanelLayout()
-        fpc.isRemovalInteractionEnabled  =  true
-        fpc.backdropView.dismissalTapGestureRecognizer.isEnabled = true
+        FPC.delegate = self
+        FPC.layout = CustomFloatingPanelLayout()
+        FPC.isRemovalInteractionEnabled  =  true
+        FPC.backdropView.dismissalTapGestureRecognizer.isEnabled = true
         ///初期画像設定
-        self.profileView.settingButton.setImage(UIImage(named: "setting"), for: .normal)
+        self.PROFILEVIEW.settingButton.setImage(UIImage(named: "setting"), for: .normal)
+        ///ローカルDBをインスタンス化
+        let REALM = try! Realm()
+        let LOCALDBGETDATA = REALM.objects(profileInfoLocal.self)
+        let PREDICATE = NSPredicate(format: "UID == %@", UID!)
+        ///自身のプロフィール情報を取得
+        if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
+            ///Firebaseの形式に合わせて辞書型で保存する
+            profileData = [ "createdAt":SELFPROFILEDATA.createdAt,
+                           "updatedAt":SELFPROFILEDATA.updatedAt,
+                           "sex":SELFPROFILEDATA.sex,
+                           "aboutMessage":SELFPROFILEDATA.aboutMessage,
+                           "nickName":SELFPROFILEDATA.nickName,
+                           "age":SELFPROFILEDATA.age,
+                           "area":SELFPROFILEDATA.area
+                          ]
+            
+        } else {
+            
+        }
+        
+        
+        
         ///画面表示前にユーザー情報を取得
-        userDataManagedData.userInfoDataGet(callback: {document in
+        USERDATAMANAGE.userInfoDataGet(callback: {document in
             guard let document = document else {
                 return
             }
             self.userInfoDataSetup(userInfoData: document)
-        }, UID: uid)
+        }, UID: UID)
     }
     
     override func viewDidLayoutSubviews() {
-        self.view = profileView
+        self.view = PROFILEVIEW
     }
     
 
@@ -75,15 +95,15 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         super.viewWillAppear(animated)
         
             ///自身のプロフィール画像を取ってくる
-        self.userDataManagedData.contentOfFIRStorageGet(callback: { imageStruct in
+        self.USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
                 ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
             if imageStruct.image != nil {
-                self.profileView.profileImageButton.setImage(imageStruct.image, for: .normal)
+                self.PROFILEVIEW.profileImageButton.setImage(imageStruct.image, for: .normal)
                 ///コールバック関数でNilが返ってきたら初期画像を設定
                 } else {
-                    self.profileView.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
+                    self.PROFILEVIEW.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
                 }
-        }, UID: uid, UpdateTime: ChatDataManagedData.pastTimeGet())
+        }, UID: UID, UpdateTime: ChatDataManagedData.pastTimeGet())
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -106,14 +126,14 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
                 switch actionFlg{
                 ///画像を表示
                 case 1:
-                    self.present(self.showImageViewController, animated: true, completion: nil)
+                    self.present(self.SHOWIMAGEVIEWCONTROLLER, animated: true, completion: nil)
                 ///画像を変更
                 case 2:
-                    self.picker.delegate = self
+                    self.PICKER.delegate = self
                     ///強制的にアルバム
-                    self.picker.sourceType = .photoLibrary
+                    self.PICKER.sourceType = .photoLibrary
                     ///カメラピッカー表示
-                    self.present(self.picker, animated: true, completion: nil)
+                    self.present(self.PICKER, animated: true, completion: nil)
                 default:
                     break
                 }
@@ -161,9 +181,9 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
         let UIimageView = UIImageView()
         UIimageView.image = image
         ///プロフィールイメージ投稿Model
-        userDataManagedData.contentOfFIRStorageUpload(callback: { pressureImage in
-            self.profileView.profileImageButton.setImage(pressureImage, for: .normal)
-        }, UIimagedata: UIimageView, UID: uid)
+        USERDATAMANAGE.contentOfFIRStorageUpload(callback: { pressureImage in
+            self.PROFILEVIEW.profileImageButton.setImage(pressureImage, for: .normal)
+        }, UIimagedata: UIimageView, UID: UID)
         
         ///cropViewControllerを閉じる
         cropViewController.dismiss(animated: true, completion: nil)
@@ -215,32 +235,32 @@ extension ProfileViewController:ProfileChildViewDelegate{
     /// - Returns:
     func selfTappedclearButton(tag: Int) {
         //戻ってきてすぐに同じボタンをタップされてしまった際を想定してfpcに親が存在していたらリターンする
-        guard fpc.parent == nil else {
+        guard FPC.parent == nil else {
             return
         }
         self.tabBarController?.tabBar.isHidden = true
-        self.view.addSubview(semiModalTranslucentView)
+        self.view.addSubview(SEMIMODALTRANSLUCENTVIEW)
         switch tag{
         case 1:
             let semiModalViewController = SemiModalViewController(viewFlg: 1)
-            fpc.set(contentViewController: semiModalViewController)
+            FPC.set(contentViewController: semiModalViewController)
             semiModalViewController.delegate = self
-            fpc.addPanel(toParent: self)
+            FPC.addPanel(toParent: self, at: -1, animated: true, completion: nil)
         case 2:
             let semiModalViewController = SemiModalViewController(viewFlg: 2)
-            fpc.set(contentViewController: semiModalViewController)
+            FPC.set(contentViewController: semiModalViewController)
             semiModalViewController.delegate = self
-            fpc.addPanel(toParent: self)
+            FPC.addPanel(toParent: self, at: -1, animated: true, completion: nil)
         case 3:
             let semiModalViewController = SemiModalViewController(viewFlg: 3)
-            fpc.set(contentViewController: semiModalViewController)
+            FPC.set(contentViewController: semiModalViewController)
             semiModalViewController.delegate = self
-            fpc.addPanel(toParent: self)
+            FPC.addPanel(toParent: self, at: -1, animated: true, completion: nil)
         case 4:
             let semiModalViewController = SemiModalViewController(viewFlg: 4)
-            fpc.set(contentViewController: semiModalViewController)
+            FPC.set(contentViewController: semiModalViewController)
             semiModalViewController.delegate = self
-            fpc.addPanel(toParent: self)
+            FPC.addPanel(toParent: self, at: -1, animated: true, completion: nil)
         default:break
         }
         
@@ -264,15 +284,15 @@ extension ProfileViewController{
         let date = dateUnix.dateValue()
         ///日付型をStringに変更してラベルにセット
         let userCreatedAtdate:String = dateFormatter.string(from: date as Date)
-        self.profileView.startDateInfoLabel.text = userCreatedAtdate
+        self.PROFILEVIEW.startDateInfoLabel.text = userCreatedAtdate
         ///性別を取得。Firebaseでは数値で入っているために数字を判断して性別表示
         switch userInfoData["Sex"] as? Int {
         case 0:
-            self.profileView.sexInfoLabel.text = "設定なし"
+            self.PROFILEVIEW.sexInfoLabel.text = "設定なし"
         case 1:
-            self.profileView.sexInfoLabel.text = "男性"
+            self.PROFILEVIEW.sexInfoLabel.text = "男性"
         case 2:
-            self.profileView.sexInfoLabel.text = "女性"
+            self.PROFILEVIEW.sexInfoLabel.text = "女性"
         default:break
         }
         ///文字列に改行処理を入れる
@@ -287,23 +307,23 @@ extension ProfileViewController{
         }
         guard let resultValue = resultValue else {return}
         ///ニックネームのラベルとニックネームの項目にデータセット
-        self.profileView.nickNameItemView.valueLabel.text = userInfoData["nickname"] as? String
-        self.profileView.personalInformationLabel.text = userInfoData["nickname"] as? String
+        self.PROFILEVIEW.nickNameItemView.valueLabel.text = userInfoData["nickname"] as? String
+        self.PROFILEVIEW.personalInformationLabel.text = userInfoData["nickname"] as? String
         ///ひとことにデータセット
-        self.profileView.AboutMeItemView.valueLabel.text = resultValue
+        self.PROFILEVIEW.AboutMeItemView.valueLabel.text = resultValue
         //年齢にデータセット
         guard let ageTypeInt:Int = userInfoData["age"] as? Int else {
             print("年齢を取得できませんでした。")
             return
         }
         if String(ageTypeInt)  == "0" {
-            self.profileView.ageItemView.valueLabel.text = "未設定"
+            self.PROFILEVIEW.ageItemView.valueLabel.text = "未設定"
         } else {
-            self.profileView.ageItemView.valueLabel.text = String(ageTypeInt)
+            self.PROFILEVIEW.ageItemView.valueLabel.text = String(ageTypeInt)
         }
         
         //出身地にデータセット
-        self.profileView.areaItemView.valueLabel.text = userInfoData["area"] as? String
+        self.PROFILEVIEW.areaItemView.valueLabel.text = userInfoData["area"] as? String
     }
     
 }
@@ -324,19 +344,19 @@ extension ProfileViewController:FloatingPanelControllerDelegate{
     
     ///fpcを閉じる
     func removesemiModal(){
-        fpc.removePanelFromParent(animated: true)
+        FPC.removePanelFromParent(animated: true)
     }
     ///fpcが破棄された時に呼ばれる。（ちなみにユーザーが下にスワイプして画面からfpcが見えなくなっても呼ばれる）
     func floatingPanelWillRemove(_ fpc: FloatingPanelController) {
         ///後ろのブラービューを破棄
-        semiModalTranslucentView.removeFromSuperview()
+        SEMIMODALTRANSLUCENTVIEW.removeFromSuperview()
         ///ユーザー情報を再取得
-        userDataManagedData.userInfoDataGet(callback: {document in
+        USERDATAMANAGE.userInfoDataGet(callback: {document in
             guard let document = document else {
                 return
             }
             self.userInfoDataSetup(userInfoData: document)
-        }, UID: uid)
+        }, UID: UID)
         ///タブバーコントローラーを表示
         self.tabBarController?.tabBar.isHidden = false
 
@@ -348,7 +368,7 @@ extension ProfileViewController:SideMenuViewControllerDelegate{
     ///サイドメニュー表示
     func settingSidemenu() {
         
-        let MenuNavigationController = SideMenuNavigationController(rootViewController: sideMenuViewController)
+        let MenuNavigationController = SideMenuNavigationController(rootViewController: SIDEMENUVIEWCONTROLLER)
         MenuNavigationController.settings = makeSettings()
 //        MenuNavigationController.
         present(MenuNavigationController, animated: true, completion: nil)
@@ -382,6 +402,6 @@ extension ProfileViewController:SideMenuViewControllerDelegate{
 ///fpcを取り除く処理をしなくてはならないためにsemiModalViewControllerからさらにこのコントローラにデリゲートして処理を行なっている。
 extension ProfileViewController:SemiModalViewControllerProtcol{
     func ButtonTappedActionChildDelegateAction() {
-        fpc.removePanelFromParent(animated: true)
+        FPC.removePanelFromParent(animated: true)
     }
 }
