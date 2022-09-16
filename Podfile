@@ -22,7 +22,7 @@ target 'MeTalk' do
   pod 'Firebase/Database'
   pod 'Firebase/Storage'
   #ここから一般ライブラリ
-  pod 'FloatingPanel'
+  pod 'FloatingPanel', '~> 2.5.4'
   pod 'SideMenu'
   pod 'MessageKit', '>= 1.0.0'
   pod 'RealmSwift'

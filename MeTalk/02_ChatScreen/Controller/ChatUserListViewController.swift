@@ -114,10 +114,22 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         
         ///画像に関してはCell生成の一番最初は問答無用でInitイメージを適用
         cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
+
         ///ユーザーネーム設定処理
         if let nickname = USERINFODATA.userNickName {
-            cell.nickNameSetCell(Item: nickname)
+            ///セルのUIDと一致したらセット
+            if cell.cellUID == USERINFODATA.UID {
+                cell.nickNameSetCell(Item: nickname)
+            }
         } else {
+//            userInfoDataGetの書き方をあらためる。基本的にクエリを投げる際はドキュメントを指定してからさらにそのドキュメントの中のフィールド
+//            を比較して持ってきたりはしない(日付のクエリが特殊なだけ)。なのでもしもクエリが二つ投げれることが前提でフィールドにもUIDを持たせて
+//            UID&日付のクエリとするかもしくは
+//            日付を指定してそれより最新の情報全てを持ってきて合致したもののみの情報を更新するかどっちかにする。
+            よく考えたらそもそも初回起動という考え方がいらない可能性。
+            自分が送った際もしくは送られた際のパターンしかないからその二つの時にだけオブザーバーに任せればいいのでは。
+            自分のプロフィールに関しても自身が送信したタイミングでオブザーバが起動するようにすれば差分更新としては問題ない気がする。
+//
             ///サーバーに対してユーザーの情報取得
             USERDATAMANAGE.userInfoDataGet(callback: { document in
                 guard let document = document else {
@@ -126,9 +138,11 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
                 guard let nickname = document["nickname"] as? String else {
                     return
                 }
-                ///取得できたらセルの値にセット
-                cell.nickNameSetCell(Item: nickname)
-            }, UID: USERINFODATA.UID)
+                ///セルのUIDと一致したらセット
+                if cell.cellUID == USERINFODATA.UID {
+                    cell.nickNameSetCell(Item: nickname)
+                }
+            }, UID: USERINFODATA.UID, lastUpdataAt: USERINFODATA.upDateDate)
         }
         
         //最新メッセージをセルに反映する処理
@@ -175,7 +189,8 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         let cell = tableView.cellForRow(at: indexPath) as! ChatUserListTableViewCell
         ///選んだセルの相手のUIDを取得
         let YouUID = self.talkListUsersMock[indexPath.row].UID
-        ///サーバーに対して画像取得要求
+        ///サーバーに対してユーザー取得要求
+        ///ローカルDBの処理を挟んでいないのはブロックされている可能性を調べるため
         USERDATAMANAGE.userInfoDataGet(callback: { document in
             ///ブロックもしくは退会していた場合
             if let block = document?["UID"] as? String {
@@ -211,7 +226,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             self.talkListUsersMock[indexPath.row].listend = false
             ///UINavigationControllerとして遷移
             self.navigationController?.pushViewController(CHATVIEWCONTROLLER, animated: true)
-        }, UID: YouUID)
+        }, UID: YouUID, lastUpdataAt: ChatDataManagedData.pastTimeGet())
     }
     
     ///横にスワイプした際の処理
@@ -272,19 +287,32 @@ extension ChatUserListViewController {
             }
             ///ロードフラグをTrue
             self.loadDataLockFlg = true
+            ///テーブルビューリロード処理
+            self.CHATUSERLISTTABLEVIEW.reloadData()
         }, UID: UID, argLatestTime: argLastetTime,limitCount: limitCount)
     }
     ///自身の情報を取得
     func userInfoDataGet() {
-        ///サーバーに対して画像取得要求
-        USERDATAMANAGE.userInfoDataGet(callback: { document in
-            ///ドキュメントにデータが入るまではセルを選択できないようにする
+
+        ///自身のプロフィール取得(ローカルデータを取得)
+        userProfileDatalocalGet(callback: { document in
+            ////ドキュメントにデータが入るまではセルを選択できないようにする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = false
             ///データ投入
             self.meInfoData = document
             ///セル選択を可能にする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = true
-        }, UID: UID)
+        }, UID: UID!)
+
+//        ///サーバーに対してプロフィール取得要求
+//        USERDATAMANAGE.userInfoDataGet(callback: { document in
+//            ///ドキュメントにデータが入るまではセルを選択できないようにする
+//            self.CHATUSERLISTTABLEVIEW.allowsSelection = false
+//            ///データ投入
+//            self.meInfoData = document
+//            ///セル選択を可能にする
+//            self.CHATUSERLISTTABLEVIEW.allowsSelection = true
+//        }, UID: UID, lastUpdataAt: <#Date#>)
     }
     ///自分の画像を取得してくる
     func contentOfFIRStorageGet() {
@@ -314,9 +342,9 @@ extension ChatUserListViewController {
         for data in localDBGetData {
             self.talkListUsersMock.append(TalkListUserStruct(UID: data.UID!, userNickName: data.userNickName, profileImage: nil,UpdateDate:data.upDateDate!, NewMessage: data.NewMessage!, listend: false, sendUID: data.sendUID!))
         }
-        
+//        chatUserListInfoLocalLastestTimeGet(Realm: realm)
         ///ユーザートークリスト一覧取得
-        self.talkListUsersDataGet(limitCount: 25, argLastetTime: chatUserListInfoLocalLastestTimeGet(Realm: realm))
+        self.talkListUsersDataGet(limitCount: 25, argLastetTime: ChatDataManagedData.pastTimeGet())
         var triggerFlgCount:Int = 0
     
         ///リスナー用FireStore変数

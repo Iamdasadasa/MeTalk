@@ -417,7 +417,7 @@ PODS:
   - FirebaseStorage (8.13.0):
     - FirebaseCore (~> 8.0)
     - GTMSessionFetcher/Core (~> 1.5)
-  - FloatingPanel (2.5.2)
+  - FloatingPanel (2.5.4)
   - GoogleAppMeasurement (8.13.0):
     - GoogleAppMeasurement/AdIdSupport (= 8.13.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 7.7)
@@ -511,7 +511,7 @@ DEPENDENCIES:
   - Firebase/Database
   - Firebase/Firestore
   - Firebase/Storage
-  - FloatingPanel
+  - FloatingPanel (~> 2.5.4)
   - MessageKit (>= 1.0.0)
   - RealmSwift
   - SideMenu
@@ -557,7 +557,7 @@ SPEC CHECKSUMS:
   FirebaseFirestore: 11d872a1e6f745f5ab52b96a218c60bfc6cbd770
   FirebaseInstallations: 60edbf7e11d91ae4c751d26c200dfd037099abe0
   FirebaseStorage: 0f115042c1596f5df5a80b67cf414d8f028ccddd
-  FloatingPanel: 935712d7a8076630135fbbd47f717700913efef9
+  FloatingPanel: 387377aa46a9b088e5f8f5f2a8d2c00c61e67298
   GoogleAppMeasurement: 135c2fbcf5038e0f37dbce04fa641a702fc275d1
   GoogleDataTransport: 629c20a4d363167143f30ea78320d5a7eb8bd940
   GoogleUtilities: e0913149f6b0625b553d70dae12b49fc62914fd1
@@ -573,6 +573,6 @@ SPEC CHECKSUMS:
   RealmSwift: 0e0e4786685c4442bf56d3831dfefb5fa05d6fd6
   SideMenu: f583187d21c5b1dd04c72002be544b555a2627a2
 
-PODFILE CHECKSUM: bfb9c3016b9691eea7159e1d696f5446bc9b6879
+PODFILE CHECKSUM: 34ee5cd2ca5d99b8efa93ab31c40323857acefd2
 
 COCOAPODS: 1.11.2

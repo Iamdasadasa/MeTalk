@@ -32,10 +32,10 @@ class profileInfoLocal: Object {
     
     @objc dynamic var createdAt: Date?
     @objc dynamic var updatedAt: Date?
-    @objc dynamic var sex: Int = 0
-    @objc dynamic var aboutMessage: String = ""
+    @objc dynamic var Sex: Int = 0
+    @objc dynamic var aboutMeMassage: String = ""
     @objc dynamic var nickName: String?
-    @objc dynamic var age: Int = 99
+    @objc dynamic var age: Int = 0
     @objc dynamic var area: String = "未設定"
     
 }
@@ -63,6 +63,59 @@ func userDefaultsImageDataPathCreate(UID:String) -> URL {
     return documentDirectoryFileURL
 }
 
+///ローカルDBより自身のプロフィール情報を取得して辞書型で返却する
+func userProfileDatalocalGet(callback: @escaping ([String:Any]) -> Void,UID:String) {
+    ///ローカルDBをインスタンス化
+    let REALM = try! Realm()
+    let LOCALDBGETDATA = REALM.objects(profileInfoLocal.self)
+    let PREDICATE = NSPredicate(format: "UID == %@", UID)
+    ///プロフィール情報を保存する辞書型変数
+    var profileData:[String:Any] = [:]
+    ///自身のプロフィール情報を取得
+    if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
+        ///Firebaseの形式に合わせて辞書型で保存する
+        profileData = [ "createdAt":SELFPROFILEDATA.createdAt,
+                        "updatedAt":SELFPROFILEDATA.updatedAt,
+                        "sex":SELFPROFILEDATA.Sex,
+                        "aboutMessage":SELFPROFILEDATA.aboutMeMassage,
+                        "nickname":SELFPROFILEDATA.nickName,
+                        "age":SELFPROFILEDATA.age,
+                        "area":SELFPROFILEDATA.area
+        ]
+        
+        ///初期設定で必要なニックネームが存在していない場合はサーバー問い合わせ
+        guard let nickName = profileData["nickname"] as? String else {
+
+            let USERDATAMANAGE = UserDataManage()
+            USERDATAMANAGE.userInfoDataGet(callback: {document in
+                guard let document = document else {
+                    return
+                }
+                ///ローカルに保存
+                userProfileLocalDataExtraRegist(Realm: REALM, UID: UID, nickname: document["nickname"] as? String, sex: document["Sex"] as? Int, aboutMassage: document["aboutMeMassage"] as? String, age: document["age"] as? Int, area: document["area"] as? String, createdAt: document["createdAt"] as? Date, updatedAt: document["updatedAt"] as? Date)
+                ///返却(ローカルデータに不備のためサーバー情報返却)
+                callback (document)
+            }, UID: UID, lastUpdataAt: ChatDataManagedData.pastTimeGet())
+            return
+        }
+        ///返却(ローカルデータ)
+        callback (profileData)
+    } else {
+        ///もしも自身のデータがローカルデータになければ差分条件無しでサーバーに問い合わせ
+        let USERDATAMANAGE = UserDataManage()
+        USERDATAMANAGE.userInfoDataGet(callback: {document in
+            guard let document = document else {
+                return
+            }
+            ///ローカルに保存
+            userProfileLocalDataExtraRegist(Realm: REALM, UID: UID, nickname: document["nickname"] as? String, sex: document["Sex"] as? Int, aboutMassage: document["aboutMeMassage"] as? String, age: document["age"] as? Int, area: document["area"] as? String, createdAt: document["createdAt"] as? Date, updatedAt: document["updatedAt"] as? Date)
+            ///返却(ローカルデータに自身のデータが見つからなかったため)
+            callback (document)
+        }, UID: UID, lastUpdataAt: ChatDataManagedData.pastTimeGet())
+    }
+}
+
+
 ///ローカルDBへのユーザープロフィール新規データ保存（新規登録時のみ呼び出し）
 /// - Parameters:
 ///- Realm: RealMインスタンス用実体
@@ -74,19 +127,45 @@ func userDefaultsImageDataPathCreate(UID:String) -> URL {
 ///- area: ローカルDBに保存する出身地
 ///- createdAt: ローカルDBに保存する作成日時
 ///- updatedAt: ローカルDBに保存する更新日時
-func userProfileLocalDataRegist(Realm:Realm,UID:String,nickname:String,sex:Int,aboutMassage:String,age:Int,area:String,createdAt:Date,updatedAt:Date){
+func userProfileLocalDataRegist(Realm:Realm,UID:String,nickname:String?,sex:Int,aboutMassage:String?,age:Int?,area:String?,createdAt:Date?,updatedAt:Date?){
     ///REALMにてローカルDB生成
     let realm = Realm
     let profileInfoLocalObject = profileInfoLocal()
-    ///構造体に合わせて各項目を入力
+    ///構造体に合わせて各項目を入力（オプショナルバインディングしnilで渡された場合は初期値を反映）
+
+    if let nickname = nickname {
+        profileInfoLocalObject.nickName = nickname
+    } else {
+        profileInfoLocalObject.nickName = "名称未設定"
+    }
+    if let aboutMessage = aboutMassage {
+        profileInfoLocalObject.aboutMeMassage = aboutMessage
+    } else {
+        profileInfoLocalObject.aboutMeMassage = ""
+    }
+    if let age = age {
+        profileInfoLocalObject.age = age
+    } else {
+        profileInfoLocalObject.age = 99
+    }
+    if let area = area {
+        profileInfoLocalObject.area = area
+    } else {
+        profileInfoLocalObject.area = "未設定"
+    }
+    if let createdAt = createdAt {
+        profileInfoLocalObject.createdAt = createdAt
+    } else {
+        profileInfoLocalObject.createdAt = Date()
+    }
+    if let updatedAt = updatedAt {
+        profileInfoLocalObject.updatedAt = updatedAt
+    } else {
+        profileInfoLocalObject.updatedAt = Date()
+    }
+    ///必ず値が入っているものは直接投入
     profileInfoLocalObject.UID = UID
-    profileInfoLocalObject.nickName = nickname
-    profileInfoLocalObject.aboutMessage = aboutMassage
-    profileInfoLocalObject.age = age
-    profileInfoLocalObject.area = area
-    profileInfoLocalObject.sex = sex
-    profileInfoLocalObject.createdAt = createdAt
-    profileInfoLocalObject.updatedAt = updatedAt
+    profileInfoLocalObject.Sex = sex
     ///ローカルDBに登録
     try! realm.write {
          realm.add(profileInfoLocalObject)
@@ -96,7 +175,7 @@ func userProfileLocalDataRegist(Realm:Realm,UID:String,nickname:String,sex:Int,a
     ///ローカルDBへのユーザープロフィール更新データ保存
 /// - Parameters:
 /// - 新規と同様なので略
-func userProfileLocalDataExtraRegist(Realm:Realm,UID:String,nickname:String,sex:Int,aboutMassage:String,age:Int,area:String,createdAt:Date,updatedAt:Date){
+func userProfileLocalDataExtraRegist(Realm:Realm,UID:String,nickname:String?,sex:Int?,aboutMassage:String?,age:Int?,area:String?,createdAt:Date?,updatedAt:Date?){
         ///REALMにてローカルDB生成
         let realm = Realm
         let localDBGetData = realm.objects(profileInfoLocal.self)
@@ -105,18 +184,40 @@ func userProfileLocalDataExtraRegist(Realm:Realm,UID:String,nickname:String,sex:
         let predicate = NSPredicate(format: "UID == %@", UID)
         ///ローカルDB内に渡されたUIDが存在していなければ新規ローカル保存関数呼び出し
         guard let user = localDBGetData.filter(predicate).first else {
-            userProfileLocalDataRegist(Realm: Realm, UID: UID, nickname: nickname, sex: sex, aboutMassage: aboutMassage, age: age, area: area, createdAt: createdAt, updatedAt: updatedAt)
+            userProfileLocalDataRegist(Realm: Realm, UID: UID, nickname: nickname, sex: sex ?? 0, aboutMassage: aboutMassage, age: age, area: area, createdAt: createdAt, updatedAt: updatedAt)
             return
         }
         // UID以外のデータを更新する
         do{
           try realm.write{
-              user.nickName = nickname
-              user.sex = sex
-              user.aboutMessage = aboutMassage
-              user.age = age
-              user.area = area
-              user.updatedAt = updatedAt
+              if let nickname = nickname {
+                  user.nickName = nickname
+              } else {///値が入ってこない場合は何もしない
+              }
+              if let aboutMessage = aboutMassage {
+                  user.aboutMeMassage = aboutMessage
+              } else {///値が入ってこない場合は何もしない
+              }
+              if let age = age {
+                  user.age = age
+              } else {///値が入ってこない場合は何もしない
+              }
+              if let area = area {
+                  user.area = area
+              } else {///値が入ってこない場合は何もしない
+              }
+              if let createdAt = createdAt {
+                  user.createdAt = createdAt
+              } else {///値が入ってこない場合は何もしない
+              }
+              if let updatedAt = updatedAt {
+                  user.updatedAt = updatedAt
+              } else {///値が入ってこない場合は何もしない
+              }
+              if let sex = sex {
+                  user.Sex = sex
+              }
+              
           }
         }catch {
           print("Error \(error)")

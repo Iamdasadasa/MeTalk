@@ -55,35 +55,29 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         FPC.backdropView.dismissalTapGestureRecognizer.isEnabled = true
         ///初期画像設定
         self.PROFILEVIEW.settingButton.setImage(UIImage(named: "setting"), for: .normal)
+        
         ///ローカルDBをインスタンス化
         let REALM = try! Realm()
-        let LOCALDBGETDATA = REALM.objects(profileInfoLocal.self)
-        let PREDICATE = NSPredicate(format: "UID == %@", UID!)
-        ///自身のプロフィール情報を取得
-        if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
-            ///Firebaseの形式に合わせて辞書型で保存する
-            profileData = [ "createdAt":SELFPROFILEDATA.createdAt,
-                           "updatedAt":SELFPROFILEDATA.updatedAt,
-                           "sex":SELFPROFILEDATA.sex,
-                           "aboutMessage":SELFPROFILEDATA.aboutMessage,
-                           "nickName":SELFPROFILEDATA.nickName,
-                           "age":SELFPROFILEDATA.age,
-                           "area":SELFPROFILEDATA.area
-                          ]
+        ///自身のプロフィール取得(ローカルデータを取得)
+        userProfileDatalocalGet(callback: { localDocument in
+            print(localDocument)
+            ///ローカルデータを使って画面情報をセットアップ
+            self.userInfoDataSetup(userInfoData: localDocument)
             
-        } else {
+            ///ローカルデータにある情報の更新日付の差分でサーバー問い合わせ
+            self.USERDATAMANAGE.userInfoDataGet(callback: {document in
+                guard let document = document else {
+                    return
+                }
+                ///差分更新で取得されたら画面に反映
+                self.userInfoDataSetup(userInfoData: document)
+                ///差分更新で取得されたらローカルDBに保存
+                userProfileLocalDataExtraRegist(Realm: REALM, UID: self.UID!, nickname: document["nickname"] as? String, sex: document["Sex"] as? Int, aboutMassage: document["aboutMeMassage"] as? String, age: document["age"] as? Int, area: document["area"] as? String, createdAt: document["createdAt"] as? Date, updatedAt: document["updatedAt"] as? Date)
+                
+            }, UID: self.UID, lastUpdataAt: localDocument["updatedAt"] as? Date)
             
-        }
+        }, UID: UID!)
         
-        
-        
-        ///画面表示前にユーザー情報を取得
-        USERDATAMANAGE.userInfoDataGet(callback: {document in
-            guard let document = document else {
-                return
-            }
-            self.userInfoDataSetup(userInfoData: document)
-        }, UID: UID)
     }
     
     override func viewDidLayoutSubviews() {
@@ -280,8 +274,8 @@ extension ProfileViewController{
         dateFormatter.locale = .init(identifier: "en_US_POSIX")
         dateFormatter.dateFormat = "yyyy/MM/dd HH:mm"
         dateFormatter.locale = Locale(identifier: "ja_JP")
-        let dateUnix = userInfoData["createdAt"] as! Timestamp
-        let date = dateUnix.dateValue()
+        let dateUnix = userInfoData["createdAt"] as? Timestamp
+        let date = dateUnix?.dateValue() ?? Date()
         ///日付型をStringに変更してラベルにセット
         let userCreatedAtdate:String = dateFormatter.string(from: date as Date)
         self.PROFILEVIEW.startDateInfoLabel.text = userCreatedAtdate
@@ -350,14 +344,27 @@ extension ProfileViewController:FloatingPanelControllerDelegate{
     func floatingPanelWillRemove(_ fpc: FloatingPanelController) {
         ///後ろのブラービューを破棄
         SEMIMODALTRANSLUCENTVIEW.removeFromSuperview()
-        ///ユーザー情報を再取得
-        USERDATAMANAGE.userInfoDataGet(callback: {document in
-            guard let document = document else {
-                return
-            }
-            self.userInfoDataSetup(userInfoData: document)
-        }, UID: UID)
-        ///タブバーコントローラーを表示
+        ///ローカルDBより情報を取得
+        ///ローカルDBをインスタンス化
+        let REALM = try! Realm()
+        let LOCALDBGETDATA = REALM.objects(profileInfoLocal.self)
+        let PREDICATE = NSPredicate(format: "UID == %@", UID!)
+        ///プロフィール情報を保存する辞書型変数
+        var profileData:[String:Any] = [:]
+        ///自身のプロフィール情報を取得
+        if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
+            ///Firebaseの形式に合わせて辞書型で保存する
+            profileData = [ "createdAt":SELFPROFILEDATA.createdAt,
+                            "updatedAt":SELFPROFILEDATA.updatedAt,
+                            "sex":SELFPROFILEDATA.Sex,
+                            "aboutMessage":SELFPROFILEDATA.aboutMeMassage,
+                            "nickName":SELFPROFILEDATA.nickName,
+                            "age":SELFPROFILEDATA.age,
+                            "area":SELFPROFILEDATA.area
+            ]
+            self.userInfoDataSetup(userInfoData: profileData)
+        }
+//        ///タブバーコントローラーを表示
         self.tabBarController?.tabBar.isHidden = false
 
     }

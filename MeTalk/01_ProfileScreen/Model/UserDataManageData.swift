@@ -176,11 +176,30 @@ struct UserDataManage{
         ///- USERINFODATA.UID: 取得するユーザーUID
         /// - Returns:
         /// -document:取得したユーザー情報
-    func userInfoDataGet(callback: @escaping  ([String:Any]?) -> Void,UID:String?,lastUpdataAt:Date) {
-            guard let UID = UID else {
-                print("UIDを確認できませんでした")
-                return
+    func userInfoDataGet(callback: @escaping  ([String:Any]?) -> Void,UID:String?,lastUpdataAt:Date?) {
+        guard let UID = UID else {
+            print("UIDを確認できませんでした")
+            return
+        }
+        
+        ///更新日付がNILLだった場合は更新日付を初期データでサーバーアクセス
+        guard let lastupdateAt = lastUpdataAt else {
+            ///ここでデータにアクセスしている（非同期処理）
+            let userDocuments = cloudDB.collection("users").whereField("updatedAt",isGreaterThanOrEqualTo: ChatDataManagedData.pastTimeGet())
+                ///getDocumentプロパティでコレクションデータからオブジェクトとしてデータを取得
+            userDocuments.getDocuments(){ (QuerySnapshot,err) in
+                if let error = err {
+                    print("プロフィール情報の取得ができませんでした: \(err)")
+                    ///相手のトークリストに何らかの理由で存在しないORブロック変数がTrueはここにくる
+                    var failedUserInfo = ["UID":"Block"]
+                    callback(failedUserInfo)
+                } else {
+                    let DICTIONARYSNAPSHOT = QuerySnapshot!.documents.first
+                    callback(DICTIONARYSNAPSHOT?.data())
+                }
             }
+            return
+        }
             ///ここでデータにアクセスしている（非同期処理）
         let userDocuments = cloudDB.collection("users").whereField("updatedAt",isGreaterThanOrEqualTo: lastUpdataAt)
             ///getDocumentプロパティでコレクションデータからオブジェクトとしてデータを取得
@@ -192,6 +211,7 @@ struct UserDataManage{
                 callback(failedUserInfo)
             } else {
                 let DICTIONARYSNAPSHOT = QuerySnapshot!.documents.first
+                print(QuerySnapshot!.documents)
                 callback(DICTIONARYSNAPSHOT?.data())
             }
         }
@@ -204,6 +224,10 @@ struct UserDataManage{
     //    /// - callback:コールバック。エラーを返す。エラーにならなかったら返さない。
     //    /// - Returns:
     func userInfoDataUpload(userData:Any?,dataFlg:Int?,UID:String?) {
+        ///ローカルデータ保存用インスタンス
+        let realm = try! Realm()
+        let localDBGetData = realm.objects(profileInfoLocal.self)
+        
         guard let UID = UID else {
             print("UIDが確認できませんでした")
             return
@@ -214,28 +238,42 @@ struct UserDataManage{
             guard let userData = userData as? String else {
                 return
             }
+            ///サーバーDB更新処理
             Firestore.firestore().collection("users").document(UID).updateData(["nickname":userData])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
-//            DBRef.child("users/\(uid)").updateChildValues(["nickname":userData])
-//            DBRef.child("users").updateChildValues(["updatedAt":FieldValue.serverTimestamp()])
+            ///ローカルDB更新処理
+            userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: userData, sex: nil, aboutMassage: nil, age: nil, area: nil, createdAt: nil, updatedAt: Date())
+
         case 2: ///ひとこと及び更新日時
             guard let userData = userData as? String else {
                 return
             }
+            ///サーバーDB更新処理
             Firestore.firestore().collection("users").document(UID).updateData(["aboutMeMassage":userData])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
+            ///ローカルDB更新処理
+            userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: nil, sex: nil, aboutMassage: userData, age: nil, area: nil, createdAt: nil, updatedAt: Date())
+
         case 3: ///年齢及び更新日時
             guard let userData = userData as? Int else {
                 return
             }
+            ///サーバーDB更新処理
             Firestore.firestore().collection("users").document(UID).updateData(["age":userData])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
+            ///ローカルDB更新処理
+            userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: nil, sex: nil, aboutMassage: nil, age: userData, area: nil, createdAt: nil, updatedAt: Date())
+
         case 4: ///出身地及び更新日時
             guard let userData = userData as? String else {
                 return
             }
+            ///サーバーDB更新処理
             Firestore.firestore().collection("users").document(UID).updateData(["area":userData])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
+            ///ローカルDB更新処理
+            userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: nil, sex: nil, aboutMassage: nil, age: nil, area: userData, createdAt: nil, updatedAt: Date())
+
         default:break
         }
     }
@@ -311,6 +349,7 @@ struct UserDataManage{
                     
                     ///ここでトークリストのユーザーID一覧を格納
                     UserListinfo = TalkListUserStruct(UID: UID, userNickName: nil, profileImage: nil,UpdateDate:UpdateDate, NewMessage: NewMessage, listend: false, sendUID: sendUID)
+                    
                     callbackTalkListUsersMock.append(UserListinfo)
                 }
                 callback(callbackTalkListUsersMock)

@@ -48,15 +48,16 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
             ///デリゲート委譲
             nickNameTextFieldModalView.delegate = self
             nickNameTextFieldModalView.itemTextField.delegate = self
-            ///現在のユーザー名を取得
-            userDataManageData.userInfoDataGet(callback: { userInfoData in
-                guard let userInfoData = userInfoData else {
-                    print("ユーザーデータが取得できませんでした。SemiModalViewController")
-                    return
-                }
+            ///現在のユーザー名をローカルDBから取得
+            userProfileDatalocalGet(callback: { document in
                 ///ユーザー名情報をテキストフィールドにセット
-                self.nickNameTextFieldModalView.itemTextField.text = userInfoData["nickname"] as? String
-            }, UID: uid)
+                self.nickNameTextFieldModalView.itemTextField.text = document["nickName"] as? String
+                
+//                ここでそれぞれ(下記4項目)userInfoDataSetupを呼ばないと更新したデータが画面に即時反映されない
+                
+                
+            }, UID: uid!)
+
             ///クローズ画像データをセット
             self.nickNameTextFieldModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
@@ -71,15 +72,11 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
             ///デリゲート委譲
             aboutMeTextFieldModalView.delegate = self
             aboutMeTextFieldModalView.itemTextField.delegate = self
-            ///現在のひとことを取得
-            userDataManageData.userInfoDataGet(callback: { userInfoData in
-                guard let userInfoData = userInfoData else {
-                    print("ユーザーデータが取得できませんでした。SemiModalViewController")
-                    return
-                }
-                ///ひとことをテキストフィールドにセット
-                self.aboutMeTextFieldModalView.itemTextField.text = userInfoData["aboutMeMassage"] as? String
-            }, UID: uid)
+            ///現在のひとことをローカルDBから取得
+            userProfileDatalocalGet(callback: { document in
+                ///ユーザー名情報をテキストフィールドにセット
+                self.aboutMeTextFieldModalView.itemTextField.text = document["aboutMessage"] as? String
+            }, UID: uid!)
             ///クローズ画像データをセット
             self.aboutMeTextFieldModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
@@ -89,44 +86,34 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
               object: aboutMeTextFieldModalView.itemTextField)
             ///★viewFlg3は年齢★
         } else if viewFlag == 3{
+            
             self.view = agePickerModalView
             ///デリゲート委譲
             agePickerModalView.delegate = self
-            ///現在の年齢を取得
-            userDataManageData.userInfoDataGet(callback: { userInfoData in
-                guard let userInfoData = userInfoData else {
-                    print("ユーザーデータが取得できませんでした。SemiModalViewController")
-                    return
-                }
-                ///年齢をテキストフィールドにセット
-                guard let ageTypeInt:Int = userInfoData["age"] as? Int else {
-                    print("年齢を取得できませんでした。")
-                    return
-                }
-                if String(ageTypeInt)  == "0" {
+            ///現在の年齢をローカルDBから取得
+            userProfileDatalocalGet(callback: { document in
+                var agedata = document["age"] as? Int
+                if agedata == 0 {
                     self.agePickerModalView.itemTextField.text = "未設定"
                 } else {
-                    self.agePickerModalView.itemTextField.text = String(ageTypeInt)
+                    ///年齢情報をテキストフィールドにセット
+                    self.agePickerModalView.itemTextField.text = String(agedata!)
                 }
-
-            }, UID: uid)
+                
+            }, UID: uid!)
             ///クローズ画像データをセット
             self.agePickerModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
+            
             ///★viewFlg4は住まい★
         } else if viewFlag == 4{
             self.view = areaPickerModalView
             ///デリゲート委譲
             areaPickerModalView.delegate = self
-            ///現在の住まいを取得
-            userDataManageData.userInfoDataGet(callback: { userInfoData in
-                guard let userInfoData = userInfoData else {
-                    print("ユーザーデータが取得できませんでした。SemiModalViewController")
-                    return
-                }
+            ///現在の住まいをローカルDBから取得
+            userProfileDatalocalGet(callback: { document in
                 ///住まいをテキストフィールドにセット
-                self.areaPickerModalView.itemTextField.text = userInfoData["area"] as? String
-
-            }, UID: uid)
+                self.areaPickerModalView.itemTextField.text = document["area"] as? String
+            }, UID: uid!)
             ///クローズ画像データをセット
             self.areaPickerModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
         }
