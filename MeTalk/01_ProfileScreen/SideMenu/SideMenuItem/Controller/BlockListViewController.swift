@@ -73,7 +73,7 @@ extension BlockListViewController:UITableViewDelegate,UITableViewDataSource{
                 return
             }
             cell.setCell(Item: blockUserInfoDoc["nickname"] as? String ?? "退会したユーザー")
-        }, UID: blockUserID, lastUpdataAt: ChatDataManagedData.pastTimeGet())
+        }, UID: blockUserID)
         ///取得したIDでユーザー情報の取得を開始(プロフィール画像)
         self.userDataManagedData.contentOfFIRStorageGet(callback: { imageStruct in
             ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット

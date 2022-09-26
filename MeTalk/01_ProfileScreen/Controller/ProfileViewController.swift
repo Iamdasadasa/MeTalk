@@ -14,6 +14,7 @@ import FloatingPanel
 import CropViewController
 import SideMenu
 import RealmSwift
+import RealmSwift
 
 class ProfileViewController:UIViewController, CropViewControllerDelegate{
 
@@ -30,6 +31,8 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     ///インスタンス化（Model）
     let USERDATAMANAGE = UserDataManage()
     let UID = Auth.auth().currentUser?.uid
+    ///RealMオブジェクトをインスタンス化
+    let REALM = try! Realm()
     ///プロフィール情報を保存する辞書型変数
     var profileData:[String:Any] = [:]
     
@@ -56,26 +59,10 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         ///初期画像設定
         self.PROFILEVIEW.settingButton.setImage(UIImage(named: "setting"), for: .normal)
         
-        ///ローカルDBをインスタンス化
-        let REALM = try! Realm()
         ///自身のプロフィール取得(ローカルデータを取得)
         userProfileDatalocalGet(callback: { localDocument in
-            print(localDocument)
             ///ローカルデータを使って画面情報をセットアップ
             self.userInfoDataSetup(userInfoData: localDocument)
-            
-            ///ローカルデータにある情報の更新日付の差分でサーバー問い合わせ
-            self.USERDATAMANAGE.userInfoDataGet(callback: {document in
-                guard let document = document else {
-                    return
-                }
-                ///差分更新で取得されたら画面に反映
-                self.userInfoDataSetup(userInfoData: document)
-                ///差分更新で取得されたらローカルDBに保存
-                userProfileLocalDataExtraRegist(Realm: REALM, UID: self.UID!, nickname: document["nickname"] as? String, sex: document["Sex"] as? Int, aboutMassage: document["aboutMeMassage"] as? String, age: document["age"] as? Int, area: document["area"] as? String, createdAt: document["createdAt"] as? Date, updatedAt: document["updatedAt"] as? Date)
-                
-            }, UID: self.UID, lastUpdataAt: localDocument["updatedAt"] as? Date)
-            
         }, UID: UID!)
         
     }
@@ -88,16 +75,35 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-            ///自身のプロフィール画像を取ってくる
-        self.USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
-                ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-            if imageStruct.image != nil {
-                self.PROFILEVIEW.profileImageButton.setImage(imageStruct.image, for: .normal)
-                ///コールバック関数でNilが返ってきたら初期画像を設定
-                } else {
-                    self.PROFILEVIEW.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
-                }
-        }, UID: UID, UpdateTime: ChatDataManagedData.pastTimeGet())
+        ///ローカルDBインスンス化
+        let IMAGELOCALDATASTRUCT = chatUserListLocalImageInfoGet(Realm: REALM, UID: UID!)
+        ///プロフィール画像オブジェクトに画像セット（ローカル）
+        self.PROFILEVIEW.profileImageButton.setImage(IMAGELOCALDATASTRUCT.image, for: .normal)
+        
+        ///サーバーに対して画像取得要求（ローカルとの差分更新）
+        USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
+            ///取得してきた画像がNilの場合初期画像セット
+            guard let image = imageStruct.image else {
+                self.PROFILEVIEW.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
+                return
+            }
+            ///イメージ画像をオブジェクトにセット（サーバー）
+            self.PROFILEVIEW.profileImageButton.setImage(image, for: .normal)
+            ///ローカルDBに取得したデータを上書き保存
+            chatUserListLocalImageRegist(Realm: self.REALM, UID: self.UID!, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
+            
+        }, UID: UID, UpdateTime: IMAGELOCALDATASTRUCT.upDateDate)
+        
+//        ///自身のプロフィール画像を取ってくる
+//        self.USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
+//                ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
+//            if imageStruct.image != nil {
+//                self.PROFILEVIEW.profileImageButton.setImage(imageStruct.image, for: .normal)
+//                ///コールバック関数でNilが返ってきたら初期画像を設定
+//                } else {
+//                    self.PROFILEVIEW.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
+//                }
+//        }, UID: UID, UpdateTime: ChatDataManagedData.pastTimeGet())
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -177,6 +183,8 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
         ///プロフィールイメージ投稿Model
         USERDATAMANAGE.contentOfFIRStorageUpload(callback: { pressureImage in
             self.PROFILEVIEW.profileImageButton.setImage(pressureImage, for: .normal)
+            ///ローカルDBに取得したデータを上書き保存
+            chatUserListLocalImageRegist(Realm: self.REALM, UID: self.UID!, profileImage: pressureImage!, updataDate: Date())
         }, UIimagedata: UIimageView, UID: UID)
         
         ///cropViewControllerを閉じる
@@ -292,7 +300,9 @@ extension ProfileViewController{
         ///文字列に改行処理を入れる
         let aboutMeMassageValue = userInfoData["aboutMeMassage"] as? String
         let resultValue:String!
-        guard let aboutMeMassageValue = aboutMeMassageValue else { return }
+        guard let aboutMeMassageValue = aboutMeMassageValue else {
+            return
+        }
         if aboutMeMassageValue.count >= 15 {
             resultValue = aboutMeMassageValue.prefix(15) + "\n" + aboutMeMassageValue.suffix(aboutMeMassageValue.count - 15)
             print(resultValue)
@@ -301,6 +311,7 @@ extension ProfileViewController{
         }
         guard let resultValue = resultValue else {return}
         ///ニックネームのラベルとニックネームの項目にデータセット
+        
         self.PROFILEVIEW.nickNameItemView.valueLabel.text = userInfoData["nickname"] as? String
         self.PROFILEVIEW.personalInformationLabel.text = userInfoData["nickname"] as? String
         ///ひとことにデータセット
@@ -351,19 +362,26 @@ extension ProfileViewController:FloatingPanelControllerDelegate{
         let PREDICATE = NSPredicate(format: "UID == %@", UID!)
         ///プロフィール情報を保存する辞書型変数
         var profileData:[String:Any] = [:]
-        ///自身のプロフィール情報を取得
-        if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
-            ///Firebaseの形式に合わせて辞書型で保存する
-            profileData = [ "createdAt":SELFPROFILEDATA.createdAt,
-                            "updatedAt":SELFPROFILEDATA.updatedAt,
-                            "sex":SELFPROFILEDATA.Sex,
-                            "aboutMessage":SELFPROFILEDATA.aboutMeMassage,
-                            "nickName":SELFPROFILEDATA.nickName,
-                            "age":SELFPROFILEDATA.age,
-                            "area":SELFPROFILEDATA.area
-            ]
-            self.userInfoDataSetup(userInfoData: profileData)
-        }
+        
+        ///自身のプロフィール取得(ローカルデータを取得)
+        userProfileDatalocalGet(callback: { localDocument in
+            ///ローカルデータを使って画面情報をセットアップ
+            self.userInfoDataSetup(userInfoData: localDocument)
+        }, UID: UID!)
+        
+//        ///自身のプロフィール情報を取得
+//        if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
+//            ///Firebaseの形式に合わせて辞書型で保存する
+//            profileData = [ "createdAt":SELFPROFILEDATA.createdAt,
+//                            "updatedAt":SELFPROFILEDATA.updatedAt,
+//                            "sex":SELFPROFILEDATA.Sex,
+//                            "aboutMessage":SELFPROFILEDATA.aboutMeMassage,
+//                            "nickName":SELFPROFILEDATA.nickName,
+//                            "age":SELFPROFILEDATA.age,
+//                            "area":SELFPROFILEDATA.area
+//            ]
+//            self.userInfoDataSetup(userInfoData: profileData)
+//        }
 //        ///タブバーコントローラーを表示
         self.tabBarController?.tabBar.isHidden = false
 
@@ -412,3 +430,5 @@ extension ProfileViewController:SemiModalViewControllerProtcol{
         FPC.removePanelFromParent(animated: true)
     }
 }
+
+//この画面のエクステンションでオブザーバが実装できるか確認

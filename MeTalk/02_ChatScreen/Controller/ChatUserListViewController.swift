@@ -21,6 +21,8 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
     ///インスタンス化(Model)
     let USERDATAMANAGE = UserDataManage()
     let UID = Auth.auth().currentUser?.uid
+    ///RealMオブジェクトをインスタンス化
+    let REALM = try! Realm()
     ///自身の画像View
     var selfProfileImageView = UIImageView()
     ///自身のユーザー情報格納変数
@@ -36,6 +38,12 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
     ///トークリストユーザー情報格納配列
     var talkListUsersMock:[TalkListUserStruct] = []
     
+    ///ビューが表示されるたびに実行する処理群
+    override func viewWillAppear(_ animated: Bool) {
+        ///自身の情報を取得
+        userInfoDataGet()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         ///テーブルビューを適用
@@ -46,8 +54,6 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
         CHATUSERLISTTABLEVIEW.delegate = self
         ///セルの登録
         CHATUSERLISTTABLEVIEW.register(ChatUserListTableViewCell.self, forCellReuseIdentifier: "ChatUserListTableViewCell")
-        ///自身の情報を取得
-        userInfoDataGet()
         ///自分の画像を取得してくる
         contentOfFIRStorageGet()
         ///トークリストリスナー
@@ -102,8 +108,6 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         let USERINFODATA = self.talkListUsersMock[indexPath.row]
         ///セルUID変数に対してUIDを代入
         cell.cellUID = USERINFODATA.UID
-        ///ローカルDBに存在しているUIDを検知
-        let REALM = try! Realm()
         
         ///渡したUIDが存在していた場合は追加で情報を上書き
         let extraFlg = chatUserListInfoLocalExstraRegist(Realm: REALM, UID: USERINFODATA.UID, usernickname: USERINFODATA.userNickName, newMessage: USERINFODATA.NewMessage, updateDate: USERINFODATA.upDateDate, listend: USERINFODATA.listend, SendUID: USERINFODATA.sendUID)
@@ -122,27 +126,21 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
                 cell.nickNameSetCell(Item: nickname)
             }
         } else {
-//            userInfoDataGetの書き方をあらためる。基本的にクエリを投げる際はドキュメントを指定してからさらにそのドキュメントの中のフィールド
-//            を比較して持ってきたりはしない(日付のクエリが特殊なだけ)。なのでもしもクエリが二つ投げれることが前提でフィールドにもUIDを持たせて
-//            UID&日付のクエリとするかもしくは
-//            日付を指定してそれより最新の情報全てを持ってきて合致したもののみの情報を更新するかどっちかにする。
-            よく考えたらそもそも初回起動という考え方がいらない可能性。
-            自分が送った際もしくは送られた際のパターンしかないからその二つの時にだけオブザーバーに任せればいいのでは。
-            自分のプロフィールに関しても自身が送信したタイミングでオブザーバが起動するようにすれば差分更新としては問題ない気がする。
-//
-            ///サーバーに対してユーザーの情報取得
-            USERDATAMANAGE.userInfoDataGet(callback: { document in
-                guard let document = document else {
-                    return
-                }
-                guard let nickname = document["nickname"] as? String else {
-                    return
-                }
-                ///セルのUIDと一致したらセット
-                if cell.cellUID == USERINFODATA.UID {
-                    cell.nickNameSetCell(Item: nickname)
-                }
-            }, UID: USERINFODATA.UID, lastUpdataAt: USERINFODATA.upDateDate)
+            ///USERINFODATAにて取得できなかった場合はセルのUIDと一致したことを確認
+            if cell.cellUID == USERINFODATA.UID {
+                ///サーバー問い合わせ
+                self.USERDATAMANAGE.userInfoDataGet(callback: {document in
+                    guard let document = document else {
+                        return
+                    }
+                    ///セルニックネームに反映
+                    cell.nickNameSetCell(Item: document["nickname"] as? String ?? "未設定")
+                    ///ローカルDBを更新（実質ニックネームだけ更新される状態）
+                    chatUserListInfoLocalExstraRegist(Realm: self.REALM, UID: USERINFODATA.UID, usernickname: document["nickname"] as? String ?? "未設定", newMessage: nil, updateDate: nil, listend: nil, SendUID: nil)
+                    
+                    
+                }, UID: USERINFODATA.UID)
+            }
         }
         
         //最新メッセージをセルに反映する処理
@@ -159,7 +157,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             if imageStruct.image != nil,cell.cellUID == USERINFODATA.UID{
                 cell.talkListUserProfileImageView.image = imageStruct.image ?? UIImage(named: "InitIMage")
                 ///ローカルDBに取得したデータを上書き保存
-                chatUserListLocalImageRegist(Realm: REALM, UID: USERINFODATA.UID, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
+                chatUserListLocalImageRegist(Realm: self.REALM, UID: USERINFODATA.UID, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
             }
         }, UID: USERINFODATA.UID, UpdateTime: IMAGELOCALDATASTRUCT.upDateDate)
          
@@ -224,9 +222,11 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             ///新着ベルアイコンを非表示にする＆該当ユーザーのlisntendをFalseに設定
             cell.nortificationImageRemove()
             self.talkListUsersMock[indexPath.row].listend = false
+            ///ローカルDBにニックネームの最新情報のみ更新
+            chatUserListInfoLocalExstraRegist(Realm: self.REALM, UID: YouUID, usernickname: document!["nickname"] as? String, newMessage: nil, updateDate: nil, listend: nil, SendUID: nil)
             ///UINavigationControllerとして遷移
             self.navigationController?.pushViewController(CHATVIEWCONTROLLER, animated: true)
-        }, UID: YouUID, lastUpdataAt: ChatDataManagedData.pastTimeGet())
+        }, UID: YouUID)
     }
     
     ///横にスワイプした際の処理
@@ -342,9 +342,11 @@ extension ChatUserListViewController {
         for data in localDBGetData {
             self.talkListUsersMock.append(TalkListUserStruct(UID: data.UID!, userNickName: data.userNickName, profileImage: nil,UpdateDate:data.upDateDate!, NewMessage: data.NewMessage!, listend: false, sendUID: data.sendUID!))
         }
+        ///トークリスト配列内で並び替え
+        self.talkListUsersMock = self.talkListUsersMock.sorted(by: {$0.upDateDate > $1.upDateDate})
 //        chatUserListInfoLocalLastestTimeGet(Realm: realm)
-        ///ユーザートークリスト一覧取得
-        self.talkListUsersDataGet(limitCount: 25, argLastetTime: ChatDataManagedData.pastTimeGet())
+        ///ユーザートークリスト一覧取得(いずれここは必要なくなるかも)
+//        self.talkListUsersDataGet(limitCount: 25, argLastetTime: ChatDataManagedData.pastTimeGet())
         var triggerFlgCount:Int = 0
     
         ///リスナー用FireStore変数
@@ -367,12 +369,12 @@ extension ChatUserListViewController {
             }
             ///ドキュメント内の処理
             for documentData in documentSnapShot.documents {
+
                 ///更新日時のタイムスタンプをTimeStamp⇨Date型として受け取る
                 guard let timeStamp = documentData["UpdateAt"] as? Timestamp else {
                     return
                 }
                 let UpdateDate = timeStamp.dateValue()
-                
                 ///ユーザー配列の名からリスナーで取得されたIDと一致している配列番号を取得
                 let indexNo = self.talkListUsersMock.firstIndex(where: {$0.UID == documentData.documentID})
 
@@ -386,17 +388,28 @@ extension ChatUserListViewController {
                     print("送信者UID情報が取得できませんでした")
                     return
                 }
+                ///自身のニックネーム
+                guard let meNickname = documentData["meNickname"] as? String else {
+                    print("送信者UID情報が取得できませんでした")
+                    return
+                }
+                ///相手のニックネーム
+                guard let youNickname = documentData["youNickname"] as? String else {
+                    print("送信者UID情報が取得できませんでした")
+                    return
+                }
+                    
                 ///リスナーで取得された情報がトークリスト配列になかった場合は
                 ///新規で配列に投入
                 guard let indexNo = indexNo else {
-                    self.talkListUsersMock.insert(TalkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage: NewMessage, listend: listend, sendUID: sendUID), at: 0)
+                    self.talkListUsersMock.insert(TalkListUserStruct.init(UID: documentData.documentID, userNickName: youNickname, profileImage: nil, UpdateDate: UpdateDate, NewMessage: NewMessage, listend: listend, sendUID: sendUID), at: 0)
                     self.CHATUSERLISTTABLEVIEW.reloadData()
                     triggerFlgCount = 1
                     return
                 }
                 ///更新データなので一旦リムーブして最新データを配列に投入
                 self.talkListUsersMock.remove(at: indexNo)
-                self.talkListUsersMock.insert(TalkListUserStruct.init(UID: documentData.documentID, userNickName: nil, profileImage: nil, UpdateDate: UpdateDate, NewMessage: NewMessage, listend: listend, sendUID: sendUID), at: 0)
+                self.talkListUsersMock.insert(TalkListUserStruct.init(UID: documentData.documentID, userNickName: youNickname, profileImage: nil, UpdateDate: UpdateDate, NewMessage: NewMessage, listend: listend, sendUID: sendUID), at: 0)
                 self.CHATUSERLISTTABLEVIEW.reloadData()
                 triggerFlgCount = 1
             }

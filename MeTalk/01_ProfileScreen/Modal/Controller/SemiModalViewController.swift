@@ -51,11 +51,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
             ///現在のユーザー名をローカルDBから取得
             userProfileDatalocalGet(callback: { document in
                 ///ユーザー名情報をテキストフィールドにセット
-                self.nickNameTextFieldModalView.itemTextField.text = document["nickName"] as? String
-                
-//                ここでそれぞれ(下記4項目)userInfoDataSetupを呼ばないと更新したデータが画面に即時反映されない
-                
-                
+                self.nickNameTextFieldModalView.itemTextField.text = document["nickname"] as? String
             }, UID: uid!)
 
             ///クローズ画像データをセット
@@ -75,7 +71,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
             ///現在のひとことをローカルDBから取得
             userProfileDatalocalGet(callback: { document in
                 ///ユーザー名情報をテキストフィールドにセット
-                self.aboutMeTextFieldModalView.itemTextField.text = document["aboutMessage"] as? String
+                self.aboutMeTextFieldModalView.itemTextField.text = document["aboutMeMassage"] as? String
             }, UID: uid!)
             ///クローズ画像データをセット
             self.aboutMeTextFieldModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)

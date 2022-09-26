@@ -50,6 +50,21 @@ class ListUsersImageLocal: Object{    ///UIDはプライマリーキー
     @objc dynamic var updataDate:Date?
 }
 
+///メッセージ内容のローカルデータオブジェクト
+class messageLocal: Object {
+
+    @objc dynamic var messageID:String?
+    override static func primaryKey() -> String? {
+        return "messageID"
+    }
+    @objc dynamic var roomID:String?
+    @objc dynamic var message:String = ""
+    @objc dynamic var sender:String = ""
+    @objc dynamic var date:Date?
+    @objc dynamic var listend:Bool = false
+    
+}
+
 ///どこからでも呼び出し可能なUserDefaultsの画像パス生成関数
 func userDefaultsImageDataPathCreate(UID:String) -> URL {
     ///受け取ったUIDで一意のファイルパスを生成
@@ -61,6 +76,35 @@ func userDefaultsImageDataPathCreate(UID:String) -> URL {
     documentDirectoryFileURL = documentDirectoryFileURL.appendingPathComponent(fileName)
     ///URL型のファイルパスを返す
     return documentDirectoryFileURL
+}
+
+///ローカルDBのメッセージ内容を返却。
+func localMessageDataGet(date_Time:Date,roomID:String) -> Any{
+    let REALM = try! Realm()
+    let LOCALMESSAGEDATA = REALM.objects(messageLocal.self).sorted(byKeyPath: "date",ascending: true)
+    let PREDICATE = NSPredicate(format: "roomID == %@", roomID)
+    let LOCALMASSAGE = LOCALMESSAGEDATA.filter(PREDICATE)
+    
+    return LOCALMASSAGE
+}
+
+///メッセージ内容をローカルDBに保存
+func localMessageDataRegist(roomID:String,listend:Bool,message:String,sender:String,Date:Date,messageID:String){
+    let REALM = try! Realm()
+    let MESSAGELOCAL = messageLocal()
+    
+    MESSAGELOCAL.roomID = roomID
+    MESSAGELOCAL.message = message
+    MESSAGELOCAL.sender = sender
+    MESSAGELOCAL.date = Date
+    MESSAGELOCAL.messageID = messageID
+    MESSAGELOCAL.listend = listend
+    
+    try! REALM.write{
+        REALM.add(MESSAGELOCAL)
+    }
+    
+    
 }
 
 ///ローカルDBより自身のプロフィール情報を取得して辞書型で返却する
@@ -76,8 +120,8 @@ func userProfileDatalocalGet(callback: @escaping ([String:Any]) -> Void,UID:Stri
         ///Firebaseの形式に合わせて辞書型で保存する
         profileData = [ "createdAt":SELFPROFILEDATA.createdAt,
                         "updatedAt":SELFPROFILEDATA.updatedAt,
-                        "sex":SELFPROFILEDATA.Sex,
-                        "aboutMessage":SELFPROFILEDATA.aboutMeMassage,
+                        "Sex":SELFPROFILEDATA.Sex,
+                        "aboutMeMassage":SELFPROFILEDATA.aboutMeMassage,
                         "nickname":SELFPROFILEDATA.nickName,
                         "age":SELFPROFILEDATA.age,
                         "area":SELFPROFILEDATA.area
@@ -95,7 +139,7 @@ func userProfileDatalocalGet(callback: @escaping ([String:Any]) -> Void,UID:Stri
                 userProfileLocalDataExtraRegist(Realm: REALM, UID: UID, nickname: document["nickname"] as? String, sex: document["Sex"] as? Int, aboutMassage: document["aboutMeMassage"] as? String, age: document["age"] as? Int, area: document["area"] as? String, createdAt: document["createdAt"] as? Date, updatedAt: document["updatedAt"] as? Date)
                 ///返却(ローカルデータに不備のためサーバー情報返却)
                 callback (document)
-            }, UID: UID, lastUpdataAt: ChatDataManagedData.pastTimeGet())
+            }, UID: UID)
             return
         }
         ///返却(ローカルデータ)
@@ -111,7 +155,7 @@ func userProfileDatalocalGet(callback: @escaping ([String:Any]) -> Void,UID:Stri
             userProfileLocalDataExtraRegist(Realm: REALM, UID: UID, nickname: document["nickname"] as? String, sex: document["Sex"] as? Int, aboutMassage: document["aboutMeMassage"] as? String, age: document["age"] as? Int, area: document["area"] as? String, createdAt: document["createdAt"] as? Date, updatedAt: document["updatedAt"] as? Date)
             ///返却(ローカルデータに自身のデータが見つからなかったため)
             callback (document)
-        }, UID: UID, lastUpdataAt: ChatDataManagedData.pastTimeGet())
+        }, UID: UID)
     }
 }
 
@@ -254,7 +298,7 @@ func chatUserListInfoLocalDataRegist(Realm:Realm,UID:String,usernickname:String?
 ///ローカルDBへのリストユーザー更新データ保存
 /// - Parameters:
 /// - 新規と同様なので略
-func chatUserListInfoLocalExstraRegist(Realm:Realm,UID:String,usernickname:String?,newMessage:String,updateDate:Date,listend:Bool,SendUID:String) -> Bool{
+func chatUserListInfoLocalExstraRegist(Realm:Realm,UID:String,usernickname:String?,newMessage:String?,updateDate:Date?,listend:Bool?,SendUID:String?) -> Bool{
     ///REALMにてローカルDB生成
     let realm = Realm
     let localDBGetData = realm.objects(ListUsersInfoLocal.self)
@@ -265,14 +309,24 @@ func chatUserListInfoLocalExstraRegist(Realm:Realm,UID:String,usernickname:Strin
     guard let user = localDBGetData.filter(predicate).first else {
         return false
     }
-    // UID以外のデータを更新する
+    // UID以外のデータを更新する（存在していない項目は何もしない）
     do{
       try realm.write{
-          user.userNickName = usernickname
-          user.NewMessage = newMessage
-          user.upDateDate = updateDate
-          user.listend = listend
-          user.sendUID = SendUID
+          if let usernickname = usernickname {
+              user.userNickName = usernickname
+          }
+          if let newMessage = newMessage {
+              user.NewMessage = newMessage
+          }
+          if let updateDate = updateDate {
+              user.upDateDate = updateDate
+          }
+          if let listend = listend {
+              user.listend = listend
+          }
+          if let SendUID = SendUID {
+              user.sendUID = SendUID
+          }
       }
     }catch {
       print("Error \(error)")

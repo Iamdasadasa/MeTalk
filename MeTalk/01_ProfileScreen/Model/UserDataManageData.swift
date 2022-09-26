@@ -176,42 +176,21 @@ struct UserDataManage{
         ///- USERINFODATA.UID: 取得するユーザーUID
         /// - Returns:
         /// -document:取得したユーザー情報
-    func userInfoDataGet(callback: @escaping  ([String:Any]?) -> Void,UID:String?,lastUpdataAt:Date?) {
+    func userInfoDataGet(callback: @escaping  ([String:Any]?) -> Void,UID:String?) {
         guard let UID = UID else {
             print("UIDを確認できませんでした")
             return
         }
-        
-        ///更新日付がNILLだった場合は更新日付を初期データでサーバーアクセス
-        guard let lastupdateAt = lastUpdataAt else {
-            ///ここでデータにアクセスしている（非同期処理）
-            let userDocuments = cloudDB.collection("users").whereField("updatedAt",isGreaterThanOrEqualTo: ChatDataManagedData.pastTimeGet())
-                ///getDocumentプロパティでコレクションデータからオブジェクトとしてデータを取得
-            userDocuments.getDocuments(){ (QuerySnapshot,err) in
-                if let error = err {
-                    print("プロフィール情報の取得ができませんでした: \(err)")
-                    ///相手のトークリストに何らかの理由で存在しないORブロック変数がTrueはここにくる
-                    var failedUserInfo = ["UID":"Block"]
-                    callback(failedUserInfo)
-                } else {
-                    let DICTIONARYSNAPSHOT = QuerySnapshot!.documents.first
-                    callback(DICTIONARYSNAPSHOT?.data())
-                }
-            }
-            return
-        }
-            ///ここでデータにアクセスしている（非同期処理）
-        let userDocuments = cloudDB.collection("users").whereField("updatedAt",isGreaterThanOrEqualTo: lastUpdataAt)
-            ///getDocumentプロパティでコレクションデータからオブジェクトとしてデータを取得
-        userDocuments.getDocuments(){ (QuerySnapshot,err) in
+        ///非同期処理
+        let userDocuments = cloudDB.collection("users").document(UID)
+        userDocuments.getDocument{ (QuerySnapshot,err) in
             if let error = err {
                 print("プロフィール情報の取得ができませんでした: \(err)")
                 ///相手のトークリストに何らかの理由で存在しないORブロック変数がTrueはここにくる
                 var failedUserInfo = ["UID":"Block"]
                 callback(failedUserInfo)
             } else {
-                let DICTIONARYSNAPSHOT = QuerySnapshot!.documents.first
-                print(QuerySnapshot!.documents)
+                let DICTIONARYSNAPSHOT = QuerySnapshot
                 callback(DICTIONARYSNAPSHOT?.data())
             }
         }

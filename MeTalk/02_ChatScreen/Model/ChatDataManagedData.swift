@@ -29,7 +29,7 @@ struct ChatDataManagedData{
     }
     ///相手のユーザー情報内に自分のUIDを投入し自分のユーザー情報内に相手のUIDを投入
     ///(ここは相手にメッセージを送信したタイミングもしくは相手をトーク一覧から発見して最初のトークを行う際に。。。かな。)
-    func talkListUserAuthUIDCreate(UID1:String,UID2:String,NewMessage:String){
+    func talkListUserAuthUIDCreate(UID1:String,UID2:String,NewMessage:String,meNickName:String,youNickname:String){
         
         ///送信ボタンを押したときではなくランダムのユーザーリストから選んだ場合は
         ///自分のトークリストにのみ相手のUIDを登録するようにする（相手にメッセージを送っていないのに相手側にトークリストの画面に表示されることを防ぐため）
@@ -42,7 +42,9 @@ struct ChatDataManagedData{
                 Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData([
                     "UpdateAt": FieldValue.serverTimestamp(),
                     "FirstMessage":NewMessage,
-                    "SendID":UID1
+                    "SendID":UID1,
+                    "meNickname":meNickName,
+                    "youNickname":youNickname
                 ], completion: { error in
                     if let error = error {
                         ///失敗した場合
@@ -56,7 +58,9 @@ struct ChatDataManagedData{
                 Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData([
                     "createdAt": FieldValue.serverTimestamp(),
                     "FirstMessage":NewMessage,
-                    "SendID":UID1
+                    "SendID":UID1,
+                    "meNickname":meNickName,
+                    "youNickname":youNickname
                 ], completion: { error in
                     if let error = error {
                         ///失敗した場合
@@ -74,7 +78,10 @@ struct ChatDataManagedData{
                 Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData([
                     "UpdateAt": FieldValue.serverTimestamp(),
                     "FirstMessage":NewMessage,
-                    "SendID":UID1
+                    "SendID":UID1,
+                    ///相手の方に書き込み場合は逆転させる
+                    "meNickname":youNickname,
+                    "youNickname":meNickName
                 ], completion: { error in
                     if let error = error {
                         ///失敗した場合
@@ -88,7 +95,10 @@ struct ChatDataManagedData{
                 Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData([
                     "UpdateAt": FieldValue.serverTimestamp(),
                     "FirstMessage":NewMessage,
-                    "SendID":UID1
+                    "SendID":UID1,
+                    ///相手の方に書き込み場合は逆転させる
+                    "meNickname":youNickname,
+                    "youNickname":meNickName
                 ], completion: { error in
                     if let error = error {
                         ///失敗した場合

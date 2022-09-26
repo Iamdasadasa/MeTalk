@@ -263,11 +263,11 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
         let attributedText = NSAttributedString(
             string: text, attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor: UIColor.white])
             let message = MockMessage(attributedText: attributedText, sender:currentSender(), messageId: UUID().uuidString, date: Date())
-        
+
             ///FireBaseにデータ書き込み（書き込みした時点で読み込みリロードhandlerが呼ばれる）
             chatManageData.writeMassageData(mockMassage: message, text: text, roomID: self.roomID)
-            ///最初のメッセージが存在していない場合のみそれぞれのAuthにUIDを登録
-            chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text)
+            ///最初のメッセージが存在していない場合のみそれぞれのAuthにUIDを登録、存在していたらデータ更新
+            chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text, meNickName: self.MeInfo["nickname"] as! String, youNickname: self.YouInfo["nickname"] as! String)
         
             self.messageInputBar.inputTextView.text = String()
             self.messageInputBar.invalidatePlugins()
@@ -330,16 +330,21 @@ extension ChatViewController {
     //データベースから読み込んだデータを配列(readData)に格納するメソッド
     func snapshotToArray(snapshot: DataSnapshot){
         var messageArray:[MockMessage] = []
+        ここでRealMの処理を噛ませる。
         //スナップショットとは、ある時点における特定のデータベース参照にあるデータの全体像を写し取ったもの
         if snapshot.children.allObjects as? [DataSnapshot] != nil  {
             let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
             //snapChildrenの中身の数だけsnapChildをとりだす
             for snapChild in snapChildren! {
-                ///読み込んだメッセージのlistendは全てtrueに更新
-                databaseRef.child("Chat").child(roomID).child(snapChild.key).updateChildValues(["listend":true])
+                
                 ///それぞれのValue配列を取得
                 if let postDict = snapChild.value as? [String: Any] {
-                    print(postDict)
+                    ///送信UIDが自身のUIDでなかった場合
+                    let senderID = postDict["sender"] as! String
+                    if  senderID != self.MeUID {
+                        ///読み込んだメッセージのlistendは全てtrueに更新（送信者が自分以外）
+                        databaseRef.child("Chat").child(roomID).child(snapChild.key).updateChildValues(["listend":true])
+                    }
                     ///メッセージ配列に適用
                     messageArray.append(MockMessage.loadMessage(text: postDict["message"] as! String, user: userTypeJudge(senderID: postDict["sender"] as! String),data: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String))
                 }
