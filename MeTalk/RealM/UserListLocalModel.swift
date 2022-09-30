@@ -60,7 +60,7 @@ class messageLocal: Object {
     @objc dynamic var roomID:String?
     @objc dynamic var message:String = ""
     @objc dynamic var sender:String = ""
-    @objc dynamic var date:Date?
+    @objc dynamic var Date:Date?
     @objc dynamic var listend:Bool = false
     
 }
@@ -79,9 +79,9 @@ func userDefaultsImageDataPathCreate(UID:String) -> URL {
 }
 
 ///ローカルDBのメッセージ内容を返却。
-func localMessageDataGet(date_Time:Date,roomID:String) -> Any{
+func localMessageDataGet(roomID:String) -> Results<messageLocal>{
     let REALM = try! Realm()
-    let LOCALMESSAGEDATA = REALM.objects(messageLocal.self).sorted(byKeyPath: "date",ascending: true)
+    let LOCALMESSAGEDATA = REALM.objects(messageLocal.self).sorted(byKeyPath: "Date",ascending: true)
     let PREDICATE = NSPredicate(format: "roomID == %@", roomID)
     let LOCALMASSAGE = LOCALMESSAGEDATA.filter(PREDICATE)
     
@@ -91,15 +91,23 @@ func localMessageDataGet(date_Time:Date,roomID:String) -> Any{
 ///メッセージ内容をローカルDBに保存
 func localMessageDataRegist(roomID:String,listend:Bool,message:String,sender:String,Date:Date,messageID:String){
     let REALM = try! Realm()
+    ///生成用
     let MESSAGELOCAL = messageLocal()
+    ///自前データ用
+    let LOCALDBGETDATA = REALM.objects(messageLocal.self)
+    ///最新データが既に保存してあった場合はリターン（トーク画面に入ると必ず最新データは取得する仕様のため両者が無送信で開き直した場合は発生する）
+    let PREDICATE = NSPredicate(format: "messageID == %@", messageID)
+    if let messageID = LOCALDBGETDATA.filter(PREDICATE).first{
+        return
+    }
     
     MESSAGELOCAL.roomID = roomID
     MESSAGELOCAL.message = message
     MESSAGELOCAL.sender = sender
-    MESSAGELOCAL.date = Date
+    MESSAGELOCAL.Date = Date
     MESSAGELOCAL.messageID = messageID
     MESSAGELOCAL.listend = listend
-    
+    ///保存処理
     try! REALM.write{
         REALM.add(MESSAGELOCAL)
     }

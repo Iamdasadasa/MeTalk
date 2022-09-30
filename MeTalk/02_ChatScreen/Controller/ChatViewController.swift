@@ -56,6 +56,13 @@ class ChatViewController: MessagesViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        /// 最新のデータ追加されるたびに最新データを取得する
+        handle = databaseRef.child("Chat").child(roomID).queryOrdered(byChild: "Date:").queryLimited(toLast: 1).observe(.value) { (snapshot: DataSnapshot) in
+            DispatchQueue.main.async {//クロージャの中を同期処理
+                self.snapshotToArray(snapshot: snapshot)//スナップショットを配列(readData)に入れる処理。下に定義
+            }
+        }
 
         ///ここで初回のメッセージを取得してくる。また、リアルタイム更新もここでやる。
         self.LoadMessageGet(roomID: roomID)
@@ -188,6 +195,7 @@ extension ChatViewController: MessagesDisplayDelegate {
 // MARK: - MessagesLayoutDelegate
 extension ChatViewController: MessagesLayoutDelegate {
 
+    ///日付ラベルの高さ（有無）設定
     func cellTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         
         ///対象セルのメッセージに格納されているDate情報をStringに変換
@@ -278,27 +286,27 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
 
 ///--追加リロード処理
 extension ChatViewController {
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        
-        ///取得しているメッセージリストの内容が25件未満の場合またはデータのロードフラグがTrueは何もしない
-        if messageList.count < 25 || !loadDataLockFlg {
-            return
-        }
-        ///ナビゲーションバーのmaxYの値取得
-        guard let navigationBarMaxY = self.navigationController?.navigationBar.frame.maxY else {
-            return
-        }
-
-        ///ナビゲーションバーの位置にスクロールの位置がドラッグによって来た時（一番上で新しいメッセージをロードする時）
-        if navigationBarMaxY * -1 >= scrollView.contentOffset.y && scrollView.isDragging{
-            print("LoadMessageGet直前。")
-            loadDataLockFlg = false
-            ///取得件数を25件ずつ増加
-            loadToLimitCount = loadToLimitCount + 25
-            ///新しくメッセージをFireStoreから取得してくる。
-            LoadMessageGet(roomID: self.roomID)
-        }
-    }
+//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+//
+//        ///取得しているメッセージリストの内容が25件未満の場合またはデータのロードフラグがTrueは何もしない
+////        if messageList.count < 25 || !loadDataLockFlg {
+////            return
+////        }
+//        ///ナビゲーションバーのmaxYの値取得
+//        guard let navigationBarMaxY = self.navigationController?.navigationBar.frame.maxY else {
+//            return
+//        }
+//
+//        ///ナビゲーションバーの位置にスクロールの位置がドラッグによって来た時（一番上で新しいメッセージをロードする時）
+//        if navigationBarMaxY * -1 >= scrollView.contentOffset.y && scrollView.isDragging{
+//            print("LoadMessageGet直前。")
+//            loadDataLockFlg = false
+//            ///取得件数を25件ずつ増加
+//            loadToLimitCount = loadToLimitCount + 25
+//            ///新しくメッセージをFireStoreから取得してくる。
+//            LoadMessageGet(roomID: self.roomID)
+//        }
+//    }
 }
 
 extension ChatViewController {
@@ -316,21 +324,23 @@ extension ChatViewController {
         if loadDataStopFlg == true {
             return
         }
-        ///時間計測
-        start = Date()
-        // 最新25件のデータをデータベースから取得する
-        // 最新のデータ追加されるたびに最新データを取得する
-        handle = databaseRef.child("Chat").child(roomID).queryLimited(toLast: loadToLimitCount).queryOrdered(byChild: "Date:").observe(.value) { (snapshot: DataSnapshot) in
-            DispatchQueue.main.async {//クロージャの中を同期処理
-                self.snapshotToArray(snapshot: snapshot)//スナップショットを配列(readData)に入れる処理。下に定義
-            }
-        }
+
+        
+//        // 最新のデータ追加されるたびに最新データを取得する
+//        handle = databaseRef.child("Chat").child(roomID).queryLimited(toLast: loadToLimitCount).queryOrdered(byChild: "Date:").observe(.value) { (snapshot: DataSnapshot) in
+//            DispatchQueue.main.async {//クロージャの中を同期処理
+//                self.snapshotToArray(snapshot: snapshot)//スナップショットを配列(readData)に入れる処理。下に定義
+//            }
+//        }
     }
     
     //データベースから読み込んだデータを配列(readData)に格納するメソッド
     func snapshotToArray(snapshot: DataSnapshot){
+        
         var messageArray:[MockMessage] = []
-        ここでRealMの処理を噛ませる。
+        ///ローカルDBからメッセージ取得
+        let LOCALMESSAGEDATA = localMessageDataGet(roomID: roomID)
+        
         //スナップショットとは、ある時点における特定のデータベース参照にあるデータの全体像を写し取ったもの
         if snapshot.children.allObjects as? [DataSnapshot] != nil  {
             let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
@@ -347,6 +357,13 @@ extension ChatViewController {
                     }
                     ///メッセージ配列に適用
                     messageArray.append(MockMessage.loadMessage(text: postDict["message"] as! String, user: userTypeJudge(senderID: postDict["sender"] as! String),data: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String))
+                    ///ローカルデータベースに保存
+                    localMessageDataRegist(roomID: roomID, listend: true, message: postDict["message"] as! String, sender: postDict["sender"] as! String, Date: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String)
+                    ///ローカルデータからデータ抽出
+                    for localmessage in LOCALMESSAGEDATA {
+                        ///メッセージ配列に適用
+                        messageArray.append(MockMessage.loadMessage(text: localmessage["message"] as! String, user: userTypeJudge(senderID: localmessage["sender"] as! String),data:localmessage["Date"] as! Date, messageID: localmessage["messageID"] as! String))
+                    }
                 }
             }
             ///一番最初のメッセージまでロードし終えていたらフラグにTrueを設定
@@ -355,9 +372,7 @@ extension ChatViewController {
             }
             
             self.messageList = messageArray
-            ///時間計測
-            let elapsed = Date().timeIntervalSince(start!)
-            print(elapsed)
+
             self.becomeFirstResponder()
             loadDataLockFlg = true
         }
