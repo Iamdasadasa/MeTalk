@@ -28,8 +28,6 @@ enum userType {
                 return 0
         }
     }
-        
-
 }
 
 struct MockMessage: MessageType {
@@ -38,36 +36,43 @@ struct MockMessage: MessageType {
     var sender: SenderType
     var sentDate: Date
     var kind: MessageKind
+    var DateGroupFlg:Bool
 
-    private init(kind: MessageKind, sender: SenderType, messageId: String, date: Date) {
+    private init(kind: MessageKind, sender: SenderType, messageId: String, date: Date,messageDateGroupingFlag:Bool) {
         self.kind = kind
         self.sender = sender
         self.messageId = messageId
         self.sentDate = date
+        self.DateGroupFlg = messageDateGroupingFlag
     }
 
-    init(text: String, sender: SenderType, messageId: String, date: Date) {
-        self.init(kind: .text(text), sender: sender, messageId: messageId, date: date)
-    }
+//    init(text: String, sender: SenderType, messageId: String, date: Date,messageDateGroupingFlag:Bool) {
+//        self.init(kind: .text(text), sender: sender, messageId: messageId, date: date)
+//        
+////        self.init(kind: .custom(messageDateGroupingFlag), sender: sender, messageId: messageId, date: date)
+//    }
+    
 
     ///メッセージの情報だけを取り扱いたい時はこっちでInitしてインスタンス化
-    init(attributedText: NSAttributedString, sender: SenderType, messageId: String, date: Date) {
-        self.init(kind: .attributedText(attributedText), sender: sender, messageId: messageId, date: date)
+    init(attributedText: NSAttributedString, sender: SenderType, messageId: String, date: Date,messageDateGroupingFlag:Bool) {
+        self.init(kind: .attributedText(attributedText), sender: sender, messageId: messageId, date: date, messageDateGroupingFlag: messageDateGroupingFlag)
+        
+//        self.init(kind: .custom(messageDateGroupingFlag), sender: sender, messageId: messageId, date: date)
     }
 
-    static func loadMessage(text: String, user: userType,data:Date,messageID:String) -> MockMessage {
+    static func loadMessage(text: String, user: userType,data:Date,messageID:String,messageDateGroupingFlag:Bool) -> MockMessage {
         if user.meFag == 1 {
             let attributedText = NSAttributedString(
                 string: text,
                 attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor:UIColor.black]
             )
-            return MockMessage(attributedText: attributedText, sender: user.data, messageId: messageID, date: data)
+            return MockMessage(attributedText: attributedText, sender: user.data, messageId: messageID, date: data, messageDateGroupingFlag: messageDateGroupingFlag)
         } else {
             let attributedText = NSAttributedString(
                 string: text,
                 attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor:UIColor.white]
             )
-            return MockMessage(attributedText: attributedText, sender: user.data, messageId: messageID, date:data)
+            return MockMessage(attributedText: attributedText, sender: user.data, messageId: messageID, date:data, messageDateGroupingFlag: messageDateGroupingFlag)
         }
 
     }

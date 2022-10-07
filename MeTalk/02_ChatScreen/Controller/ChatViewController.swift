@@ -25,6 +25,8 @@ class ChatViewController: MessagesViewController {
     var loadDataStopFlg:Bool = false
     ///時間計測
     var start:Date?
+    ///時間まとめ用のKeyValue
+    var DateGrouping:[String] = []
 
     
     ///インスタンス化(Model)
@@ -56,13 +58,14 @@ class ChatViewController: MessagesViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        /// 最新のデータ追加されるたびに最新データを取得する
-        handle = databaseRef.child("Chat").child(roomID).queryOrdered(byChild: "Date:").queryLimited(toLast: 1).observe(.value) { (snapshot: DataSnapshot) in
+
+        ///listendがFalse（既読扱いになっていないもののみ）を取得
+        handle = databaseRef.child("Chat").child(roomID).queryOrdered(byChild: "listend").queryEqual(toValue: false).observe(.value) { (snapshot: DataSnapshot) in
             DispatchQueue.main.async {//クロージャの中を同期処理
                 self.snapshotToArray(snapshot: snapshot)//スナップショットを配列(readData)に入れる処理。下に定義
             }
         }
+        
 
         ///ここで初回のメッセージを取得してくる。また、リアルタイム更新もここでやる。
         self.LoadMessageGet(roomID: roomID)
@@ -194,30 +197,22 @@ extension ChatViewController: MessagesDisplayDelegate {
 // 各ラベルの高さを設定（デフォルト0なので必須）
 // MARK: - MessagesLayoutDelegate
 extension ChatViewController: MessagesLayoutDelegate {
-
+    
+    
     ///日付ラベルの高さ（有無）設定
     func cellTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
+        ///messageはmessageTypeで直接フラグを持ってこれないので一旦MockMessage型に変換
+        let messages:MockMessage = message as! MockMessage
         
-        ///対象セルのメッセージに格納されているDate情報をStringに変換
-        let stringData = ChatDataManagedData.dateToStringFormatt(date: message.sentDate, formatFlg: 0)
-        ///FireStoreから取得してきているmessageListのメッセージ群にフィルターをかけてその結果を変数に格納
-        let firstMessageList = messageList.filter {
-            ///messageList群ループ開始
-            ///messageListのsentDateを同様にStringに変換
-            let messageListSentDate = ChatDataManagedData.dateToStringFormatt(date: $0.sentDate, formatFlg: 0)
-            ///stringDataがmessageListSentDateの中に年月までで調査して絞り込み
-            return (messageListSentDate as NSString).substring(to: 10) == (stringData as NSString).substring(to:10)
-            ///その中から一番若いものを取得してfirstMessageListに格納
-        }.first
-        
-        ///firstMessageListのメッセージIDと現在の対象セルのメッセージIDが比較していれば（一番若ければ）CellのTextに反映
-        if firstMessageList?.messageId == message.messageId {
+        ///フラグがTrueであれば日付ラベル表示
+        if messages.DateGroupFlg{
             return 10
         } else {
             return 0
         }
-        
+
     }
+    
 
     func messageTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         16
@@ -270,7 +265,7 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
         
         let attributedText = NSAttributedString(
             string: text, attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor: UIColor.white])
-            let message = MockMessage(attributedText: attributedText, sender:currentSender(), messageId: UUID().uuidString, date: Date())
+        let message = MockMessage(attributedText: attributedText, sender:currentSender(), messageId: UUID().uuidString, date: Date(), messageDateGroupingFlag: false)
 
             ///FireBaseにデータ書き込み（書き込みした時点で読み込みリロードhandlerが呼ばれる）
             chatManageData.writeMassageData(mockMassage: message, text: text, roomID: self.roomID)
@@ -284,37 +279,13 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
 
 }
 
-///--追加リロード処理
-extension ChatViewController {
-//    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//
-//        ///取得しているメッセージリストの内容が25件未満の場合またはデータのロードフラグがTrueは何もしない
-////        if messageList.count < 25 || !loadDataLockFlg {
-////            return
-////        }
-//        ///ナビゲーションバーのmaxYの値取得
-//        guard let navigationBarMaxY = self.navigationController?.navigationBar.frame.maxY else {
-//            return
-//        }
-//
-//        ///ナビゲーションバーの位置にスクロールの位置がドラッグによって来た時（一番上で新しいメッセージをロードする時）
-//        if navigationBarMaxY * -1 >= scrollView.contentOffset.y && scrollView.isDragging{
-//            print("LoadMessageGet直前。")
-//            loadDataLockFlg = false
-//            ///取得件数を25件ずつ増加
-//            loadToLimitCount = loadToLimitCount + 25
-//            ///新しくメッセージをFireStoreから取得してくる。
-//            LoadMessageGet(roomID: self.roomID)
-//        }
-//    }
-}
-
 extension ChatViewController {
     func closeKeyboard(){
         self.messageInputBar.inputTextView.resignFirstResponder()
         self.messagesCollectionView.scrollToLastItem()
     }
 }
+
 
 ///本当は下記の処理もChatDataManagedDataのModelに書きたかったが、非同期処理内で自身のメッセージリストに投入する方法がなかったためにやむなくextesionで対応
 import Firebase
@@ -324,14 +295,6 @@ extension ChatViewController {
         if loadDataStopFlg == true {
             return
         }
-
-        
-//        // 最新のデータ追加されるたびに最新データを取得する
-//        handle = databaseRef.child("Chat").child(roomID).queryLimited(toLast: loadToLimitCount).queryOrdered(byChild: "Date:").observe(.value) { (snapshot: DataSnapshot) in
-//            DispatchQueue.main.async {//クロージャの中を同期処理
-//                self.snapshotToArray(snapshot: snapshot)//スナップショットを配列(readData)に入れる処理。下に定義
-//            }
-//        }
     }
     
     //データベースから読み込んだデータを配列(readData)に格納するメソッド
@@ -346,24 +309,52 @@ extension ChatViewController {
             let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
             //snapChildrenの中身の数だけsnapChildをとりだす
             for snapChild in snapChildren! {
-                
                 ///それぞれのValue配列を取得
                 if let postDict = snapChild.value as? [String: Any] {
+                    ///日付格納配列初期化
+                    DateGrouping = []
                     ///送信UIDが自身のUIDでなかった場合
                     let senderID = postDict["sender"] as! String
                     if  senderID != self.MeUID {
                         ///読み込んだメッセージのlistendは全てtrueに更新（送信者が自分以外）
                         databaseRef.child("Chat").child(roomID).child(snapChild.key).updateChildValues(["listend":true])
                     }
-                    ///メッセージ配列に適用
-                    messageArray.append(MockMessage.loadMessage(text: postDict["message"] as! String, user: userTypeJudge(senderID: postDict["sender"] as! String),data: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String))
                     ///ローカルデータベースに保存
                     localMessageDataRegist(roomID: roomID, listend: true, message: postDict["message"] as! String, sender: postDict["sender"] as! String, Date: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String)
-                    ///ローカルデータからデータ抽出
-                    for localmessage in LOCALMESSAGEDATA {
-                        ///メッセージ配列に適用
-                        messageArray.append(MockMessage.loadMessage(text: localmessage["message"] as! String, user: userTypeJudge(senderID: localmessage["sender"] as! String),data:localmessage["Date"] as! Date, messageID: localmessage["messageID"] as! String))
+                }
+            }
+            ///ローカルデータからデータ抽出
+            for localmessage in LOCALMESSAGEDATA {
+                
+                ///Date型をStringに変換
+                let messageSentDataString = ChatDataManagedData.dateToStringFormatt(date: localmessage["Date"] as? Date, formatFlg: 0)
+                ///日付を年月までで切り取り
+                let YEARMONTHDATE = (messageSentDataString as NSString).substring(to: 10)
+
+                ///日付格納配列がNULLでない
+                if let DateFirst = DateGrouping.last {
+                    ///日付格納配列の中の最新が現在見ているデータと異なっている
+                    if DateFirst != YEARMONTHDATE {
+                        ///日付ラベルフラグをTRUE
+                        messageAppend(FLAG: true)
+                    } else {
+                        ///日付ラベルフラグをFALSE
+                        messageAppend(FLAG: false)
                     }
+                ///日付格納配列がNULL
+                } else {
+                    ///日付ラベルフラグをTRUE
+                    messageAppend(FLAG: true)
+                }
+                
+                ///日付格納配列に格納
+                DateGrouping.append(YEARMONTHDATE)
+                
+                ///メッセージ配列に適用
+                func messageAppend(FLAG:Bool) {
+
+                    messageArray.append(MockMessage.loadMessage(text: localmessage["message"] as! String, user: userTypeJudge(senderID: localmessage["sender"] as! String),data:localmessage["Date"] as! Date, messageID: localmessage["messageID"] as! String, messageDateGroupingFlag:FLAG
+                                                               ))
                 }
             }
             ///一番最初のメッセージまでロードし終えていたらフラグにTrueを設定
