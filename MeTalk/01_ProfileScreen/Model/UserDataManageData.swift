@@ -335,7 +335,65 @@ struct UserDataManage{
             }
         }
     }
-    
+    ///【非同期】ユーザーリスト情報取得関数
+    /// - Parameters:
+    /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
+    /// 　　　　　　（ニックネーム、性別等が含まれる）
+    /// - Returns:
+    func userListInfoDataGet(callback: @escaping ([UserListStruct]) -> Void ,CountLimit:Int) {
+        ///ここでデータにアクセスしている（非同期処理）
+        ///.whereField("UpdateAt", isGreaterThanOrEqualTo: latestTime) これが時間のクエリ　参考
+        cloudDB.collection("users").limit(to: CountLimit).order(by: "updatedAt", descending: true).getDocuments(){ (querySnapshot, err) in
+            if let err = err {
+                print("Error getting documents: \(err)")
+            } else {
+                var UserListinfo:UserListStruct
+                var callbackUserListMock:[UserListStruct] = []
+
+                for talkUserinfo in querySnapshot!.documents {
+                    ///なぜか文頭にスペースが入ることがあるのでトリム処理
+                    let UID = talkUserinfo.documentID.trimmingCharacters(in: .whitespaces)
+                    print(UID)
+                    guard let SEX = talkUserinfo["Sex"] as? Int else {
+                        print("ユーザー情報が取得できませんでした。（性別）")
+                        return
+                    }
+                    
+                    guard let ABOUTMESSAGE = talkUserinfo["aboutMeMassage"] as? String else {
+                        print("ユーザー情報が取得できませんでした。（メッセージ）")
+                        return
+                    }
+                    
+                    guard let AGE = talkUserinfo["age"] as? Int else {
+                        print("ユーザー情報が取得できませんでした。（年齢）")
+                        return
+                    }
+                    
+                    guard let AREA = talkUserinfo["area"] as? String else {
+                        print("ユーザー情報が取得できませんでした。（出身地）")
+                        return
+                    }
+                    
+                    ///更新日時のタイムスタンプをTimeStamp⇨Date型として受け取る
+                    guard let TIMESTAMP = talkUserinfo["updatedAt"] as? Timestamp else {
+                        print("更新日時が取得できませんでした。")
+                        return
+                    }
+                    
+                    guard let NICKNAME = talkUserinfo["nickname"] as? String else {
+                        print("更新日時が取得できませんでした。（ニックネーム）")
+                        return
+                    }
+                    
+                    ///ここでトークリストのユーザーID一覧を格納
+                    UserListinfo = UserListStruct(UID: UID, userNickName: NICKNAME, aboutMessage: ABOUTMESSAGE, Age: AGE, From: AREA, Sex: SEX)
+                    
+                    callbackUserListMock.append(UserListinfo)
+                }
+                callback(callbackUserListMock)
+            }
+        }
+    }
     
     ///【非同期】ブロックユーザーリスト取得関数(コレクションは"Users")
     /// - Parameters:

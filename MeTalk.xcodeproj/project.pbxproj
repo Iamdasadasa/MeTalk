@@ -37,6 +37,9 @@
 		D655504D27E4260C00C86E34 /* ChatDataManagedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655504C27E4260C00C86E34 /* ChatDataManagedData.swift */; };
 		D655504F27EADB7600C86E34 /* ChatUserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655504E27EADB7600C86E34 /* ChatUserListViewController.swift */; };
 		D655505127EADC7C00C86E34 /* chatUserListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655505027EADC7C00C86E34 /* chatUserListTableViewCell.swift */; };
+		D65BD34828EFE2BC00DDAFA4 /* UserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */; };
+		D65BD34A28EFE2D100DDAFA4 /* UserListTavleViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BD34928EFE2D100DDAFA4 /* UserListTavleViewCell.swift */; };
+		D67C27D028F88B2F00C25BA3 /* UserListStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */; };
 		D68FB39227D5AC5300E57F5A /* sideMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */; };
 		D68FB39427D5C6CC00E57F5A /* GeneralTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39327D5C6CC00E57F5A /* GeneralTableView.swift */; };
 		D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */; };
@@ -50,7 +53,6 @@
 		D696850827D24100006D85DC /* ShowImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D696850727D24100006D85DC /* ShowImageView.swift */; };
 		D698A0CB27E0BA66002C64DE /* WebViewTempleteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D698A0CA27E0BA66002C64DE /* WebViewTempleteController.swift */; };
 		D69EC37427AA55DA00290B18 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */; };
-		D69EC37627AA66D400290B18 /* UserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37527AA66D400290B18 /* UserListViewController.swift */; };
 		D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37927AA681100290B18 /* MainTabBarController.swift */; };
 		D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37B27AA85C300290B18 /* loadingView.swift */; };
 		D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37F27AA92F100290B18 /* ProfileViewController.swift */; };
@@ -116,6 +118,9 @@
 		D655504C27E4260C00C86E34 /* ChatDataManagedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDataManagedData.swift; sourceTree = "<group>"; };
 		D655504E27EADB7600C86E34 /* ChatUserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatUserListViewController.swift; sourceTree = "<group>"; };
 		D655505027EADC7C00C86E34 /* chatUserListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = chatUserListTableViewCell.swift; sourceTree = "<group>"; };
+		D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListViewController.swift; sourceTree = "<group>"; };
+		D65BD34928EFE2D100DDAFA4 /* UserListTavleViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListTavleViewCell.swift; sourceTree = "<group>"; };
+		D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListStruct.swift; sourceTree = "<group>"; };
 		D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sideMenuViewController.swift; sourceTree = "<group>"; };
 		D68FB39327D5C6CC00E57F5A /* GeneralTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralTableView.swift; sourceTree = "<group>"; };
 		D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuTableViewCell.swift; sourceTree = "<group>"; };
@@ -127,7 +132,6 @@
 		D696850727D24100006D85DC /* ShowImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowImageView.swift; sourceTree = "<group>"; };
 		D698A0CA27E0BA66002C64DE /* WebViewTempleteController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewTempleteController.swift; sourceTree = "<group>"; };
 		D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
-		D69EC37527AA66D400290B18 /* UserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListViewController.swift; sourceTree = "<group>"; };
 		D69EC37927AA681100290B18 /* MainTabBarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabBarController.swift; sourceTree = "<group>"; };
 		D69EC37B27AA85C300290B18 /* loadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = loadingView.swift; sourceTree = "<group>"; };
 		D69EC37F27AA92F100290B18 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
@@ -211,6 +215,7 @@
 				D655503F27E20FBF00C86E34 /* 00_initialScreen */,
 				D655504327E2107100C86E34 /* 01_ProfileScreen */,
 				D655504427E35FC800C86E34 /* 02_ChatScreen */,
+				D65BD34628EFE15F00DDAFA4 /* 03_UserListScreen */,
 			);
 			path = MeTalk;
 			sourceTree = "<group>";
@@ -255,7 +260,6 @@
 		D631EC1F27A5823000800693 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				D69EC37527AA66D400290B18 /* UserListViewController.swift */,
 				D69EC37F27AA92F100290B18 /* ProfileViewController.swift */,
 				D696850527D23FBD006D85DC /* showImageViewController.swift */,
 			);
@@ -397,6 +401,40 @@
 				D655504E27EADB7600C86E34 /* ChatUserListViewController.swift */,
 			);
 			path = Controller;
+			sourceTree = "<group>";
+		};
+		D65BD34628EFE15F00DDAFA4 /* 03_UserListScreen */ = {
+			isa = PBXGroup;
+			children = (
+				D67C27D228F88B9E00C25BA3 /* Model */,
+				D65BD34E28F8895400DDAFA4 /* View */,
+				D65BD34F28F8895B00DDAFA4 /* Controller */,
+			);
+			path = 03_UserListScreen;
+			sourceTree = "<group>";
+		};
+		D65BD34E28F8895400DDAFA4 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D65BD34928EFE2D100DDAFA4 /* UserListTavleViewCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		D65BD34F28F8895B00DDAFA4 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		D67C27D228F88B9E00C25BA3 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 		D68FB39027D5AC3500E57F5A /* SideMenu */ = {
@@ -717,6 +755,7 @@
 				D631EC2127A582A200800693 /* initialSettingViewcontroller.swift in Sources */,
 				D68FB3AD27D9D65400E57F5A /* BlockListViewController.swift in Sources */,
 				D68FB39427D5C6CC00E57F5A /* GeneralTableView.swift in Sources */,
+				D67C27D028F88B2F00C25BA3 /* UserListStruct.swift in Sources */,
 				D6543DC127B7B61500444454 /* SemiModalViewController.swift in Sources */,
 				D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */,
 				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,
@@ -730,10 +769,11 @@
 				D655504D27E4260C00C86E34 /* ChatDataManagedData.swift in Sources */,
 				D6543DCD27BF6BC900444454 /* AboutMeTextFieldModalView.swift in Sources */,
 				D6543DC927BA268200444454 /* NickNameTextFieldModalView.swift in Sources */,
-				D69EC37627AA66D400290B18 /* UserListViewController.swift in Sources */,
 				D655504F27EADB7600C86E34 /* ChatUserListViewController.swift in Sources */,
 				D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */,
 				D696850827D24100006D85DC /* ShowImageView.swift in Sources */,
+				D65BD34A28EFE2D100DDAFA4 /* UserListTavleViewCell.swift in Sources */,
+				D65BD34828EFE2BC00DDAFA4 /* UserListViewController.swift in Sources */,
 				D655504B27E3630400C86E34 /* Mock.swift in Sources */,
 				D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */,
 				D631EC2527A7E26D00800693 /* InitialSettingData.swift in Sources */,
