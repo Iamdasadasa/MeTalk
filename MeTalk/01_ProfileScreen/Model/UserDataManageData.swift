@@ -15,7 +15,6 @@ struct UserDataManage{
     let cloudDB = Firestore.firestore()
     let storage = Storage.storage()
     let host = "gs://metalk-f132e.appspot.com"
-    var DBRef:DatabaseReference = Database.database().reference()
     
     ///匿名登録処理で登録したユーザー情報を返す& DB登録も初回は一緒にやる
     func signInAnonymously(callback: @escaping (String?) -> Void,nickName:String?,SexNo:Int?) {
@@ -393,6 +392,18 @@ struct UserDataManage{
                 callback(callbackUserListMock)
             }
         }
+    }
+    
+    ///【非同期】ここにライクボタンを押下した際のデータ送信
+    /// - Parameters:
+    /// - callback:コールバック関数。
+    /// - Returns:
+    func LikeDataPushIncrement(YouUID:String,MEUID:String,LikeInfo:[String:Any]) {
+        ///ライクボタンを押下した相手のプロフィール情報のライク数をインクリメント
+        Firestore.firestore().collection("users").document(YouUID).setData(["likeIncrement":FieldValue.increment(1.0)],merge: true)
+        ///RealtimeDBに対して相手のUID配下に自身のライク押下時間を記載
+        Database.database().reference().child("Like").child(YouUID).child(MEUID).setValue(LikeInfo)
+        
     }
     
     ///【非同期】ブロックユーザーリスト取得関数(コレクションは"Users")

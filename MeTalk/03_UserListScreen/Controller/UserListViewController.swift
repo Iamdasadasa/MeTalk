@@ -234,7 +234,18 @@ extension UserListViewController {
 }
 
 extension UserListViewController:UserListTableViewCellDelegate{
-    func likebuttonPushed(LIKEBUTTONIMAGEVIEW: UIImageView) {
+    func likebuttonPushed(LIKEBUTTONIMAGEVIEW: UIImageView, CELLUID: String) {
+        
+        if CELLUID == "unknown" {
+            print("ここにきたらエラーアラート")
+        }
+
         LIKEBUTTONIMAGEVIEW.image = UIImage(named: "LIKEBUTTON_IMAGE_Pushed")
+        
+        let date = ChatDataManagedData.dateToStringFormatt(date: Date(), formatFlg: 0)
+        let LIKEINFO = ["Date":date]
+        
+        USERDATAMANAGE.LikeDataPushIncrement(YouUID: CELLUID, MEUID: UID!, LikeInfo: LIKEINFO)
+        
     }
 }

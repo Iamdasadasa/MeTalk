@@ -8,7 +8,7 @@
 import UIKit
 
 protocol UserListTableViewCellDelegate:AnyObject{
-    func likebuttonPushed(LIKEBUTTONIMAGEVIEW:UIImageView)
+    func likebuttonPushed(LIKEBUTTONIMAGEVIEW:UIImageView,CELLUID:String)
 }
 
 class UserListTableViewCell: UITableViewCell {
@@ -89,7 +89,7 @@ class UserListTableViewCell: UITableViewCell {
     }()
     
     @objc func likebuttonPushed(){
-        delegate?.likebuttonPushed(LIKEBUTTONIMAGEVIEW: self.ImageView)
+        delegate?.likebuttonPushed(LIKEBUTTONIMAGEVIEW: self.ImageView, CELLUID: cellUID ?? "unknown")
     }
     
 //

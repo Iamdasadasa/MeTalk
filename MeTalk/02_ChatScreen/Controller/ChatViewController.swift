@@ -276,7 +276,6 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
             self.messageInputBar.invalidatePlugins()
 //            self.messagesCollectionView.scrollToLastItem()
     }
-
 }
 
 extension ChatViewController {
