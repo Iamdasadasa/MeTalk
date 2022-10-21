@@ -8,12 +8,12 @@
 import UIKit
 
 protocol UserListTableViewCellDelegate:AnyObject{
-    func likebuttonPushed(LIKEBUTTONIMAGEVIEW:UIImageView,CELLUID:String)
+    func likebuttonPushed(CELL:UserListTableViewCell,CELLUSERSTRUCT:UserListStruct)
 }
 
 class UserListTableViewCell: UITableViewCell {
   ///セル自体が持つUID定数（画面には表示させない nillを初期値にしているがControllerから値は代入される）
-    var cellUID:String?
+    var celluserStruct:UserListStruct?
     weak var delegate:UserListTableViewCellDelegate?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -87,9 +87,22 @@ class UserListTableViewCell: UITableViewCell {
         
         return returnUIButton
     }()
+    ///時間表示用VIEW
+    let UITextView:UIView = {
+        let returnUIVIEW = UIView()
+        returnUIVIEW.backgroundColor = .clear
+        returnUIVIEW.alpha = 0
+        return returnUIVIEW
+    }()
+    ///時間表示用ラベル
+    let UItextLabel:UILabel = {
+        let UItextLabel = UILabel()
+        UItextLabel.textColor = .white
+        return UItextLabel
+    }()
     
     @objc func likebuttonPushed(){
-        delegate?.likebuttonPushed(LIKEBUTTONIMAGEVIEW: self.ImageView, CELLUID: cellUID ?? "unknown")
+        delegate?.likebuttonPushed(CELL: self, CELLUSERSTRUCT: celluserStruct!)
     }
     
 //
@@ -115,14 +128,17 @@ class UserListTableViewCell: UITableViewCell {
         self.contentView.addSubview(talkListUserProfileImageView)
         self.contentView.addSubview(talkListUserNicknameLabel)
         self.contentView.addSubview(aboutMessage)
-        self.contentView.addSubview(LikeButton)
         self.contentView.addSubview(ImageView)
+        self.contentView.addSubview(UITextView)
+        self.contentView.addSubview(LikeButton)
+        self.UITextView.addSubViewFill(UItextLabel)
 //        ///UIオートレイアウトと競合させない処理
         talkListUserProfileImageView.translatesAutoresizingMaskIntoConstraints = false
         talkListUserNicknameLabel.translatesAutoresizingMaskIntoConstraints = false
         aboutMessage.translatesAutoresizingMaskIntoConstraints = false
         ImageView.translatesAutoresizingMaskIntoConstraints = false
         LikeButton.translatesAutoresizingMaskIntoConstraints = false
+        UITextView.translatesAutoresizingMaskIntoConstraints = false
     }
 //※レイアウト※
     func autoLayout() {
@@ -152,6 +168,11 @@ class UserListTableViewCell: UITableViewCell {
         ImageView.leadingAnchor.constraint(equalTo: LikeButton.leadingAnchor,constant: 15).isActive = true
         ImageView.trailingAnchor.constraint(equalTo: LikeButton.trailingAnchor,constant: -15).isActive = true
         ImageView.bottomAnchor.constraint(equalTo: LikeButton.bottomAnchor,constant: -10).isActive = true
+        ///残り時間表示テキストビュー
+        UITextView.topAnchor.constraint(equalTo: ImageView.topAnchor).isActive = true
+        UITextView.leadingAnchor.constraint(equalTo: ImageView.leadingAnchor).isActive = true
+        UITextView.trailingAnchor.constraint(equalTo: ImageView.trailingAnchor).isActive = true
+        UITextView.bottomAnchor.constraint(equalTo: ImageView.bottomAnchor).isActive = true
         
      }
 

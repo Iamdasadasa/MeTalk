@@ -46,18 +46,15 @@ struct MockMessage: MessageType {
         self.DateGroupFlg = messageDateGroupingFlag
     }
 
-//    init(text: String, sender: SenderType, messageId: String, date: Date,messageDateGroupingFlag:Bool) {
-//        self.init(kind: .text(text), sender: sender, messageId: messageId, date: date)
-//        
-////        self.init(kind: .custom(messageDateGroupingFlag), sender: sender, messageId: messageId, date: date)
-//    }
-    
-
     ///メッセージの情報だけを取り扱いたい時はこっちでInitしてインスタンス化
     init(attributedText: NSAttributedString, sender: SenderType, messageId: String, date: Date,messageDateGroupingFlag:Bool) {
         self.init(kind: .attributedText(attributedText), sender: sender, messageId: messageId, date: date, messageDateGroupingFlag: messageDateGroupingFlag)
         
 //        self.init(kind: .custom(messageDateGroupingFlag), sender: sender, messageId: messageId, date: date)
+    }
+    ///画像の情報を取り扱いたいときはこっちでinitしてインスタンス化
+    init(photo: MediaItem, sender: SenderType, messageId: String, date: Date,messageDateGroupingFlag:Bool) {
+        self.init(kind: .photo(photo), sender: sender, messageId: messageId, date: date, messageDateGroupingFlag: messageDateGroupingFlag)
     }
 
     static func loadMessage(text: String, user: userType,data:Date,messageID:String,messageDateGroupingFlag:Bool) -> MockMessage {
@@ -74,7 +71,40 @@ struct MockMessage: MessageType {
             )
             return MockMessage(attributedText: attributedText, sender: user.data, messageId: messageID, date:data, messageDateGroupingFlag: messageDateGroupingFlag)
         }
-
     }
     
+    static func likeInfoLoad(photo:MediaItem,user: userType,data:Date,messageID:String,messageDateGroupingFlag:Bool) -> MockMessage {
+        if user.meFag == 1 {
+
+            return MockMessage(photo: photo, sender: user.data, messageId: messageID, date: data, messageDateGroupingFlag: messageDateGroupingFlag)
+        } else {
+
+            return MockMessage(photo: photo, sender: user.data, messageId: messageID, date: data, messageDateGroupingFlag: messageDateGroupingFlag)
+        }
+        
+    }
+    
+}
+
+
+struct MessageMediaEntity: MediaItem {
+    var url: URL?
+    var image: UIImage?
+
+    var placeholderImage: UIImage {
+        return UIImage(named: "questionmark.app.fill")!
+    }
+    var size: CGSize {
+        return CGSize(width: UIScreen.main.bounds.width/2,
+                      height: UIScreen.main.bounds.width/2)
+    }
+
+    // MARK: static new
+    static func new(url: URL?) -> MessageMediaEntity {
+        MessageMediaEntity(url: url, image: nil)
+    }
+
+    static func new(image: UIImage?) -> MessageMediaEntity {
+        MessageMediaEntity(url: nil, image: image)
+    }
 }

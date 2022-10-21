@@ -57,6 +57,10 @@ class UserListViewController:UIViewController, UINavigationControllerDelegate{
         CHATUSERLISTTABLEVIEW.register(UserListTableViewCell.self, forCellReuseIdentifier: "UserListTableViewCell")
         ///タイトルラベル追加
         navigationItem.title = "ユーザーリスト"
+        ///自身の情報をローカルから取得
+        userProfileDatalocalGet(callback: { localData in
+            self.meInfoData = localData
+        }, UID: UID!, ViewFLAG: 1)
     }
 }
 
@@ -103,9 +107,9 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
         let cell = tableView.dequeueReusableCell(withIdentifier: "UserListTableViewCell", for: indexPath ) as! UserListTableViewCell
         ///Mockのインデックス番号の中身を取得
         let USERINFODATA = self.UserListMock[indexPath.row]
-        print(USERINFODATA.UID)
-        ///セルUID変数に対してUIDを代入
-        cell.cellUID = USERINFODATA.UID
+                
+        ///セルのユーザー情報構造体にユーザー情報を投入
+        cell.celluserStruct = USERINFODATA
         
         ///画像に関してはCell生成の一番最初は問答無用でInitイメージを適用
         cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
@@ -113,7 +117,7 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
         ///ユーザーネーム設定処理
         if let nickname = USERINFODATA.userNickName {
             ///セルのUIDと一致したらセット
-            if cell.cellUID == USERINFODATA.UID {
+            if cell.celluserStruct!.UID == USERINFODATA.UID {
                 cell.nickNameSetCell(Item: nickname)
             }
         } else {
@@ -124,12 +128,23 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
         //最新メッセージをセルに反映する処理
         let ABOUTMESSAGE = USERINFODATA.aboutMessage
         cell.aboutMessageSetCell(Item: ABOUTMESSAGE)
+        ///自身の相手に押したライクボタン押下時間を取得して表示する処理（ローカルDB）
+        userProfileDatalocalGet(callback: { localDocument in
+            if let PUSHEDDATE = localDocument["LikeButtonPushedDate"] as? Date{
+                cell.celluserStruct?.LikeButtonPushedFLAG = true
+                let DIFFTIME = self.pushTimeDiffDate(pushTime: PUSHEDDATE)
+                ///差分が60分未満（IMAGE変更）
+                if DIFFTIME < 60.0 {
+                    cell.ImageView.image = UIImage(named: "LIKEBUTTON_IMAGE_Pushed")
+                }
+            }
+        }, UID: cell.celluserStruct!.UID, ViewFLAG: 0)
 
         ///サーバーに対して画像取得要求
         USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
             ///取得してきた画像がNilでない且つセルに設定してあるUIDとサーバー取得UIDが合致した場合
             ///イメージ画像をオブジェクトにセット
-            if imageStruct.image != nil,cell.cellUID == USERINFODATA.UID{
+            if imageStruct.image != nil,cell.celluserStruct!.UID == USERINFODATA.UID{
                 cell.talkListUserProfileImageView.image = imageStruct.image ?? UIImage(named: "InitIMage")
             }
         }, UID: USERINFODATA.UID, UpdateTime: ChatDataManagedData.pastTimeGet())
@@ -221,7 +236,7 @@ extension UserListViewController {
                     self.UserListMock.remove(at: indexNo)
                 }
                 ///サーバーから取得したデータを配列に入れ直す
-                self.UserListMock.append(UserListStruct(UID: data.UID, userNickName: data.userNickName, aboutMessage: data.aboutMessage, Age: data.Age, From: data.From!, Sex: data.Sex))
+                self.UserListMock.append(UserListStruct(UID: data.UID, userNickName: data.userNickName, aboutMessage: data.aboutMessage, Age: data.Age, From: data.From!, Sex: data.Sex,createdAt: data.createdAt,updatedAt: data.updatedAt))
             }
             ///ロードフラグをTrue
             self.loadDataLockFlg = true
@@ -234,18 +249,96 @@ extension UserListViewController {
 }
 
 extension UserListViewController:UserListTableViewCellDelegate{
-    func likebuttonPushed(LIKEBUTTONIMAGEVIEW: UIImageView, CELLUID: String) {
+    ///ライクボタン押下時のアクション
+    /// - Parameters:
+    ///- CELL: CELL全体が引数
+    ///- CELLUSERSTRUCT:サーバーから取得した個人データ（ReloadViewしてセル更新されるまで最新にはならない）
+    func likebuttonPushed(CELL: UserListTableViewCell, CELLUSERSTRUCT: UserListStruct) {
         
-        if CELLUID == "unknown" {
+        if CELLUSERSTRUCT.UID  == "unknown" {
             print("ここにきたらエラーアラート")
         }
-
-        LIKEBUTTONIMAGEVIEW.image = UIImage(named: "LIKEBUTTON_IMAGE_Pushed")
         
-        let date = ChatDataManagedData.dateToStringFormatt(date: Date(), formatFlg: 0)
-        let LIKEINFO = ["Date":date]
-        
-        USERDATAMANAGE.LikeDataPushIncrement(YouUID: CELLUID, MEUID: UID!, LikeInfo: LIKEINFO)
-        
+        if !CELL.celluserStruct!.LikeButtonPushedFLAG {
+            ///画像タップ時のイメージ保存
+            CELL.ImageView.image = UIImage(named: "LIKEBUTTON_IMAGE_Pushed")
+            ///ローカルとサーバーそれぞれにライクボタンデータ送信
+            self.LikeButtonPushedInfoUpdate(CELLUSERSTRUCT: CELLUSERSTRUCT)
+            ///ReloadView前の連続押下防止
+            CELL.celluserStruct?.LikeButtonPushedFLAG = true
+        } else {
+            ///ローカルデータから情報取得
+            userProfileDatalocalGet(callback: { localData in
+                ///ローカルより相手にPushした時間を取得
+                if let PUSHEDLOCALDATA = localData["LikeButtonPushedDate"] as? Date {
+                    ///現在時間との差分を求める
+                    let DIFFTIME = self.pushTimeDiffDate(pushTime: PUSHEDLOCALDATA)
+                    ///差分が60分未満（拒否）
+                    if DIFFTIME < 60.0 {
+                        let INTTIME = Int(DIFFTIME)
+                        let minuteString = String(60 - INTTIME)
+                        ///時間表示ラベル調整
+                        CELL.UItextLabel.textAlignment = NSTextAlignment.center
+                        CELL.UItextLabel.text = "\(minuteString)分"
+                        CELL.UItextLabel.font = CELL.UItextLabel.font.withSize(CELL.UItextLabel.bounds.width * 0.25)
+                        ///ボタンを押下した際の文字表示処理
+                        ///TIMER処理(下の関数呼び出し)
+                        let timer = Timer.scheduledTimer(withTimeInterval: 0.0, repeats: false) { (timer) in
+                            self.animateView(CELL.UITextView)
+                        }
+                    ///差分が60分以上(許可)
+                    } else {
+                        ///画像タップ時のイメージ保存
+                        CELL.ImageView.image = UIImage(named: "LIKEBUTTON_IMAGE_Pushed")
+                        ///ローカルとサーバーそれぞれにライクボタンデータ送信
+                        self.LikeButtonPushedInfoUpdate(CELLUSERSTRUCT: CELLUSERSTRUCT)
+                    }
+                ///ローカルに時間が入っていない時（多分入らない）
+                } else {
+                    ///画像タップ時のイメージ保存
+                    CELL.ImageView.image = UIImage(named: "LIKEBUTTON_IMAGE_Pushed")
+                    ///ローカルとサーバーそれぞれにライクボタンデータ送信
+                    self.LikeButtonPushedInfoUpdate(CELLUSERSTRUCT: CELLUSERSTRUCT)
+                }
+            }, UID: CELLUSERSTRUCT.UID, ViewFLAG: 0)
+        }
     }
+    
+    func animateView(_ viewAnimate: UIView) {
+        UIView.animate(withDuration: 0.5, delay: 0, options: .curveEaseIn) {
+            viewAnimate.alpha = 1
+        } completion: { (_) in
+            UIView.animate(withDuration: 0.5, delay: 1, options: .curveEaseIn) {
+                viewAnimate.alpha = 0
+            }
+        }
+    }
+    
+    func pushTimeDiffDate(pushTime:Date) -> Double {
+        
+        print("Date:\(Date())PushedDate:\(pushTime)")
+        
+        let minute = round(Date().timeIntervalSince(pushTime)/60)
+        
+        return minute
+    }
+    
+    func LikeButtonPushedInfoUpdate(CELLUSERSTRUCT:UserListStruct) {
+        ///自身の情報からニックネームを取得
+        let nickname = self.meInfoData!["nickname"] as? String
+
+        ///ライクデータのインクリメントを相手のデータに加算
+        USERDATAMANAGE.LikeDataPushIncrement(YouUID: CELLUSERSTRUCT.UID, MEUID: UID!)
+        ///それぞれのトーク情報にライクボタン情報を送信
+        let chatManageData = ChatDataManagedData()
+        chatManageData.talkListUserAuthUIDCreate(UID1: UID!, UID2: CELLUSERSTRUCT.UID, NewMessage: "💓", meNickName: nickname ?? "Unknown", youNickname: CELLUSERSTRUCT.userNickName!, LikeButtonFLAG: true)
+        
+        ///ライクボタン情報をトークDBに送信
+        let roomID = chatManageData.ChatRoomID(UID1: UID!, UID2: CELLUSERSTRUCT.UID)
+        chatManageData.WriteLikeButtonInfo(message: "💓", messageId: UUID().uuidString, sender: UID!, Date: Date(), roomID: roomID)
+        ///ローカルデータにライクボタン情報を保存
+        LikeUserDataRegist_Update(Realm: REALM, UID: CELLUSERSTRUCT.UID, nickname: CELLUSERSTRUCT.userNickName, sex: CELLUSERSTRUCT.Sex, aboutMassage: CELLUSERSTRUCT.aboutMessage, age: CELLUSERSTRUCT.Age, area: CELLUSERSTRUCT.From, createdAt: CELLUSERSTRUCT.createdAt,updatedAt: CELLUSERSTRUCT.updatedAt, LikeButtonPushedFLAG:1, LikeButtonPushedDate: Date())
+    }
+    
+    
 }

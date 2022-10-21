@@ -38,9 +38,10 @@
 		D655504F27EADB7600C86E34 /* ChatUserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655504E27EADB7600C86E34 /* ChatUserListViewController.swift */; };
 		D655505127EADC7C00C86E34 /* chatUserListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655505027EADC7C00C86E34 /* chatUserListTableViewCell.swift */; };
 		D65BD34828EFE2BC00DDAFA4 /* UserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */; };
-		D65BD34A28EFE2D100DDAFA4 /* UserListTavleViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BD34928EFE2D100DDAFA4 /* UserListTavleViewCell.swift */; };
+		D65BD34A28EFE2D100DDAFA4 /* UserListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BD34928EFE2D100DDAFA4 /* UserListTableViewCell.swift */; };
 		D67C27D028F88B2F00C25BA3 /* UserListStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */; };
 		D67C27D428F88CDA00C25BA3 /* UserListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27D328F88CDA00C25BA3 /* UserListManager.swift */; };
+		D67C27D628FE959100C25BA3 /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27D528FE959100C25BA3 /* Extension.swift */; };
 		D68FB39227D5AC5300E57F5A /* sideMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */; };
 		D68FB39427D5C6CC00E57F5A /* GeneralTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39327D5C6CC00E57F5A /* GeneralTableView.swift */; };
 		D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */; };
@@ -120,9 +121,10 @@
 		D655504E27EADB7600C86E34 /* ChatUserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatUserListViewController.swift; sourceTree = "<group>"; };
 		D655505027EADC7C00C86E34 /* chatUserListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = chatUserListTableViewCell.swift; sourceTree = "<group>"; };
 		D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListViewController.swift; sourceTree = "<group>"; };
-		D65BD34928EFE2D100DDAFA4 /* UserListTavleViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListTavleViewCell.swift; sourceTree = "<group>"; };
+		D65BD34928EFE2D100DDAFA4 /* UserListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListTableViewCell.swift; sourceTree = "<group>"; };
 		D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListStruct.swift; sourceTree = "<group>"; };
 		D67C27D328F88CDA00C25BA3 /* UserListManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListManager.swift; sourceTree = "<group>"; };
+		D67C27D528FE959100C25BA3 /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
 		D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sideMenuViewController.swift; sourceTree = "<group>"; };
 		D68FB39327D5C6CC00E57F5A /* GeneralTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralTableView.swift; sourceTree = "<group>"; };
 		D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuTableViewCell.swift; sourceTree = "<group>"; };
@@ -317,6 +319,7 @@
 				D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */,
 				D631EBED27A581BE00800693 /* AppDelegate.swift */,
 				D631EBEF27A581BE00800693 /* SceneDelegate.swift */,
+				D67C27D528FE959100C25BA3 /* Extension.swift */,
 			);
 			path = Default;
 			sourceTree = "<group>";
@@ -418,7 +421,7 @@
 		D65BD34E28F8895400DDAFA4 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				D65BD34928EFE2D100DDAFA4 /* UserListTavleViewCell.swift */,
+				D65BD34928EFE2D100DDAFA4 /* UserListTableViewCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -760,6 +763,7 @@
 				D68FB3AD27D9D65400E57F5A /* BlockListViewController.swift in Sources */,
 				D68FB39427D5C6CC00E57F5A /* GeneralTableView.swift in Sources */,
 				D67C27D028F88B2F00C25BA3 /* UserListStruct.swift in Sources */,
+				D67C27D628FE959100C25BA3 /* Extension.swift in Sources */,
 				D6543DC127B7B61500444454 /* SemiModalViewController.swift in Sources */,
 				D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */,
 				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,
@@ -776,7 +780,7 @@
 				D655504F27EADB7600C86E34 /* ChatUserListViewController.swift in Sources */,
 				D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */,
 				D696850827D24100006D85DC /* ShowImageView.swift in Sources */,
-				D65BD34A28EFE2D100DDAFA4 /* UserListTavleViewCell.swift in Sources */,
+				D65BD34A28EFE2D100DDAFA4 /* UserListTableViewCell.swift in Sources */,
 				D65BD34828EFE2BC00DDAFA4 /* UserListViewController.swift in Sources */,
 				D655504B27E3630400C86E34 /* Mock.swift in Sources */,
 				D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */,

@@ -37,7 +37,14 @@ class ChatUserListTableViewCell: UITableViewCell {
         self.talkListUserProfileImageView.layer.cornerRadius = self.talkListUserProfileImageView.bounds.size.width/2
 
     }
-//
+    ///ライク画像表示View
+    let UILikeImageView:UIImageView = {
+        let returnImageView = UIImageView()
+        returnImageView.backgroundColor = .clear
+        returnImageView.alpha = 0
+        returnImageView.image = UIImage(named: "LIKEBUTTON_IMAGE_Pushed")
+       return returnImageView
+    }()
     
     ///プロフィール画像ボタン
     let talkListUserProfileImageView:UIImageView = {
@@ -96,11 +103,13 @@ class ChatUserListTableViewCell: UITableViewCell {
         self.contentView.addSubview(talkListUserNicknameLabel)
         self.contentView.addSubview(talkListUserNewMessage)
         self.contentView.addSubview(nortificationImage)
+        self.contentView.addSubview(UILikeImageView)
 //        ///UIオートレイアウトと競合させない処理
         talkListUserProfileImageView.translatesAutoresizingMaskIntoConstraints = false
         talkListUserNicknameLabel.translatesAutoresizingMaskIntoConstraints = false
         talkListUserNewMessage.translatesAutoresizingMaskIntoConstraints = false
         nortificationImage.translatesAutoresizingMaskIntoConstraints = false
+        UILikeImageView.translatesAutoresizingMaskIntoConstraints = false
     }
 //※レイアウト※
     func autoLayout() {
@@ -124,6 +133,11 @@ class ChatUserListTableViewCell: UITableViewCell {
         nortificationImage.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.25).isActive = true
         nortificationImage.widthAnchor.constraint(equalTo: nortificationImage.heightAnchor).isActive = true
         nortificationImage.leadingAnchor.constraint(equalTo: talkListUserNewMessage.trailingAnchor).isActive = true
+        ///ライク画像
+        UILikeImageView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        UILikeImageView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+        UILikeImageView.leadingAnchor.constraint(equalTo: nortificationImage.trailingAnchor).isActive = true
+        UILikeImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
      }
 
     override func awakeFromNib() {

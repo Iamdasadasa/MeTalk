@@ -146,7 +146,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         //最新メッセージをセルに反映する処理
         let newMessage = USERINFODATA.NewMessage
         cell.newMessageSetCell(Item: newMessage)
-        ///ローカルDBインスンス化
+        ///ローカルDBインスタンス化
         let IMAGELOCALDATASTRUCT = chatUserListLocalImageInfoGet(Realm: REALM, UID: USERINFODATA.UID)
         ///プロファイルイメージをセルに反映(ローカルDB)
         cell.talkListUserProfileImageView.image = IMAGELOCALDATASTRUCT.image ?? UIImage(named: "InitIMage")
@@ -293,7 +293,6 @@ extension ChatUserListViewController {
     }
     ///自身の情報を取得
     func userInfoDataGet() {
-
         ///自身のプロフィール取得(ローカルデータを取得)
         userProfileDatalocalGet(callback: { document in
             ////ドキュメントにデータが入るまではセルを選択できないようにする
@@ -302,19 +301,9 @@ extension ChatUserListViewController {
             self.meInfoData = document
             ///セル選択を可能にする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = true
-        }, UID: UID!)
-
-//        ///サーバーに対してプロフィール取得要求
-//        USERDATAMANAGE.userInfoDataGet(callback: { document in
-//            ///ドキュメントにデータが入るまではセルを選択できないようにする
-//            self.CHATUSERLISTTABLEVIEW.allowsSelection = false
-//            ///データ投入
-//            self.meInfoData = document
-//            ///セル選択を可能にする
-//            self.CHATUSERLISTTABLEVIEW.allowsSelection = true
-//        }, UID: UID, lastUpdataAt: <#Date#>)
+        }, UID: UID!, ViewFLAG: 1)
     }
-    ///自分の画像を取得してくる
+    ///自分の画像を取得してくる(ここもローカルから持ってくるようにしたいね)
     func contentOfFIRStorageGet() {
         ///サーバーに対して画像取得要求
         USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in

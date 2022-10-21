@@ -27,7 +27,6 @@ class ChatViewController: MessagesViewController {
     var start:Date?
     ///時間まとめ用のKeyValue
     var DateGrouping:[String] = []
-
     
     ///インスタンス化(Model)
     let chatManageData = ChatDataManagedData()
@@ -97,7 +96,6 @@ class ChatViewController: MessagesViewController {
     //viewが表示されなくなる直前に呼び出されるメソッド
     override func viewWillDisappear(_ animated: Bool) {
         databaseRef.child("chats").removeObserver(withHandle: handle)
-        
     }
 
     private func setupInput(){
@@ -223,7 +221,6 @@ extension ChatViewController: MessagesLayoutDelegate {
     }
 }
 
-
 // MARK: - MessageCellDelegate
 extension ChatViewController: MessageCellDelegate {
 
@@ -270,7 +267,7 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
             ///FireBaseにデータ書き込み（書き込みした時点で読み込みリロードhandlerが呼ばれる）
             chatManageData.writeMassageData(mockMassage: message, text: text, roomID: self.roomID)
             ///最初のメッセージが存在していない場合のみそれぞれのAuthにUIDを登録、存在していたらデータ更新
-            chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text, meNickName: self.MeInfo["nickname"] as! String, youNickname: self.YouInfo["nickname"] as! String)
+        chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text, meNickName: self.MeInfo["nickname"] as! String, youNickname: self.YouInfo["nickname"] as! String, LikeButtonFLAG: false)
         
             self.messageInputBar.inputTextView.text = String()
             self.messageInputBar.invalidatePlugins()
@@ -298,11 +295,6 @@ extension ChatViewController {
     
     //データベースから読み込んだデータを配列(readData)に格納するメソッド
     func snapshotToArray(snapshot: DataSnapshot){
-        
-        var messageArray:[MockMessage] = []
-        ///ローカルDBからメッセージ取得
-        let LOCALMESSAGEDATA = localMessageDataGet(roomID: roomID)
-        
         //スナップショットとは、ある時点における特定のデータベース参照にあるデータの全体像を写し取ったもの
         if snapshot.children.allObjects as? [DataSnapshot] != nil  {
             let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
@@ -318,42 +310,56 @@ extension ChatViewController {
                         ///読み込んだメッセージのlistendは全てtrueに更新（送信者が自分以外）
                         databaseRef.child("Chat").child(roomID).child(snapChild.key).updateChildValues(["listend":true])
                     }
+                    ///ライクボタン有無（ライクボタン以外がきたらfalse）
+                    var likeButtonFLAG:Bool = false
+                    likeButtonFLAG = postDict["LikeButtonFLAG"] as? Bool ?? false
                     ///ローカルデータベースに保存
-                    localMessageDataRegist(roomID: roomID, listend: true, message: postDict["message"] as! String, sender: postDict["sender"] as! String, Date: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String)
+                    localMessageDataRegist(roomID: roomID, listend: true, message: postDict["message"] as! String, sender: postDict["sender"] as! String, Date: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String, likeButtonFLAG: likeButtonFLAG)
                 }
             }
-            ///ローカルデータからデータ抽出
-            for localmessage in LOCALMESSAGEDATA {
-                
-                ///Date型をStringに変換
-                let messageSentDataString = ChatDataManagedData.dateToStringFormatt(date: localmessage["Date"] as? Date, formatFlg: 0)
-                ///日付を年月までで切り取り
-                let YEARMONTHDATE = (messageSentDataString as NSString).substring(to: 10)
+        } else {
+            print("ここはどうかな？")
+        }
+    }
+    
+    func messageListAppend() {
+        var messageArray:[MockMessage] = []
+        ///ローカルDBからメッセージ取得
+        let LOCALMESSAGEDATA = localMessageDataGet(roomID: roomID)
+        ///ローカルデータからデータ抽出
+        for localmessage in LOCALMESSAGEDATA {
+            ///Date型をStringに変換
+            let messageSentDataString = ChatDataManagedData.dateToStringFormatt(date: localmessage["Date"] as? Date, formatFlg: 0)
+            ///日付を年月までで切り取り
+            let YEARMONTHDATE = (messageSentDataString as NSString).substring(to: 10)
 
-                ///日付格納配列がNULLでない
-                if let DateFirst = DateGrouping.last {
-                    ///日付格納配列の中の最新が現在見ているデータと異なっている
-                    if DateFirst != YEARMONTHDATE {
-                        ///日付ラベルフラグをTRUE
-                        messageAppend(FLAG: true)
-                    } else {
-                        ///日付ラベルフラグをFALSE
-                        messageAppend(FLAG: false)
-                    }
-                ///日付格納配列がNULL
-                } else {
+            ///日付格納配列がNULLでない
+            if let DateFirst = DateGrouping.last {
+                ///日付格納配列の中の最新が現在見ているデータと異なっている
+                if DateFirst != YEARMONTHDATE {
                     ///日付ラベルフラグをTRUE
                     messageAppend(FLAG: true)
+                } else {
+                    ///日付ラベルフラグをFALSE
+                    messageAppend(FLAG: false)
                 }
-                
-                ///日付格納配列に格納
-                DateGrouping.append(YEARMONTHDATE)
-                
-                ///メッセージ配列に適用
-                func messageAppend(FLAG:Bool) {
-
-                    messageArray.append(MockMessage.loadMessage(text: localmessage["message"] as! String, user: userTypeJudge(senderID: localmessage["sender"] as! String),data:localmessage["Date"] as! Date, messageID: localmessage["messageID"] as! String, messageDateGroupingFlag:FLAG
-                                                               ))
+            ///日付格納配列がNULL
+            } else {
+                ///日付ラベルフラグをTRUE
+                messageAppend(FLAG: true)
+            }
+            
+            ///日付格納配列に格納
+            DateGrouping.append(YEARMONTHDATE)
+            
+            ///メッセージ配列に適用
+            func messageAppend(FLAG:Bool) {
+                let likeTrue = localmessage["likeButtonFLAG"] as? Bool ?? false
+                if likeTrue {
+                    let mediaItem = MessageMediaEntity.new(image: UIImage(named: "LIKEBUTTON_IMAGE_Pushed"))
+                    messageArray.append(MockMessage.likeInfoLoad(photo: mediaItem, user: userTypeJudge(senderID: localmessage["sender"] as! String), data: localmessage["Date"] as! Date, messageID: localmessage["messageID"] as! String, messageDateGroupingFlag: FLAG))
+                }else {
+                    messageArray.append(MockMessage.loadMessage(text: localmessage["message"] as! String, user: userTypeJudge(senderID: localmessage["sender"] as! String),data:localmessage["Date"] as! Date, messageID: localmessage["messageID"] as! String, messageDateGroupingFlag:FLAG))
                 }
             }
             ///一番最初のメッセージまでロードし終えていたらフラグにTrueを設定

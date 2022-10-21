@@ -52,7 +52,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
             userProfileDatalocalGet(callback: { document in
                 ///ユーザー名情報をテキストフィールドにセット
                 self.nickNameTextFieldModalView.itemTextField.text = document["nickname"] as? String
-            }, UID: uid!)
+            }, UID: uid!, ViewFLAG: 1)
 
             ///クローズ画像データをセット
             self.nickNameTextFieldModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
@@ -72,7 +72,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
             userProfileDatalocalGet(callback: { document in
                 ///ユーザー名情報をテキストフィールドにセット
                 self.aboutMeTextFieldModalView.itemTextField.text = document["aboutMeMassage"] as? String
-            }, UID: uid!)
+            }, UID: uid!, ViewFLAG: 1)
             ///クローズ画像データをセット
             self.aboutMeTextFieldModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
@@ -96,7 +96,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
                     self.agePickerModalView.itemTextField.text = String(agedata!)
                 }
                 
-            }, UID: uid!)
+            }, UID: uid!, ViewFLAG: 1)
             ///クローズ画像データをセット
             self.agePickerModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
             
@@ -109,7 +109,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate,NickNameTextF
             userProfileDatalocalGet(callback: { document in
                 ///住まいをテキストフィールドにセット
                 self.areaPickerModalView.itemTextField.text = document["area"] as? String
-            }, UID: uid!)
+            }, UID: uid!, ViewFLAG: 1)
             ///クローズ画像データをセット
             self.areaPickerModalView.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
         }

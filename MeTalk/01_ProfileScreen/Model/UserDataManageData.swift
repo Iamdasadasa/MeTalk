@@ -374,18 +374,27 @@ struct UserDataManage{
                     }
                     
                     ///更新日時のタイムスタンプをTimeStamp⇨Date型として受け取る
-                    guard let TIMESTAMP = talkUserinfo["updatedAt"] as? Timestamp else {
+                    guard let UPDATEDATE = talkUserinfo["updatedAt"] as? Timestamp else {
                         print("更新日時が取得できませんでした。")
                         return
                     }
+                    let UPDATEDATEVALUE = UPDATEDATE.dateValue()
+                    
+                    guard let CREATEDAT = talkUserinfo["createdAt"] as? Timestamp else {
+                        print("作成日時が取得できませんでした。（ニックネーム）")
+                        return
+                    }
+                    let CREATEDATDATEVALUE = CREATEDAT.dateValue()
                     
                     guard let NICKNAME = talkUserinfo["nickname"] as? String else {
                         print("更新日時が取得できませんでした。（ニックネーム）")
                         return
                     }
                     
+                    
+                    
                     ///ここでトークリストのユーザーID一覧を格納
-                    UserListinfo = UserListStruct(UID: UID, userNickName: NICKNAME, aboutMessage: ABOUTMESSAGE, Age: AGE, From: AREA, Sex: SEX)
+                    UserListinfo = UserListStruct(UID: UID, userNickName: NICKNAME, aboutMessage: ABOUTMESSAGE, Age: AGE, From: AREA, Sex: SEX, createdAt: CREATEDATDATEVALUE, updatedAt: UPDATEDATEVALUE)
                     
                     callbackUserListMock.append(UserListinfo)
                 }
@@ -398,11 +407,9 @@ struct UserDataManage{
     /// - Parameters:
     /// - callback:コールバック関数。
     /// - Returns:
-    func LikeDataPushIncrement(YouUID:String,MEUID:String,LikeInfo:[String:Any]) {
+    func LikeDataPushIncrement(YouUID:String,MEUID:String) {
         ///ライクボタンを押下した相手のプロフィール情報のライク数をインクリメント
         Firestore.firestore().collection("users").document(YouUID).setData(["likeIncrement":FieldValue.increment(1.0)],merge: true)
-        ///RealtimeDBに対して相手のUID配下に自身のライク押下時間を記載
-        Database.database().reference().child("Like").child(YouUID).child(MEUID).setValue(LikeInfo)
         
     }
     

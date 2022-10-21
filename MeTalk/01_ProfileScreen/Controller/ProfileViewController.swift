@@ -63,7 +63,7 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         userProfileDatalocalGet(callback: { localDocument in
             ///ローカルデータを使って画面情報をセットアップ
             self.userInfoDataSetup(userInfoData: localDocument)
-        }, UID: UID!)
+        }, UID: UID!, ViewFLAG: 1)
         
     }
     
@@ -367,7 +367,7 @@ extension ProfileViewController:FloatingPanelControllerDelegate{
         userProfileDatalocalGet(callback: { localDocument in
             ///ローカルデータを使って画面情報をセットアップ
             self.userInfoDataSetup(userInfoData: localDocument)
-        }, UID: UID!)
+        }, UID: UID!, ViewFLAG: 1)
         
 //        ///自身のプロフィール情報を取得
 //        if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
