@@ -95,8 +95,8 @@ struct MessageMediaEntity: MediaItem {
         return UIImage(named: "questionmark.app.fill")!
     }
     var size: CGSize {
-        return CGSize(width: UIScreen.main.bounds.width/2,
-                      height: UIScreen.main.bounds.width/2)
+        return CGSize(width: UIScreen.main.bounds.width/4,
+                      height: UIScreen.main.bounds.width/4)
     }
 
     // MARK: static new

@@ -25,21 +25,17 @@ class ShowImageViewController:UIViewController{
     let storage = Storage.storage()
     let host = "gs://metalk-f132e.appspot.com"
     let uid = Auth.auth().currentUser?.uid
+    var profileImage:UIImage?
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        ///自身のプロフィール画像を取ってくる
-        self.userDataManagedData.contentOfFIRStorageGet(callback: { imageStruct in
-            ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-            if imageStruct.image != nil {
-                self.showImageView.imageView.image = imageStruct.image
-            ///コールバック関数でNilが返ってきたら初期画像を設定
-            } else {
-                self.showImageView.imageView.image = UIImage(named: "InitIMage")
-            }
-        }, UID: uid, UpdateTime: ChatDataManagedData.pastTimeGet())
+        guard let profileImage = profileImage else {
+            self.showImageView.imageView.image = UIImage(named: "InitIMage")
+            return
+        }
+            self.showImageView.imageView.image = profileImage
+
     }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
     }

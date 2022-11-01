@@ -22,10 +22,12 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     var handle:AuthStateDidChangeListenerHandle?
     ///カメラピッカーの定義
     let PICKER = UIImagePickerController()
+    
+
     ///インスタンス化(Controller)
     var contentVC:UIViewController?
-    let SHOWIMAGEVIEWCONTROLLER = ShowImageViewController()
     let SIDEMENUVIEWCONTROLLER = SideMenuViewcontroller()
+    let SHOWIMAGEVIEWCONTROLLER = ShowImageViewController()
     ///インスタンス化（View）
     let PROFILEVIEW = ProfileView()
     ///インスタンス化（Model）
@@ -35,6 +37,7 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     let REALM = try! Realm()
     ///プロフィール情報を保存する辞書型変数
     var profileData:[String:Any] = [:]
+    var profileImage:UIImage?
     
     ///ライブラリのハンモーダルインスタンス
     let FPC = FloatingPanelController()
@@ -66,11 +69,10 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         }, UID: UID!, ViewFLAG: 1)
         
     }
-    
-    override func viewDidLayoutSubviews() {
+    ///コードレイアウトで行う場合はLoadView
+    override func loadView() {
         self.view = PROFILEVIEW
     }
-    
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -79,7 +81,8 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         let IMAGELOCALDATASTRUCT = chatUserListLocalImageInfoGet(Realm: REALM, UID: UID!)
         ///プロフィール画像オブジェクトに画像セット（ローカル）
         self.PROFILEVIEW.profileImageButton.setImage(IMAGELOCALDATASTRUCT.image, for: .normal)
-        
+        self.profileImage = IMAGELOCALDATASTRUCT.image
+
         ///サーバーに対して画像取得要求（ローカルとの差分更新）
         USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
             ///取得してきた画像がNilの場合初期画像セット
@@ -94,16 +97,6 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
             
         }, UID: UID, UpdateTime: IMAGELOCALDATASTRUCT.upDateDate)
         
-//        ///自身のプロフィール画像を取ってくる
-//        self.USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
-//                ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-//            if imageStruct.image != nil {
-//                self.PROFILEVIEW.profileImageButton.setImage(imageStruct.image, for: .normal)
-//                ///コールバック関数でNilが返ってきたら初期画像を設定
-//                } else {
-//                    self.PROFILEVIEW.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
-//                }
-//        }, UID: UID, UpdateTime: ChatDataManagedData.pastTimeGet())
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -126,6 +119,7 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
                 switch actionFlg{
                 ///画像を表示
                 case 1:
+                    self.SHOWIMAGEVIEWCONTROLLER.profileImage = self.profileImage
                     self.present(self.SHOWIMAGEVIEWCONTROLLER, animated: true, completion: nil)
                 ///画像を変更
                 case 2:
@@ -368,21 +362,6 @@ extension ProfileViewController:FloatingPanelControllerDelegate{
             ///ローカルデータを使って画面情報をセットアップ
             self.userInfoDataSetup(userInfoData: localDocument)
         }, UID: UID!, ViewFLAG: 1)
-        
-//        ///自身のプロフィール情報を取得
-//        if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
-//            ///Firebaseの形式に合わせて辞書型で保存する
-//            profileData = [ "createdAt":SELFPROFILEDATA.createdAt,
-//                            "updatedAt":SELFPROFILEDATA.updatedAt,
-//                            "sex":SELFPROFILEDATA.Sex,
-//                            "aboutMessage":SELFPROFILEDATA.aboutMeMassage,
-//                            "nickName":SELFPROFILEDATA.nickName,
-//                            "age":SELFPROFILEDATA.age,
-//                            "area":SELFPROFILEDATA.area
-//            ]
-//            self.userInfoDataSetup(userInfoData: profileData)
-//        }
-//        ///タブバーコントローラーを表示
         self.tabBarController?.tabBar.isHidden = false
 
     }

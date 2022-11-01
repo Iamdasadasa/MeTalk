@@ -8,27 +8,36 @@
 import Foundation
 import UIKit
 
-protocol ProfileViewDelegate:AnyObject{
-    func settingButtonTappedDelegate()
-    func profileImageButtonTappedDelegate()
-}
-
-class  ProfileView:UIView{
-    ///オブジェクト間の中間値格納変数
-    var objectMedianValue:CGFloat?
+class  TargetProfileView:UIView{
+    ///遷移元のNabigation BarのButtomAnchor
+//    var navigationBottomAnchor:NSLayoutYAxisAnchor
     
     let nickNameItemView = ProfileChildView()
     let AboutMeItemView = ProfileChildView()
     let ageItemView = ProfileChildView()
     let areaItemView = ProfileChildView()
+    //※初期化処理※
     
-    override init(frame: CGRect) {
+     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .black
-        autoLayoutSetUp()
-        autoLayout()
-        viewSetUp()
+         autoLayoutSetUp()
+         autoLayout()
+         viewSetUp()
+         ///ここでは相手のプロフィール表示Viewなので編集可能ImageはRemove
+         nickNameItemView.editImageView.removeFromSuperview()
+         AboutMeItemView.editImageView.removeFromSuperview()
+         ageItemView.editImageView.removeFromSuperview()
+         areaItemView.editImageView.removeFromSuperview()
+         
+     }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
+    
+    
+
     
     //※layoutSubviews レイアウト描写が更新された後※
     override func layoutSubviews() {
@@ -36,49 +45,25 @@ class  ProfileView:UIView{
         ///プロフィール画像を丸くする処理
         profileImageButton.layer.cornerRadius = profileImageButton.bounds.height/2
         
-        ///文字サイズを横幅いっぱいまで拡大
-        profileTitleLabel.font = profileTitleLabel.font.withSize(profileTitleLabel.bounds.height)
-        personalInformationLabel.font = personalInformationLabel.font.withSize(personalInformationLabel.bounds.width * 0.07)
-        
-        ///線を引くオブジェクトの中間値の値を取得
-        medianValueGet()
+//        ///文字サイズを横幅いっぱいまで拡大
+//        profileTitleLabel.font = profileTitleLabel.font.withSize(profileTitleLabel.bounds.height)
+//        personalInformationLabel.font = personalInformationLabel.font.withSize(personalInformationLabel.bounds.width * 0.07)
+//
+//        ///線を引くオブジェクトの中間値の値を取得
+//        medianValueGet()
     }
     
-//※初期化処理※
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+
 //※各定義※
     
     weak var delegate:ProfileViewDelegate?
     
     ///ボタン・フィールド定義
-
-    //設定ボタン
-    let settingButton:UIButton = {
-        let returnUIButton = UIButton()
-        returnUIButton.backgroundColor = .clear
-        returnUIButton.layer.cornerRadius = 10.0
-        returnUIButton.addTarget(self, action: #selector(settingButtonTapped), for: .touchUpInside)
-        return returnUIButton
-    }()
-    
+    ///
     ///ログアウトボタンタップ押下時の挙動
     @objc func settingButtonTapped(){
         delegate?.settingButtonTappedDelegate()
     }
-    
-    ///プロフィールタイトルラベル
-    let profileTitleLabel:UILabel = {
-        let returnLabel = UILabel()
-        returnLabel.text = "プロフィール"
-        returnLabel.textColor = .white
-        returnLabel.backgroundColor = .clear
-        returnLabel.textAlignment = NSTextAlignment.left
-        returnLabel.adjustsFontSizeToFitWidth = true
-        return returnLabel
-    }()
     
     ///プロフィール画像ボタン
     let profileImageButton:UIButton = {
@@ -107,7 +92,6 @@ class  ProfileView:UIView{
     ///基本情報ラベル
     let personalInformationLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.text = "10文字でユーザー名"
         returnLabel.textColor = .white
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
@@ -122,14 +106,9 @@ class  ProfileView:UIView{
         returnUIButton.layer.borderWidth = 1
         returnUIButton.clipsToBounds = true
         returnUIButton.layer.borderColor = UIColor.orange.cgColor
-        returnUIButton.addTarget(self, action: #selector(profileImageButtonTapped), for: .touchUpInside)
         return returnUIButton
     }()
-    
-    @objc func profileNameButtonTapped(){
-//        delegate?.profileNameButtonTappedDelegate()
-    }
-    
+        
     ///変更不可情報ラベル
     let cantBeChangedInfoTitleLabel:UILabel = {
         let returnLabel = UILabel()
@@ -152,7 +131,6 @@ class  ProfileView:UIView{
     ///性別ラベル
     let sexInfoLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.text = ""
         returnLabel.textColor = .white
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.center
@@ -171,7 +149,6 @@ class  ProfileView:UIView{
     ///ふぁぼラベル
     let favInfoLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.text = ""
         returnLabel.textColor = .white
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.center
@@ -202,15 +179,13 @@ class  ProfileView:UIView{
     func autoLayoutSetUp() {
         ///各オブジェクトをViewに追加
         
-        addSubview(settingButton)
         addSubview(profileImageButton)
-        addSubview(profileTitleLabel)
         addSubview(personalInformationLabel)
+        addSubview(cantBeChangedInfoTitleLabel)
         addSubview(nickNameItemView)
         addSubview(AboutMeItemView)
         addSubview(ageItemView)
         addSubview(areaItemView)
-        addSubview(cantBeChangedInfoTitleLabel)
         addSubview(favImageView)
         addSubview(favInfoLabel)
         addSubview(sexImageView)
@@ -219,15 +194,8 @@ class  ProfileView:UIView{
         addSubview(startDateInfoLabel)
 
         ///UIオートレイアウトと競合させない処理
-
-        settingButton.translatesAutoresizingMaskIntoConstraints = false
         profileImageButton.translatesAutoresizingMaskIntoConstraints = false
-        profileTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         personalInformationLabel.translatesAutoresizingMaskIntoConstraints = false
-        AboutMeItemView.translatesAutoresizingMaskIntoConstraints = false
-        ageItemView.translatesAutoresizingMaskIntoConstraints = false
-        areaItemView.translatesAutoresizingMaskIntoConstraints = false
-        nickNameItemView.translatesAutoresizingMaskIntoConstraints = false
         cantBeChangedInfoTitleLabel.translatesAutoresizingMaskIntoConstraints = false
         sexImageView.translatesAutoresizingMaskIntoConstraints = false
         favImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -235,23 +203,18 @@ class  ProfileView:UIView{
         sexInfoLabel.translatesAutoresizingMaskIntoConstraints = false
         favInfoLabel.translatesAutoresizingMaskIntoConstraints = false
         startDateInfoLabel.translatesAutoresizingMaskIntoConstraints = false
+        AboutMeItemView.translatesAutoresizingMaskIntoConstraints = false
+        ageItemView.translatesAutoresizingMaskIntoConstraints = false
+        areaItemView.translatesAutoresizingMaskIntoConstraints = false
+        nickNameItemView.translatesAutoresizingMaskIntoConstraints = false
     }
     //※レイアウト※
     func autoLayout() {
-        profileTitleLabel.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor).isActive = true
-        profileTitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10).isActive = true
-        profileTitleLabel.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.05).isActive = true
-        profileTitleLabel.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.3).isActive = true
         
-        profileImageButton.topAnchor.constraint(equalTo: self.profileTitleLabel.bottomAnchor, constant: 25).isActive = true
-        profileImageButton.leadingAnchor.constraint(equalTo: self.profileTitleLabel.leadingAnchor).isActive = true
+        profileImageButton.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor).isActive = true
+        profileImageButton.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
         profileImageButton.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.125).isActive = true
         profileImageButton.widthAnchor.constraint(equalTo: self.profileImageButton.heightAnchor).isActive = true
-        
-        settingButton.topAnchor.constraint(equalTo: self.safeAreaLayoutGuide.topAnchor).isActive = true
-        settingButton.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
-        settingButton.heightAnchor.constraint(equalTo: self.profileTitleLabel.heightAnchor).isActive = true
-        settingButton.widthAnchor.constraint(equalTo: self.profileTitleLabel.heightAnchor).isActive = true
         
         personalInformationLabel.topAnchor.constraint(equalTo: self.profileImageButton.topAnchor).isActive = true
         personalInformationLabel.leadingAnchor.constraint(equalTo: self.profileImageButton.trailingAnchor, constant: 10).isActive = true
@@ -259,8 +222,6 @@ class  ProfileView:UIView{
         personalInformationLabel.bottomAnchor.constraint(equalTo: self.profileImageButton.bottomAnchor).isActive = true
         
         nickNameItemView.topAnchor.constraint(equalTo: self.profileImageButton.bottomAnchor,constant: 50).isActive = true
-//        nickNameItemView.leadingAnchor.constraint(equalTo: self.profileImageButton.leadingAnchor).isActive = true
-//        nickNameItemView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
         nickNameItemView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 5).isActive = true
         nickNameItemView.trailingAnchor.constraint(equalTo: self.centerXAnchor, constant: -2.5).isActive = true
         nickNameItemView.heightAnchor.constraint(equalTo: self.profileImageButton.heightAnchor).isActive = true
@@ -317,38 +278,8 @@ class  ProfileView:UIView{
     }
 }
 
-extension ProfileView{
-    ///プロフィールタイトルラベルとプロフィールボタンの中間の位置を取得
-    func medianValueGet(){
-        ///プロフィール画像の最大Y座標の最大値からプロフィールボタンのY座標の最小値を減算した値を取得(オブジェクト同士の真ん中の値が取れる)
-        self.objectMedianValue = (self.profileImageButton.frame.maxX - self.profileTitleLabel.frame.minX)/2
-        ///上に位置するオブジェクトの最小Y座標の値を加算して、適切な位置に持ってくる
-        guard let objectMedianValue = self.objectMedianValue else { return }
-        self.objectMedianValue = objectMedianValue + self.profileTitleLabel.frame.minY
-    }
-
-    override func draw(_ rect: CGRect) {
-        // オブジェクト間の直線 -------------------------------------
-        guard let objectMedianValue = self.objectMedianValue else { return }
-        // UIBezierPath のインスタンス生成
-        let line = UIBezierPath();
-        // 起点
-        line.move(to: CGPoint(x: self.frame.minX, y: objectMedianValue));
-        // 帰着点
-        line.addLine(to: CGPoint(x: self.frame.maxX, y:objectMedianValue));
-        // ラインを結ぶ
-        line.close()
-        // 色の設定
-        UIColor.init(red: 255, green: 255, blue: 255, alpha: 100).setStroke()
-        // ライン幅
-        line.lineWidth = 1
-        // 描画
-        line.stroke();
-    }
-}
-
 ///Viewセットアップ
-extension ProfileView{
+extension TargetProfileView{
     func viewSetUp(){
         ///タイトルセットアップ
         self.nickNameItemView.TitleLabel.text = "ニックネーム"

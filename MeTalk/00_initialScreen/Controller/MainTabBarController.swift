@@ -17,17 +17,19 @@ final class MainTabBarController: UITabBarController {
 
     func setupTab() {
         let firstViewController = UserListViewController()
-        firstViewController.tabBarItem = UITabBarItem(title: "tab1", image: .none, tag: 0)
+        let UINavigationController_0 = UINavigationController(rootViewController: firstViewController)
+        UINavigationController_0.modalPresentationStyle = .fullScreen
+        UINavigationController_0.tabBarItem = UITabBarItem(title: "tab1", image: .none, tag: 0)
 
         let secondViewController = ChatUserListViewController()
-        let UINavigationController = UINavigationController(rootViewController: secondViewController)
-        UINavigationController.modalPresentationStyle = .fullScreen
-        UINavigationController.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 0)
+        let UINavigationController_1 = UINavigationController(rootViewController: secondViewController)
+        UINavigationController_1.modalPresentationStyle = .fullScreen
+        UINavigationController_1.tabBarItem = UITabBarItem(tabBarSystemItem: .bookmarks, tag: 0)
         
         let thirdViewController = ProfileViewController()
         thirdViewController.tabBarItem = UITabBarItem(tabBarSystemItem: .favorites, tag: 0)
 
-        viewControllers = [firstViewController, UINavigationController, thirdViewController]
+        viewControllers = [UINavigationController_0, UINavigationController_1, thirdViewController]
     }
 
 }

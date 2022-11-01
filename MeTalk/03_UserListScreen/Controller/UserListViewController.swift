@@ -13,7 +13,7 @@ import RealmSwift
 import CoreAudio
 
 
-class UserListViewController:UIViewController, UINavigationControllerDelegate{
+class UserListViewController:UIViewController,UINavigationControllerDelegate{
     ///インスタンス化(View)
     let CHATUSERLISTTABLEVIEW = GeneralTableView()
     ///RealMからデータを受け取るようの変数
@@ -21,6 +21,8 @@ class UserListViewController:UIViewController, UINavigationControllerDelegate{
     ///インスタンス化(Model)
     let USERDATAMANAGE = UserDataManage()
     let UID = Auth.auth().currentUser?.uid
+    ///インスタンス化(Controller)
+    let SHOWIMAGEVIEWCONTROLLER = ShowImageViewController()
     ///RealMオブジェクトをインスタンス化
     let REALM = try! Realm()
     ///自身の画像View
@@ -55,6 +57,7 @@ class UserListViewController:UIViewController, UINavigationControllerDelegate{
         CHATUSERLISTTABLEVIEW.delegate = self
         ///セルの登録
         CHATUSERLISTTABLEVIEW.register(UserListTableViewCell.self, forCellReuseIdentifier: "UserListTableViewCell")
+        
         ///タイトルラベル追加
         navigationItem.title = "ユーザーリスト"
         ///自身の情報をローカルから取得
@@ -247,8 +250,10 @@ extension UserListViewController {
         }, CountLimit: limitCount)
     }
 }
-
+///ライクボタン処理
 extension UserListViewController:UserListTableViewCellDelegate{
+
+    
     ///ライクボタン押下時のアクション
     /// - Parameters:
     ///- CELL: CELL全体が引数
@@ -341,4 +346,120 @@ extension UserListViewController:UserListTableViewCellDelegate{
     }
     
     
+}
+
+extension UserListViewController {
+    ///_プロフィール画像タップ時アクションシート_
+    func profileImageButtonPushed(CELL: UserListTableViewCell, CELLUSERSTRUCT: UserListStruct) {
+        ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
+        profileImageActionSheet(callback: {actionFlg in
+            if let actionFlg = actionFlg {
+                switch actionFlg{
+                ///画像を表示
+                case 1:
+                    self.SHOWIMAGEVIEWCONTROLLER.profileImage = CELL.talkListUserProfileImageView.image
+                    self.present(self.SHOWIMAGEVIEWCONTROLLER, animated: true, completion: nil)
+                ///画像を変更
+                case 2:
+                    ///プロフィール画面遷移
+                    let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController()
+                    ///遷移先のControllerに対してnavigationBarの値を渡す
+                    TARGETPROFILEVIEWCONTROLLER.profileData = self.userArrayCreate(userListStruct: CELLUSERSTRUCT, profileImagedata: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
+                    ///遷移先のControllerに対してプロフィール画像データを渡す
+                    TARGETPROFILEVIEWCONTROLLER.profileData
+                    self.navigationController?.pushViewController(TARGETPROFILEVIEWCONTROLLER, animated: true)
+                default:
+                    break
+                }
+            }
+        })
+    }
+    
+    ///アクションシートの生成
+    func profileImageActionSheet(callback:@escaping (Int?) -> Void){
+        var actionFlg:Int?
+        //アクションシートを作る
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        //ボタン1
+        alert.addAction(UIAlertAction(title: "画像を表示", style: .default, handler: {
+            (action: UIAlertAction!) in
+            actionFlg = 1
+            callback(actionFlg)
+        }))
+        //ボタン２
+        alert.addAction(UIAlertAction(title: "プロフィールを表示", style: .default, handler: {
+            (action: UIAlertAction!) in
+            actionFlg = 2
+            callback(actionFlg)
+        }))
+        //ボタン３
+        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
+        //アクションシートを表示する
+        self.present(alert, animated: true, completion: nil)
+        
+    }
+    
+    ///_セルタップ時アクションシート_
+    ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
+    func cellPushed(CELL: UserListTableViewCell, CELLUSERSTRUCT: UserListStruct) {
+        ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
+        cellActionSheet(callback: {actionFlg in
+            if let actionFlg = actionFlg {
+                switch actionFlg{
+                ///画像を表示
+                case 1:
+                    ///プロフィール画面遷移
+                    let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController()
+                    ///遷移先のControllerに対してnavigationBarの値を渡す
+                    TARGETPROFILEVIEWCONTROLLER.profileData = self.userArrayCreate(userListStruct: CELLUSERSTRUCT, profileImagedata: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
+                    ///遷移先のControllerに対してプロフィール画像データを渡す
+                    TARGETPROFILEVIEWCONTROLLER.profileData
+                    self.navigationController?.pushViewController(TARGETPROFILEVIEWCONTROLLER, animated: true)
+                ///トーク画面に遷移
+                case 2:
+                    
+                default:
+                    break
+                }
+            }
+        })
+    }
+    ///アクションシートの生成
+    func cellActionSheet(callback:@escaping (Int?) -> Void){
+        var actionFlg:Int?
+        //アクションシートを作る
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        //ボタン1
+        alert.addAction(UIAlertAction(title: "プロフィールを表示", style: .default, handler: {
+            (action: UIAlertAction!) in
+            actionFlg = 1
+            callback(actionFlg)
+        }))
+        //ボタン２
+        alert.addAction(UIAlertAction(title: "トークを表示", style: .default, handler: {
+            (action: UIAlertAction!) in
+            actionFlg = 2
+            callback(actionFlg)
+        }))
+        //ボタン３
+        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
+        //アクションシートを表示する
+        self.present(alert, animated: true, completion: nil)
+        
+    }
+    
+    func userArrayCreate(userListStruct:UserListStruct,profileImagedata:UIImage) -> [String:Any]{
+        
+        var userInfoData:[String:Any] = [:]
+        userInfoData["createdAt"] = userListStruct.createdAt
+        userInfoData["Sex"] = userListStruct.Sex
+        userInfoData["aboutMeMassage"] = userListStruct.aboutMessage
+        userInfoData["nickname"] = userListStruct.userNickName
+        userInfoData["age"] = userListStruct.Age
+        userInfoData["area"] = userListStruct.From
+        userInfoData["profileImageData"] = profileImagedata
+        
+        return userInfoData
+        
+    }
 }

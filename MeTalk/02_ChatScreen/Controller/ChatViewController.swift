@@ -35,7 +35,6 @@ class ChatViewController: MessagesViewController {
 
     var messageList: [MockMessage] = [] {
         didSet {
-
             if !loadDataLockFlg {
                 self.messagesCollectionView.reloadDataAndKeepOffset()
             } else {
@@ -44,7 +43,6 @@ class ChatViewController: MessagesViewController {
                 // 一番下までスクロールする
                 self.messagesCollectionView.scrollToLastItem()
             }
-
         }
     }
 
@@ -57,7 +55,6 @@ class ChatViewController: MessagesViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
         ///listendがFalse（既読扱いになっていないもののみ）を取得
         handle = databaseRef.child("Chat").child(roomID).queryOrdered(byChild: "listend").queryEqual(toValue: false).observe(.value) { (snapshot: DataSnapshot) in
             DispatchQueue.main.async {//クロージャの中を同期処理
@@ -87,6 +84,18 @@ class ChatViewController: MessagesViewController {
         
         ///タイトルラベル追加
         navigationItem.title = "\(YouInfo["nickname"] as! String)"
+    }
+    ///Did Load内でメッセージ追加するとView表示前なのでメッセージ表示が行われないのでDidApper内で追加
+    override func viewDidAppear(_ animated: Bool) {
+        ///ネットワーク確認
+        let NETWORKSTATUS = Reachabiliting()
+        if NETWORKSTATUS.NetworkStatus() == 0{
+            let dialog = UIAlertController(title: "ネットワーク接続がありません", message: "ネットワークを確認してからもう一度実行してください", preferredStyle: .alert)
+            dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+            self.present(dialog, animated: true, completion: nil)
+            ///メッセージ追加
+            messageListAppend()
+        }
     }
 
     override func didReceiveMemoryWarning() {
@@ -172,15 +181,27 @@ extension ChatViewController: MessagesDisplayDelegate {
     func backgroundColor(
         for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView
     ) -> UIColor {
-        isFromCurrentSender(message: message) ? .orange : .darkGray
+        switch message.kind {
+        case .photo(_):
+            return .clear
+        default:
+            return isFromCurrentSender(message: message) ? .orange : .darkGray
+        }        
     }
 
     // メッセージの枠にしっぽを付ける
     func messageStyle(
         for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView
     ) -> MessageStyle {
+        
         let corner: MessageStyle.TailCorner = isFromCurrentSender(message: message) ? .bottomRight : .bottomLeft
-        return .bubbleTail(corner, .curved)
+        
+        switch message.kind {
+            case .photo(_):
+                return .none
+            default:
+                return .bubbleTail(corner, .curved)
+        }
     }
 
     // アイコンをセット
@@ -210,8 +231,6 @@ extension ChatViewController: MessagesLayoutDelegate {
         }
 
     }
-    
-
     func messageTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         16
     }
@@ -298,27 +317,31 @@ extension ChatViewController {
         //スナップショットとは、ある時点における特定のデータベース参照にあるデータの全体像を写し取ったもの
         if snapshot.children.allObjects as? [DataSnapshot] != nil  {
             let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
-            //snapChildrenの中身の数だけsnapChildをとりだす
-            for snapChild in snapChildren! {
-                ///それぞれのValue配列を取得
-                if let postDict = snapChild.value as? [String: Any] {
-                    ///日付格納配列初期化
-                    DateGrouping = []
-                    ///送信UIDが自身のUIDでなかった場合
-                    let senderID = postDict["sender"] as! String
-                    if  senderID != self.MeUID {
-                        ///読み込んだメッセージのlistendは全てtrueに更新（送信者が自分以外）
-                        databaseRef.child("Chat").child(roomID).child(snapChild.key).updateChildValues(["listend":true])
+            ///更新件数がない場合
+            if snapChildren?.count == 0 {
+                ///メッセージ追加
+                messageListAppend()
+            } else {
+                //snapChildrenの中身の数だけsnapChildをとりだす
+                for snapChild in snapChildren! {
+                    ///それぞれのValue配列を取得
+                    if let postDict = snapChild.value as? [String: Any] {
+                        ///送信UIDが自身のUIDでなかった場合
+                        let senderID = postDict["sender"] as! String
+                        if  senderID != self.MeUID {
+                            ///読み込んだメッセージのlistendは全てtrueに更新（送信者が自分以外）
+                            databaseRef.child("Chat").child(roomID).child(snapChild.key).updateChildValues(["listend":true])
+                        }
+                        ///ライクボタン有無（ライクボタン以外がきたらfalse）
+                        var likeButtonFLAG:Bool = false
+                        likeButtonFLAG = postDict["LikeButtonFLAG"] as? Bool ?? false
+                        ///ローカルデータベースに保存
+                        localMessageDataRegist(roomID: roomID, listend: true, message: postDict["message"] as! String, sender: postDict["sender"] as! String, Date: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String, likeButtonFLAG: likeButtonFLAG)
                     }
-                    ///ライクボタン有無（ライクボタン以外がきたらfalse）
-                    var likeButtonFLAG:Bool = false
-                    likeButtonFLAG = postDict["LikeButtonFLAG"] as? Bool ?? false
-                    ///ローカルデータベースに保存
-                    localMessageDataRegist(roomID: roomID, listend: true, message: postDict["message"] as! String, sender: postDict["sender"] as! String, Date: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String, likeButtonFLAG: likeButtonFLAG)
                 }
+                ///メッセージ追加
+                messageListAppend()
             }
-        } else {
-            print("ここはどうかな？")
         }
     }
     
@@ -358,7 +381,7 @@ extension ChatViewController {
                 if likeTrue {
                     let mediaItem = MessageMediaEntity.new(image: UIImage(named: "LIKEBUTTON_IMAGE_Pushed"))
                     messageArray.append(MockMessage.likeInfoLoad(photo: mediaItem, user: userTypeJudge(senderID: localmessage["sender"] as! String), data: localmessage["Date"] as! Date, messageID: localmessage["messageID"] as! String, messageDateGroupingFlag: FLAG))
-                }else {
+                } else {
                     messageArray.append(MockMessage.loadMessage(text: localmessage["message"] as! String, user: userTypeJudge(senderID: localmessage["sender"] as! String),data:localmessage["Date"] as! Date, messageID: localmessage["messageID"] as! String, messageDateGroupingFlag:FLAG))
                 }
             }
@@ -366,12 +389,12 @@ extension ChatViewController {
             if messageArray.first?.messageId == messageList.sorted(by: {$0.sentDate < $1.sentDate}).first?.messageId{
                 loadDataStopFlg = true
             }
-            
-            self.messageList = messageArray
-
-            self.becomeFirstResponder()
-            loadDataLockFlg = true
         }
+        print("メッセージ挿入直前")
+        self.messageList = messageArray
+
+        self.becomeFirstResponder()
+        loadDataLockFlg = true
     }
     
     ///自身かどうか判断

@@ -303,7 +303,7 @@ extension ChatUserListViewController {
             self.CHATUSERLISTTABLEVIEW.allowsSelection = true
         }, UID: UID!, ViewFLAG: 1)
     }
-    ///自分の画像を取得してくる(ここもローカルから持ってくるようにしたいね)
+    ///自分の画像を取得してくる()
     func contentOfFIRStorageGet() {
         ///サーバーに対して画像取得要求
         USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in

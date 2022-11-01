@@ -9,6 +9,7 @@ import UIKit
 
 protocol UserListTableViewCellDelegate:AnyObject{
     func likebuttonPushed(CELL:UserListTableViewCell,CELLUSERSTRUCT:UserListStruct)
+    func profileImageButtonPushed(CELL:UserListTableViewCell,CELLUSERSTRUCT:UserListStruct)
 }
 
 class UserListTableViewCell: UITableViewCell {
@@ -42,7 +43,7 @@ class UserListTableViewCell: UITableViewCell {
     }
 //
     
-    ///プロフィール画像ボタン
+    ///プロフィール画像View
     let talkListUserProfileImageView:UIImageView = {
         let returnUIImageView = UIImageView()
         returnUIImageView.layer.borderWidth = 1
@@ -50,6 +51,18 @@ class UserListTableViewCell: UITableViewCell {
         returnUIImageView.layer.borderColor = UIColor.orange.cgColor
         return returnUIImageView
     }()
+    
+    
+    ///ライクボタン
+    let profileImageButton:UIButton = {
+        let returnUIButton = UIButton()
+        returnUIButton.addTarget(self, action: #selector(profileImageButtonPush), for: .touchUpInside)
+        returnUIButton.backgroundColor = .clear
+        
+        return returnUIButton
+    }()
+    
+    
 //ニックネームラベル
     let talkListUserNicknameLabel:UILabel = {
         let returnLabel = UILabel()
@@ -105,6 +118,10 @@ class UserListTableViewCell: UITableViewCell {
         delegate?.likebuttonPushed(CELL: self, CELLUSERSTRUCT: celluserStruct!)
     }
     
+    @objc func profileImageButtonPush() {
+        delegate?.profileImageButtonPushed(CELL: self, CELLUSERSTRUCT: celluserStruct!)
+    }
+    
 //
 //    func nortificationImageSetting(){
 //        self.nortificationImage.image = UIImage(named: "NotificationIcon")
@@ -129,6 +146,7 @@ class UserListTableViewCell: UITableViewCell {
         self.contentView.addSubview(talkListUserNicknameLabel)
         self.contentView.addSubview(aboutMessage)
         self.contentView.addSubview(ImageView)
+        self.contentView.addSubview(profileImageButton)
         self.contentView.addSubview(UITextView)
         self.contentView.addSubview(LikeButton)
         self.UITextView.addSubViewFill(UItextLabel)
@@ -139,6 +157,7 @@ class UserListTableViewCell: UITableViewCell {
         ImageView.translatesAutoresizingMaskIntoConstraints = false
         LikeButton.translatesAutoresizingMaskIntoConstraints = false
         UITextView.translatesAutoresizingMaskIntoConstraints = false
+        profileImageButton.translatesAutoresizingMaskIntoConstraints = false
     }
 //※レイアウト※
     func autoLayout() {
@@ -147,6 +166,11 @@ class UserListTableViewCell: UITableViewCell {
         talkListUserProfileImageView.bottomAnchor.constraint(equalTo: self.bottomAnchor, constant: -2.5).isActive = true
         talkListUserProfileImageView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 20).isActive = true
         talkListUserProfileImageView.widthAnchor.constraint(equalTo: self.talkListUserProfileImageView.heightAnchor).isActive = true
+        ///プロフィール画像ボタン
+        profileImageButton.topAnchor.constraint(equalTo: talkListUserProfileImageView.topAnchor).isActive = true
+        profileImageButton.leadingAnchor.constraint(equalTo: talkListUserProfileImageView.leadingAnchor).isActive = true
+        profileImageButton.trailingAnchor.constraint(equalTo: talkListUserProfileImageView.trailingAnchor).isActive = true
+        profileImageButton.bottomAnchor.constraint(equalTo: talkListUserProfileImageView.bottomAnchor).isActive = true
         //ニックネームラベル
         talkListUserNicknameLabel.leadingAnchor.constraint(equalTo: self.talkListUserProfileImageView.trailingAnchor, constant: 5).isActive = true
         talkListUserNicknameLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -80).isActive = true
