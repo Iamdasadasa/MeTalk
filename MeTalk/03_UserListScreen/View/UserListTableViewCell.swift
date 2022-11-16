@@ -19,7 +19,7 @@ class UserListTableViewCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: "UserListTableViewCell")
-        self.backgroundColor = UIColor.black
+        self.backgroundColor = UIColor.white
         autoLayoutSetUp()
         autoLayout()
     }
@@ -66,7 +66,7 @@ class UserListTableViewCell: UITableViewCell {
 //ニックネームラベル
     let talkListUserNicknameLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.textColor = .white
+        returnLabel.textColor = .gray
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
 //        returnLabel.font = returnLabel.font.withSize(returnLabel.font.pointSize*3)

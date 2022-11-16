@@ -194,10 +194,10 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
                     self.present(mainTabBarController, animated: true, completion: nil)
                 })
             } else {
-                ///コールバック関数でエラーが返ってきた場合は全てこちらで処理。
-                let dialog = UIAlertController(title: "ユーザー情報の登録に失敗", message: "もう一度やり直してください\(errorFlg)", preferredStyle: .alert)
-                dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-                self.present(dialog, animated: true, completion: nil)
+                ///コールバック関数でエラーが返ってきた場合は全てこちらで警告アラート
+                let dialog = actionSheets(title01: "ユーザー情報の登録に失敗", message: "もう一度やり直してください\(errorFlg)", buttonMessage: "OK")
+                dialog.showAlertAction(SelfViewController: self)
+
             }},nickName: self.initialSettingView.nicknameTextField.text, SexNo: self.SexNo)
     }
 }

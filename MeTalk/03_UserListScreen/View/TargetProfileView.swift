@@ -175,6 +175,17 @@ class  TargetProfileView:UIView{
         return returnLabel
     }()
     
+    ///トーク遷移ボタン
+    let talkTransitButton:UIButton = {
+        let returnButton = UIButton()
+        returnButton.setTitle("トークする", for: .normal)
+        returnButton.setTitleColor(.white, for: .normal)
+        returnButton.titleLabel?.adjustsFontSizeToFitWidth = true
+        returnButton.backgroundColor = .orange
+        returnButton.layer.cornerRadius = 10
+        return returnButton
+    }()
+    
     //※レイアウト設定※
     func autoLayoutSetUp() {
         ///各オブジェクトをViewに追加
@@ -192,6 +203,7 @@ class  TargetProfileView:UIView{
         addSubview(startDateImageView)
         addSubview(sexInfoLabel)
         addSubview(startDateInfoLabel)
+        addSubview(talkTransitButton)
 
         ///UIオートレイアウトと競合させない処理
         profileImageButton.translatesAutoresizingMaskIntoConstraints = false
@@ -207,6 +219,7 @@ class  TargetProfileView:UIView{
         ageItemView.translatesAutoresizingMaskIntoConstraints = false
         areaItemView.translatesAutoresizingMaskIntoConstraints = false
         nickNameItemView.translatesAutoresizingMaskIntoConstraints = false
+        talkTransitButton.translatesAutoresizingMaskIntoConstraints = false
     }
     //※レイアウト※
     func autoLayout() {
@@ -275,6 +288,11 @@ class  TargetProfileView:UIView{
         startDateInfoLabel.widthAnchor.constraint(equalTo: self.startDateImageView.widthAnchor).isActive = true
         startDateInfoLabel.heightAnchor.constraint(equalTo: cantBeChangedInfoTitleLabel.heightAnchor).isActive = true
         startDateInfoLabel.trailingAnchor.constraint(equalTo: self.startDateImageView.trailingAnchor).isActive = true
+        
+        talkTransitButton.widthAnchor.constraint(equalTo: self.favInfoLabel.widthAnchor).isActive = true
+        talkTransitButton.topAnchor.constraint(equalTo: self.favInfoLabel.bottomAnchor, constant: 5).isActive = true
+        talkTransitButton.heightAnchor.constraint(equalTo: self.favInfoLabel.heightAnchor).isActive = true
+        talkTransitButton.leadingAnchor.constraint(equalTo: self.favInfoLabel.leadingAnchor).isActive = true
     }
 }
 

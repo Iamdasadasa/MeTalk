@@ -36,7 +36,14 @@ struct ChatDataManagedData{
     
     ///相手のユーザー情報内に自分のUIDを投入し自分のユーザー情報内に相手のUIDを投入
     ///(ここは相手にメッセージを送信したタイミングもしくは相手をトーク一覧から発見して最初のトークを行う際に。。。かな。)
-    func talkListUserAuthUIDCreate(UID1:String,UID2:String,NewMessage:String,meNickName:String,youNickname:String,LikeButtonFLAG:Bool){
+    func talkListUserAuthUIDCreate(UID1:String,UID2:String,NewMessage:String,meNickName:String,youNickname:String,LikeButtonFLAG:Bool,blockedFlag:Int?){
+        
+        ///ブロックされている場合は自身のデータ更新のみ行い終了
+        if let blockedFlag = blockedFlag {
+            ///登録処理（Cloud Firestore）自分が送信したメッセージ情報を登録
+            Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData(setDataCreate(CreateFLAG: 1, NewMessage: NewMessage, UID1: UID1, meNickName: meNickName, youNickname: youNickname, LikeButtonFLAG: LikeButtonFLAG), merge: true)
+            return
+        }
 
         ///送信ボタンを押したときではなくランダムのユーザーリストから選んだ場合は
         ///自分のトークリストにのみ相手のUIDを登録するようにする（相手にメッセージを送っていないのに相手側にトークリストの画面に表示されることを防ぐため）
@@ -46,23 +53,11 @@ struct ChatDataManagedData{
             if let document = document,document.exists {
                 ///
                 ///登録処理（Cloud Firestore）自分が送信したメッセージ情報を登録
-                Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData(setDataCreate(CreateFLAG: 1, NewMessage: NewMessage, UID1: UID1, meNickName: meNickName, youNickname: youNickname, LikeButtonFLAG: LikeButtonFLAG), completion: { error in
-                    if let error = error {
-                        ///失敗した場合
-                        print(error.localizedDescription)
-                        return
-                    }
-                })
-            //存在していない場合
+                Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData(setDataCreate(CreateFLAG: 1, NewMessage: NewMessage, UID1: UID1, meNickName: meNickName, youNickname: youNickname, LikeButtonFLAG: LikeButtonFLAG), merge: true)
+                //存在していない場合
             } else {
                 ///各登録処理（Cloud Firestore）
-                Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData(setDataCreate(CreateFLAG: 2, NewMessage: NewMessage, UID1: UID1, meNickName: meNickName, youNickname: youNickname, LikeButtonFLAG: LikeButtonFLAG), completion: { error in
-                    if let error = error {
-                        ///失敗した場合
-                        print(error.localizedDescription)
-                        return
-                    }
-                })
+                Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData(setDataCreate(CreateFLAG: 2, NewMessage: NewMessage, UID1: UID1, meNickName: meNickName, youNickname: youNickname, LikeButtonFLAG: LikeButtonFLAG), merge: true)
             }
         })
         ///相手のトークリスト情報に自分のUIDを登録
@@ -70,25 +65,13 @@ struct ChatDataManagedData{
             ///既に存在していた場合
             if let document = document,document.exists {
                 ///各登録処理（Cloud Firestore）登録処理（Cloud Firestore）自分が送信したメッセージ情報を登録
-                Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData(setDataCreate(CreateFLAG: 3, NewMessage: NewMessage, UID1: UID1, meNickName: meNickName, youNickname: youNickname, LikeButtonFLAG: LikeButtonFLAG), completion: { error in
-                    if let error = error {
-                        ///失敗した場合
-                        print(error.localizedDescription)
-                        return
-                    }
-                })
-            ///存在していない場合
+                Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData(setDataCreate(CreateFLAG: 3, NewMessage: NewMessage, UID1: UID1, meNickName: meNickName, youNickname: youNickname, LikeButtonFLAG: LikeButtonFLAG), merge: true)
+                ///存在していない場合
             } else {
                 ///各登録処理（Cloud Firestore）
-                Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData(setDataCreate(CreateFLAG: 4, NewMessage: NewMessage, UID1: UID1, meNickName: meNickName, youNickname: youNickname, LikeButtonFLAG: LikeButtonFLAG), completion: { error in
-                    if let error = error {
-                        ///失敗した場合
-                        print(error.localizedDescription)
-                        return
-                    }
-                })
+                Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData(setDataCreate(CreateFLAG: 4, NewMessage: NewMessage, UID1: UID1, meNickName: meNickName, youNickname: youNickname, LikeButtonFLAG: LikeButtonFLAG), merge: true)
             }
-        })        
+        })
     }
     
     private func setDataCreate(CreateFLAG:Int,NewMessage:String,UID1:String,meNickName:String,youNickname:String,LikeButtonFLAG:Bool) -> [String:Any]{
@@ -195,9 +178,6 @@ struct ChatDataManagedData{
         return MeUID
     }
     
-    
-
-    
     ///ChatのルームIDを生成する
     func ChatRoomID(UID1:String,UID2:String) -> String{
         let array = [UID1,UID2]
@@ -205,6 +185,9 @@ struct ChatDataManagedData{
         let roomID:String = sortArray[0] + "_" + sortArray[1]
         return roomID
     }
+    
+
+
 }
 
 ///時間管理

@@ -30,54 +30,46 @@ enum menuCellItem:Int,CaseIterable {
         let viewController:UIViewController?
     }
     ///メンバーシップ削除のためのFunction
-    func deleteMemberShipActionSheet() -> UIAlertController{
-        //アクションシートを作る
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        //ボタン1
-        alert.addAction(UIAlertAction(title: "テスト的ログアウトボタン", style: .default, handler: {
-            (action: UIAlertAction!) in
-                do {
-                    try Auth.auth().signOut()
-                } catch let signOutError as NSError {
-                    print("SignOut Error: %@", signOutError)
-                }
-        }))
-        //ボタン開発テストデータ大量作成
-        alert.addAction(UIAlertAction(title: "テストデータ大量作成", style: .default, handler: {
-            (action: UIAlertAction!) in
-            
-            let kaihatu = kaihatutouroku()
-            let ramdom = "テストデータ\(Int.random(in: 1..<100000))"
-            kaihatu.tesutotairyou(callback: { document in
-                print(document)
-            }, nickName: ramdom, SexNo: 99, ramdomString: ramdom, jibunUID: Auth.auth().currentUser!.uid)
-            
-            
-        }))
-        //ボタン2
-        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
-
-        return alert
+    func deleteMemberShipActionSheet(UIVIEWCONTROLLER:UIViewController){
+        let dialog = actionSheets(title01: "テスト的ログアウトボタン", title02: "テストデータ大量作成")
+        dialog.showTwoActionSheets(callback: { actionFLAG in
+            switch actionFLAG {
+                ///画像を表示
+                case 1:
+                    do {
+                        try Auth.auth().signOut()
+                    } catch let signOutError as NSError {
+                        print("SignOut Error: %@", signOutError)
+                    }
+                ///トーク画面に遷移
+                case 2:
+                    let kaihatu = kaihatutouroku()
+                    let ramdom = "テストデータ\(Int.random(in: 1..<100000))"
+                    kaihatu.tesutotairyou(callback: { document in
+                        print(document)
+                    }, nickName: ramdom, SexNo: 99, ramdomString: ramdom, jibunUID: Auth.auth().currentUser!.uid)
+                    
+                default:
+                    break
+            }
+        }, SelfViewController: UIVIEWCONTROLLER)
     }
     
     ///利用規約かプライバシーポリシー選択のためのFunction
-    func chooseAboutAppActionSheet(callback: @escaping (Int) -> Void) -> UIAlertController{
-        //アクションシートを作る
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        //ボタン1
-        alert.addAction(UIAlertAction(title: "利用規約", style: .default, handler: {
-            (action: UIAlertAction!) in
-                callback(1)
-        }))
-        //ボタン2
-        alert.addAction(UIAlertAction(title: "プライバシーポリシー", style: .default, handler: {
-            (action: UIAlertAction!) in
-            callback(2)
-        }))
-        //ボタン2
-        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
-
-        return alert
+    func chooseAboutAppActionSheet(callback: @escaping (Int) -> Void,UIVIEWCONTROLLER:UIViewController){
+        let dialog = actionSheets(title01: "利用規約", title02: "プライバシーポリシー")
+        dialog.showTwoActionSheets(callback: { actionFLAG in
+            switch actionFLAG {
+                ///画像を表示
+                case 1:
+                    callback(1)
+                ///トーク画面に遷移
+                case 2:
+                    callback(2)
+                default:
+                    break
+            }
+        }, SelfViewController: UIVIEWCONTROLLER)
     }
     
     ///アイテムに対して適切なセル情報を投入
@@ -214,11 +206,11 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
             mailViewControllerSet()
             print("メール問い合わせが押下されました。")
         case(2,0):
-            self.present(menusectionitem.deleteMemberShipActionSheet(), animated: true, completion: nil)
+            menusectionitem.deleteMemberShipActionSheet(UIVIEWCONTROLLER: self)
         case(1,1):
-            self.present(menusectionitem.chooseAboutAppActionSheet(callback: {viewFlg in
+            menusectionitem.chooseAboutAppActionSheet(callback: {viewFlg in
                 self.delegate?.pushViewController(nextViewController: WebViewTempleteController(webPageFlg: viewFlg), sideMenuViewcontroller: self)
-            }), animated: true, completion: nil)
+            }, UIVIEWCONTROLLER: self)
 
         default:
         guard let nextViewController = menusectionitem.info.viewController else { return }
@@ -247,10 +239,8 @@ extension SideMenuViewcontroller:MFMailComposeViewControllerDelegate{
         //メール送信が不可能なら
         } else {
             //アラートで通知
-            let alert = UIAlertController(title: "メールアカウントが存在しません", message: "問い合わせを行うにはメールアカウントのセットアップが必要です。", preferredStyle: .alert)
-            let dismiss = UIAlertAction(title: "OK", style: .cancel, handler: nil)
-            alert.addAction(dismiss)
-            self.present(alert, animated: true, completion: nil)
+            let dialog = actionSheets(title01: "メールアカウントが存在しません", message: "問い合わせを行うにはメールアカウントのセットアップが必要です。", buttonMessage: "OK")
+            dialog.showAlertAction(SelfViewController: self)
         }
     }
     ///エラー処理

@@ -3,12 +3,14 @@ import MessageKit
 import InputBarAccessoryView
 
 class ChatViewController: MessagesViewController {
-    
+    ///ブロック有無変数
+    var blocked:Bool = false
+    var blocker:Bool = false
     ///init変数　自分のUIDと相手のUID
     var MeUID:String!
     var YouUID:String!
     var MeInfo:[String:Any]!
-    var YouInfo:[String:Any]!
+    var YouInfo:TalkListUserStruct
     ///init変数　自分のプロフィール画像と相手のプロフィール画像
     var meProfileImage:UIImage!
     var youProfileImage:UIImage!
@@ -27,6 +29,15 @@ class ChatViewController: MessagesViewController {
     var start:Date?
     ///時間まとめ用のKeyValue
     var DateGrouping:[String] = []
+    
+    init (Youinfo:TalkListUserStruct) {
+        self.YouInfo = Youinfo
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     ///インスタンス化(Model)
     let chatManageData = ChatDataManagedData()
@@ -83,18 +94,26 @@ class ChatViewController: MessagesViewController {
         maintainPositionOnKeyboardFrameChanged = false
         
         ///タイトルラベル追加
-        navigationItem.title = "\(YouInfo["nickname"] as! String)"
+        navigationItem.title = "\(YouInfo.userNickName!)"
     }
     ///Did Load内でメッセージ追加するとView表示前なのでメッセージ表示が行われないのでDidApper内で追加
     override func viewDidAppear(_ animated: Bool) {
         ///ネットワーク確認
         let NETWORKSTATUS = Reachabiliting()
         if NETWORKSTATUS.NetworkStatus() == 0{
-            let dialog = UIAlertController(title: "ネットワーク接続がありません", message: "ネットワークを確認してからもう一度実行してください", preferredStyle: .alert)
-            dialog.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
-            self.present(dialog, animated: true, completion: nil)
+            let dialog = actionSheets(title01: "ネットワーク接続がありません", message: "ネットワークを確認してからもう一度実行してください", buttonMessage: "OK")
+            dialog.showAlertAction(SelfViewController: self)
             ///メッセージ追加
             messageListAppend()
+        }
+        
+        ///ブロックしている場合
+        if blocker {
+            messageInputBar.backgroundView.backgroundColor = .black
+            messageInputBar.inputTextView.backgroundColor = .black
+            messageInputBar.inputTextView.textColor = .gray
+            messageInputBar.inputTextView.text = "ブロック中"
+            messageInputBar.inputTextView.isEditable = false
         }
     }
 
@@ -134,7 +153,7 @@ extension ChatViewController: MessagesDataSource {
     }
 
     func otherSender() -> SenderType {
-        return userType.you(UID: self.YouUID, displayName: self.YouInfo["nickName"] as! String).data
+        return userType.you(UID: self.YouUID, displayName: YouInfo.userNickName!).data
     }
 
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
@@ -278,18 +297,35 @@ extension ChatViewController: MessageCellDelegate {
 extension ChatViewController: InputBarAccessoryViewDelegate {
     // 送信ボタンをタップした時の挙動
     func inputBar(_ inputBar: InputBarAccessoryView, didPressSendButtonWith text: String) {
-        
+        ///ブロックしている場合は送信ボタンを押下できない
+        if blocker {
+            return
+        }
+            
         let attributedText = NSAttributedString(
             string: text, attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor: UIColor.white])
         let message = MockMessage(attributedText: attributedText, sender:currentSender(), messageId: UUID().uuidString, date: Date(), messageDateGroupingFlag: false)
-
+        if blocked {
+            ///ブロックされているので自身のローカルデータに保存してテーブル更新後終了
+            ///ローカルデータベースに保存
+            localMessageDataRegist(roomID: roomID, listend: true, message: text, sender: message.sender.senderId, Date: Date(), messageID: message.messageId, likeButtonFLAG: false)
+            ///自身のデータベースのみ更新
+            chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text, meNickName: self.MeInfo["nickname"] as! String, youNickname: YouInfo.userNickName!, LikeButtonFLAG: false, blockedFlag: 1)
+            
+            self.messageInputBar.inputTextView.text = String()
+            self.messageInputBar.invalidatePlugins()
+            messageListAppend()
+            return
+        } else {
             ///FireBaseにデータ書き込み（書き込みした時点で読み込みリロードhandlerが呼ばれる）
             chatManageData.writeMassageData(mockMassage: message, text: text, roomID: self.roomID)
             ///最初のメッセージが存在していない場合のみそれぞれのAuthにUIDを登録、存在していたらデータ更新
-        chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text, meNickName: self.MeInfo["nickname"] as! String, youNickname: self.YouInfo["nickname"] as! String, LikeButtonFLAG: false)
-        
-            self.messageInputBar.inputTextView.text = String()
-            self.messageInputBar.invalidatePlugins()
+            chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text, meNickName: self.MeInfo["nickname"] as! String, youNickname: YouInfo.userNickName!, LikeButtonFLAG: false, blockedFlag: nil)
+        }
+
+    
+        self.messageInputBar.inputTextView.text = String()
+        self.messageInputBar.invalidatePlugins()
 //            self.messagesCollectionView.scrollToLastItem()
     }
 }
@@ -402,7 +438,7 @@ extension ChatViewController {
         if senderID == Auth.auth().currentUser?.uid{
             return userType.me(UID: MeUID, displayName: self.MeInfo["nickname"] as! String)
         } else {
-            return userType.you(UID: YouUID, displayName: self.YouInfo["nickname"] as! String)
+            return userType.you(UID: YouUID, displayName:YouInfo.userNickName!)
         }
     }
     

@@ -113,10 +113,10 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
     /// - Parameters:
     /// - Returns: none
     func profileImageButtonTappedDelegate() {
-        ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
-        profileImageActionSheet(callback: {actionFlg in
-            if let actionFlg = actionFlg {
-                switch actionFlg{
+            ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
+            let dialog = actionSheets(title01: "画像を表示", title02: "画像を変更")
+            dialog.showTwoActionSheets(callback: { actionFLAG in
+                switch actionFLAG{
                 ///画像を表示
                 case 1:
                     self.SHOWIMAGEVIEWCONTROLLER.profileImage = self.profileImage
@@ -131,8 +131,7 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
                 default:
                     break
                 }
-            }
-        })
+            }, SelfViewController: self)
     }
     
     ///カメラピッカーでキャンセルを押下した際の処理（デリゲートなので自動で呼ばれる）
@@ -191,37 +190,6 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
         print("設定ボタンが押下")
     }
     
-}
-
-///プロフィール画像を選択した際のアクションシート
-extension ProfileViewController{
-    func profileImageActionSheet(callback:@escaping (Int?) -> Void){
-        var actionFlg:Int?
-        //アクションシートを作る
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-
-        //ボタン1
-        alert.addAction(UIAlertAction(title: "画像を表示", style: .default, handler: {
-            (action: UIAlertAction!) in
-            actionFlg = 1
-            callback(actionFlg)
-        }))
-
-        //ボタン２
-        alert.addAction(UIAlertAction(title: "画像を変更", style: .default, handler: {
-            (action: UIAlertAction!) in
-            actionFlg = 2
-            callback(actionFlg)
-        }))
-
-        //ボタン３
-        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
-
-        //アクションシートを表示する
-        self.present(alert, animated: true, completion: nil)
-        
-
-    }
 }
 
 extension ProfileViewController:ProfileChildViewDelegate{

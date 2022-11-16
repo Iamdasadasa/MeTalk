@@ -8,6 +8,7 @@
 import Foundation
 import Realm
 import RealmSwift
+import Firebase
 ///リストユーザーの情報を保存するローカルオブジェクト
 class ListUsersInfoLocal: Object{
     ///UIDはプライマリーキー
@@ -18,9 +19,11 @@ class ListUsersInfoLocal: Object{
     @objc dynamic var userNickName: String?
     @objc dynamic var NewMessage: String?
     @objc dynamic var upDateDate:Date?
-    dynamic var listend:Bool?
+    @objc dynamic var listend:Bool = false
     @objc dynamic var sendUID:String?
-    
+    ///下記ブロック関連
+    @objc dynamic var blockedFLAG:Bool = false
+    @objc dynamic var blockerFLAG:Bool = false
 }
 ///プロフィールユーザー情報を保存するローカルオブジェクト
 class profileInfoLocal: Object {
@@ -37,9 +40,11 @@ class profileInfoLocal: Object {
     @objc dynamic var nickName: String?
     @objc dynamic var age: Int = 0
     @objc dynamic var area: String = "未設定"
+
     ///下記ライクボタン関連
     @objc dynamic var LikeButtonPushedFLAG:Int = 0
     @objc dynamic var LikeButtonPushedDate:Date?
+
     
 }
 
@@ -300,7 +305,7 @@ func userProfileLocalDataExtraRegist(Realm:Realm,UID:String,nickname:String?,sex
 ///- updateDate: ローカルDBに更新日時
 ///- listend: ローカルDBに保存する既読フラグ
 ///- SendUID: ローカルDBに送信者UID
-func chatUserListInfoLocalDataRegist(Realm:Realm,UID:String,usernickname:String?,newMessage:String,updateDate:Date,listend:Bool,SendUID:String){
+private func chatUserListInfoLocalDataRegist(Realm:Realm,UID:String,usernickname:String?,newMessage:String?,updateDate:Date?,listend:Bool?,SendUID:String?,blockedFLAG:Bool){
     ///REALMにてローカルDB生成
     let realm = Realm
     let UserListLocalObject = ListUsersInfoLocal()
@@ -309,8 +314,9 @@ func chatUserListInfoLocalDataRegist(Realm:Realm,UID:String,usernickname:String?
     UserListLocalObject.userNickName = usernickname
     UserListLocalObject.NewMessage = newMessage
     UserListLocalObject.upDateDate = updateDate
-    UserListLocalObject.listend = listend
+    UserListLocalObject.listend = listend ?? false
     UserListLocalObject.sendUID = SendUID
+    UserListLocalObject.blockedFLAG = blockedFLAG
     ///ローカルDBに登録
     try! realm.write {
          realm.add(UserListLocalObject)
@@ -320,7 +326,7 @@ func chatUserListInfoLocalDataRegist(Realm:Realm,UID:String,usernickname:String?
 ///ローカルDBへのリストユーザー更新データ保存
 /// - Parameters:
 /// - 新規と同様なので略
-func chatUserListInfoLocalExstraRegist(Realm:Realm,UID:String,usernickname:String?,newMessage:String?,updateDate:Date?,listend:Bool?,SendUID:String?) -> Bool{
+func chatUserListInfoLocalExstraRegist(Realm:Realm,UID:String,usernickname:String?,newMessage:String?,updateDate:Date?,listend:Bool?,SendUID:String?,blockedFLAG:Bool){
     ///REALMにてローカルDB生成
     let realm = Realm
     let localDBGetData = realm.objects(ListUsersInfoLocal.self)
@@ -329,7 +335,8 @@ func chatUserListInfoLocalExstraRegist(Realm:Realm,UID:String,usernickname:Strin
     let predicate = NSPredicate(format: "UID == %@", UID)
     ///ローカルDB内に渡されたUIDが存在していなければfalseを返す
     guard let user = localDBGetData.filter(predicate).first else {
-        return false
+        chatUserListInfoLocalDataRegist(Realm: realm, UID: UID, usernickname: usernickname, newMessage: newMessage, updateDate: Date(), listend: listend, SendUID: SendUID, blockedFLAG: blockedFLAG)
+        return
     }
     // UID以外のデータを更新する（存在していない項目は何もしない）
     do{
@@ -349,12 +356,14 @@ func chatUserListInfoLocalExstraRegist(Realm:Realm,UID:String,usernickname:Strin
           if let SendUID = SendUID {
               user.sendUID = SendUID
           }
+          user.blockedFLAG = blockedFLAG
+          
       }
     }catch {
       print("Error \(error)")
     }
     ///登録後はTrueを返す
-    return true
+    return
 }
 
 ///ローカルDBに保存してあるトークリストユーザーデータの中で最新の時間を取得して返す
@@ -471,7 +480,6 @@ func chatUserListLocalImageInfoGet(Realm:Realm,UID:String) -> listUserImageStruc
 }
 
 ///ライクボタン押下時のローカルデータ保存および更新
-
 func LikeUserDataRegist_Update(Realm:Realm,UID:String,nickname:String?,sex:Int?,aboutMassage:String?,age:Int?,area:String?,createdAt:Date?,updatedAt:Date?,LikeButtonPushedFLAG:Int,LikeButtonPushedDate:Date?){
     ///REALMにてローカルDB生成
     let realm = Realm
@@ -500,6 +508,40 @@ func LikeUserDataRegist_Update(Realm:Realm,UID:String,nickname:String?,sex:Int?,
         try realm.write{
             user.LikeButtonPushedDate = LikeButtonPushedDate
             user.LikeButtonPushedFLAG = LikeButtonPushedFLAG
+        }
+    } catch {
+        print("Error \(error)")
+    }
+}
+
+///ブロック処理(相手と自分に登録)(フラグによって解除も登録も)
+func blockUserRegist(UID1:String,UID2:String,blockerFLAG:Bool,nickname:String) {
+    ///ブロック登録(相手に自分がブロックしている情報を)
+    Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData(["blocked":blockerFLAG], merge: true)
+    ///ブロック登録(自分に相手のブロック情報を)
+    Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData(["blocker":blockerFLAG], merge: true)
+    ///自分のローカルデータに相手のブロック情報登録
+    blockUserDataRegist_Update(UID: UID2, blockerFLAG: blockerFLAG, nickname: nickname)
+    
+}
+
+///ブロック登録時のローカルデータ保存および更新【blockUserRegistから呼び出すこと。】
+ private func blockUserDataRegist_Update(UID:String,blockerFLAG:Bool,nickname:String){
+    ///REALMにてローカルDB生成
+    let realm = try! Realm()
+    let localDBGetData = realm.objects(ListUsersInfoLocal.self)
+    // UIDで検索
+    let predicate = NSPredicate(format: "UID == %@", UID)
+    ///ローカルDB内に渡されたUIDが存在していなければ新規ローカル保存関数呼び出し
+    guard let user = localDBGetData.filter(predicate).first else {
+        chatUserListInfoLocalExstraRegist(Realm: realm, UID: UID, usernickname: nickname, newMessage: nil, updateDate: Date(), listend: nil, SendUID: nil, blockedFLAG: blockerFLAG)
+        return
+    }
+    ///ローカルDB内に渡されたUIDが存在していれば更新
+    // ブロック情報のみ更新する
+    do{
+        try realm.write{
+            user.blockerFLAG = blockerFLAG
         }
     } catch {
         print("Error \(error)")

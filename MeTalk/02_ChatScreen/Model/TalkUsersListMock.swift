@@ -10,7 +10,8 @@ struct TalkListUserStruct{
     var upDateDate:Date
     var listend:Bool
     var sendUID:String
-
+    var blocked:Bool = false
+    var blocker:Bool = false
     
     init(UID:String,userNickName:String?,profileImage:UIImage?,UpdateDate:Date,NewMessage:String,listend:Bool,sendUID:String){
         self.UID = UID

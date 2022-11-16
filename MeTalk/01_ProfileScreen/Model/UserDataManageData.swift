@@ -165,16 +165,11 @@ struct UserDataManage{
             }
         }
     }
-    
-    ///Cloud Fire DBにデータを登録
-    func userInfoDataDBRegister() {
-        
-    }
-        ///サーバーに対してユーザーの情報取得
-        /// - Parameters:
-        ///- USERINFODATA.UID: 取得するユーザーUID
-        /// - Returns:
-        /// -document:取得したユーザー情報
+    ///サーバーに対してユーザーの情報取得
+    /// - Parameters:
+    ///- USERINFODATA.UID: 取得するユーザーUID
+    /// - Returns:
+    /// -document:取得したユーザー情報
     func userInfoDataGet(callback: @escaping  ([String:Any]?) -> Void,UID:String?) {
         guard let UID = UID else {
             print("UIDを確認できませんでした")
@@ -277,7 +272,37 @@ struct UserDataManage{
             }
         })
     }
-    ///【非同期】トークユーザーリスト及び自身の情報取得関数(コレクションは"Users")
+    ///【非同期】トークユーザー情報取得関数(コレクションは"Users")
+    /// - Parameters:
+    /// - callback:コールバック関数。document.dataはFirebaseのユーザー1人分を返している
+    /// 　　　　　　（ニックネーム、性別等が含まれる）
+    /// - Returns:
+    func talkListTargetUserDataGet(callback: @escaping  (TalkListUserStruct) -> Void,UID1:String,UID2:String,selfViewController:UIViewController) {
+        
+        ///ここでデータにアクセスしている（非同期処理）
+        let userDocuments = cloudDB.collection("users").document(UID1).collection("TalkUsersList").document(UID2)
+        userDocuments.getDocument(completion: { (querySnapshot, err) in
+            if let err = err {
+                print("Error getting documents: \(err)")
+            } else {
+                let DOCUMENTS = querySnapshot!
+                if let userNickname = DOCUMENTS["youNickname"] as? String,let UpdateDate = DOCUMENTS["UpdateAt"] as? Timestamp,let sendUID = DOCUMENTS["SendID"] as? String {
+                    var talkListTargetUserInfo:TalkListUserStruct = TalkListUserStruct(UID: UID2, userNickName: userNickname, profileImage: nil, UpdateDate: UpdateDate.dateValue(), NewMessage: DOCUMENTS["FirstMessage"] as? String ?? "", listend: true, sendUID: sendUID)
+                    talkListTargetUserInfo.blocked = DOCUMENTS["blocked"] as? Bool ?? false
+                    talkListTargetUserInfo.blocker = DOCUMENTS["blocker"] as? Bool ?? false
+                    callback(talkListTargetUserInfo)
+                } else {
+                    let alert = actionSheets(title01: "申し訳ありませんがこのユーザーに異常が発生しました", message: "このユーザーにメッセージを送ることはできません。", buttonMessage: "OK")
+                    alert.showAlertAction(SelfViewController: selfViewController)
+                    return
+                }
+
+            }
+        })
+
+    }
+    
+    ///【非同期】トークユーザーリスト情報取得関数(コレクションは"Users")
     /// - Parameters:
     /// - callback:コールバック関数。document.dataはFirebaseのユーザーコレクション全体を返している
     /// 　　　　　　（ニックネーム、性別等が含まれる）
