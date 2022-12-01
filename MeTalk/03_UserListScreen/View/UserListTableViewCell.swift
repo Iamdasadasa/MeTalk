@@ -19,7 +19,7 @@ class UserListTableViewCell: UITableViewCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: "UserListTableViewCell")
-        self.backgroundColor = UIColor.white
+        self.backgroundColor = UIColor.black
         autoLayoutSetUp()
         autoLayout()
     }
@@ -66,7 +66,7 @@ class UserListTableViewCell: UITableViewCell {
 //ニックネームラベル
     let talkListUserNicknameLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.textColor = .gray
+        returnLabel.textColor = .white
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
 //        returnLabel.font = returnLabel.font.withSize(returnLabel.font.pointSize*3)
@@ -121,15 +121,7 @@ class UserListTableViewCell: UITableViewCell {
     @objc func profileImageButtonPush() {
         delegate?.profileImageButtonPushed(CELL: self, CELLUSERSTRUCT: celluserStruct!)
     }
-    
-//
-//    func nortificationImageSetting(){
-//        self.nortificationImage.image = UIImage(named: "NotificationIcon")
-//    }
-//
-//    func nortificationImageRemove() {
-//        self.nortificationImage.image = nil
-//    }
+
 
     func nickNameSetCell(Item: String) {
       self.talkListUserNicknameLabel.text = Item

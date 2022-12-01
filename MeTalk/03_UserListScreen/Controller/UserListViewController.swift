@@ -165,23 +165,6 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
         let cell = tableView.cellForRow(at: indexPath) as! UserListTableViewCell
         ///選んだセルの相手のUIDを取得
         let YouUID = self.UserListMock[indexPath.row].UID
-            ///遷移先のプロフィール画面のViewcontrollerをインスタンス化
-//            let CHATVIEWCONTROLLER = ChatViewController()
-            ///それぞれのユーザー情報を渡す
-//            CHATVIEWCONTROLLER.MeInfo = self.meInfoData
-//            CHATVIEWCONTROLLER.MeUID = self.UID
-//            CHATVIEWCONTROLLER.YouInfo = document
-//            CHATVIEWCONTROLLER.YouUID = YouUID
-//            CHATVIEWCONTROLLER.meProfileImage = self.selfProfileImageView.image
-//            CHATVIEWCONTROLLER.youProfileImage = cell.talkListUserProfileImageView.image
-            ///新着ベルアイコンを非表示にする＆該当ユーザーのlisntendをFalseに設定
-//            cell.nortificationImageRemove()
-//            self.UserListMock[indexPath.row].listend = false
-//            ///ローカルDBにニックネームの最新情報のみ更新
-//            chatUserListInfoLocalExstraRegist(Realm: self.REALM, UID: YouUID, usernickname: document!["nickname"] as? String, newMessage: nil, updateDate: nil, listend: nil, SendUID: nil)
-            ///UINavigationControllerとして遷移
-//            self.navigationController?.pushViewController(CHATVIEWCONTROLLER, animated: true)
-//        }, UID: YouUID)
     }
     
     ///横にスワイプした際の処理
@@ -283,7 +266,7 @@ extension UserListViewController:UserListTableViewCellDelegate{
     ///- CELL: CELL全体が引数
     ///- CELLUSERSTRUCT:サーバーから取得した個人データ（ReloadViewしてセル更新されるまで最新にはならない）
     func likebuttonPushed(CELL: UserListTableViewCell, CELLUSERSTRUCT: UserListStruct) {
-        
+                
         if CELLUSERSTRUCT.UID  == "unknown" {
             print("ここにきたらエラーアラート")
         }
@@ -383,9 +366,8 @@ extension UserListViewController {
                 ///画像を変更
                 case 2:
                     ///プロフィール画面遷移
-                    let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController()
+                    let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController(profileData: CELLUSERSTRUCT, profileImage: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
                     ///遷移先のControllerに対してプロフィール画像データを渡す
-                    TARGETPROFILEVIEWCONTROLLER.profileData = self.userArrayCreate(userListStruct: CELLUSERSTRUCT, profileImagedata: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
                     self.navigationController?.pushViewController(TARGETPROFILEVIEWCONTROLLER, animated: true)
                 default:
                     break
@@ -402,9 +384,7 @@ extension UserListViewController {
                 ///画像を表示
                 case 1:
                     ///プロフィール画面遷移
-                    let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController()
-                    ///遷移先のControllerに対してnavigationBarの値を渡す
-                    TARGETPROFILEVIEWCONTROLLER.profileData = self.userArrayCreate(userListStruct: CELLUSERSTRUCT, profileImagedata: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
+                    let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController(profileData: CELLUSERSTRUCT, profileImage: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
                     ///遷移先のControllerに対してプロフィール画像データを渡す
                     TARGETPROFILEVIEWCONTROLLER.profileData
                     self.navigationController?.pushViewController(TARGETPROFILEVIEWCONTROLLER, animated: true)

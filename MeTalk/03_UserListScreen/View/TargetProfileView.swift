@@ -8,6 +8,12 @@
 import Foundation
 import UIKit
 
+protocol TargetProfileViewDelegate:AnyObject {
+    func likebuttonPushed()
+    func talkTransitButtonPushed()
+    func profileImageButtonTapped()
+}
+
 class  TargetProfileView:UIView{
     ///遷移元のNabigation BarのButtomAnchor
 //    var navigationBottomAnchor:NSLayoutYAxisAnchor
@@ -56,15 +62,9 @@ class  TargetProfileView:UIView{
 
 //※各定義※
     
-    weak var delegate:ProfileViewDelegate?
+    weak var delegate:TargetProfileViewDelegate?
     
     ///ボタン・フィールド定義
-    ///
-    ///ログアウトボタンタップ押下時の挙動
-    @objc func settingButtonTapped(){
-        delegate?.settingButtonTappedDelegate()
-    }
-    
     ///プロフィール画像ボタン
     let profileImageButton:UIButton = {
         let returnUIButton = UIButton()
@@ -76,7 +76,7 @@ class  TargetProfileView:UIView{
     }()
     
     @objc func profileImageButtonTapped(){
-        delegate?.profileImageButtonTappedDelegate()
+        delegate?.profileImageButtonTapped()
     }
     
     ///プロフィール名ラベル
@@ -183,8 +183,40 @@ class  TargetProfileView:UIView{
         returnButton.titleLabel?.adjustsFontSizeToFitWidth = true
         returnButton.backgroundColor = .orange
         returnButton.layer.cornerRadius = 10
+        returnButton.addTarget(self, action: #selector(talkTransitButtonPushed), for: .touchUpInside)
         return returnButton
     }()
+    
+    ///ライクボタン用背景View
+    let likeButtonBackGroundView:UIView = {
+        var returnUIView = UIView()
+        returnUIView.backgroundColor = .orange
+        returnUIView.layer.cornerRadius = 10
+        return returnUIView
+    }()
+    
+    ///ライクボタン用ImageView
+    let likeButtonImageView:UIImageView = {
+        var returnImageView = UIImageView()
+        returnImageView.image = UIImage(named: "LIKEBUTTON_IMAGE_NORMAL")
+        return returnImageView
+    }()
+    
+    ///ライクボタン
+    let LikeButton:UIButton = {
+        let returnUIButton = UIButton()
+        returnUIButton.addTarget(self, action: #selector(likebuttonPushed), for: .touchUpInside)
+        returnUIButton.backgroundColor = .clear
+        return returnUIButton
+    }()
+    
+    @objc func talkTransitButtonPushed(){
+        delegate?.talkTransitButtonPushed()
+    }
+    
+    @objc func likebuttonPushed(){
+        delegate?.likebuttonPushed()
+    }
     
     //※レイアウト設定※
     func autoLayoutSetUp() {
@@ -204,6 +236,10 @@ class  TargetProfileView:UIView{
         addSubview(sexInfoLabel)
         addSubview(startDateInfoLabel)
         addSubview(talkTransitButton)
+        addSubview(likeButtonBackGroundView)
+        addSubview(likeButtonImageView)
+        addSubview(LikeButton)
+
 
         ///UIオートレイアウトと競合させない処理
         profileImageButton.translatesAutoresizingMaskIntoConstraints = false
@@ -220,6 +256,9 @@ class  TargetProfileView:UIView{
         areaItemView.translatesAutoresizingMaskIntoConstraints = false
         nickNameItemView.translatesAutoresizingMaskIntoConstraints = false
         talkTransitButton.translatesAutoresizingMaskIntoConstraints = false
+        LikeButton.translatesAutoresizingMaskIntoConstraints = false
+        likeButtonImageView.translatesAutoresizingMaskIntoConstraints = false
+        likeButtonBackGroundView.translatesAutoresizingMaskIntoConstraints = false
     }
     //※レイアウト※
     func autoLayout() {
@@ -289,10 +328,27 @@ class  TargetProfileView:UIView{
         startDateInfoLabel.heightAnchor.constraint(equalTo: cantBeChangedInfoTitleLabel.heightAnchor).isActive = true
         startDateInfoLabel.trailingAnchor.constraint(equalTo: self.startDateImageView.trailingAnchor).isActive = true
         
+        talkTransitButton.centerXAnchor.constraint(equalTo: sexInfoLabel.trailingAnchor).isActive = true
         talkTransitButton.widthAnchor.constraint(equalTo: self.favInfoLabel.widthAnchor).isActive = true
         talkTransitButton.topAnchor.constraint(equalTo: self.favInfoLabel.bottomAnchor, constant: 5).isActive = true
         talkTransitButton.heightAnchor.constraint(equalTo: self.favInfoLabel.heightAnchor).isActive = true
-        talkTransitButton.leadingAnchor.constraint(equalTo: self.favInfoLabel.leadingAnchor).isActive = true
+        
+        likeButtonBackGroundView.centerXAnchor.constraint(equalTo: startDateInfoLabel.leadingAnchor).isActive = true
+        likeButtonBackGroundView.widthAnchor.constraint(equalTo: self.favInfoLabel.widthAnchor).isActive = true
+        likeButtonBackGroundView.topAnchor.constraint(equalTo: self.favInfoLabel.bottomAnchor, constant: 5).isActive = true
+        likeButtonBackGroundView.heightAnchor.constraint(equalTo: self.favInfoLabel.heightAnchor).isActive = true
+        
+        LikeButton.centerXAnchor.constraint(equalTo: startDateInfoLabel.leadingAnchor).isActive = true
+        LikeButton.widthAnchor.constraint(equalTo: self.favInfoLabel.widthAnchor).isActive = true
+        LikeButton.topAnchor.constraint(equalTo: self.favInfoLabel.bottomAnchor, constant: 5).isActive = true
+        LikeButton.heightAnchor.constraint(equalTo: self.favInfoLabel.heightAnchor).isActive = true
+        
+        likeButtonImageView.centerXAnchor.constraint(equalTo: startDateInfoLabel.leadingAnchor).isActive = true
+        likeButtonImageView.widthAnchor.constraint(equalTo: self.favInfoLabel.heightAnchor).isActive = true
+        likeButtonImageView.heightAnchor.constraint(equalTo: self.favInfoLabel.heightAnchor).isActive = true
+        likeButtonImageView.topAnchor.constraint(equalTo: self.favInfoLabel.bottomAnchor, constant: 5).isActive = true
+        
+
     }
 }
 
