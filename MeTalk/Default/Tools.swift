@@ -144,3 +144,16 @@ struct actionSheets{
     }
     
 }
+
+struct LOADINGVIEW {
+    func loadingViewIndicator(isVisible:Bool){
+        let loadingView = LoadingView()
+        
+        let scenes = UIApplication.shared.connectedScenes
+        let windowScene = scenes.first as? UIWindowScene
+        let window = windowScene?.windows.first
+        
+        isVisible ? window?.addSubview(loadingView) : window?.removeFromSuperview()
+        
+    }
+}

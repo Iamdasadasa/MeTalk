@@ -10,9 +10,11 @@ import UIKit
 import Firebase
 import RealmSwift
 
+
 class initialSettingViewcontroller:UIViewController{
     ///インスタンス化（View）
-    let initialSettingView = InitialSettingView()
+    var initialSettingView:InitialSettingView!
+    ///ロード中に表示する画面
     let loadingView = LoadingView()
     ///インスタンス化（Model）
     let initialSettingData = InitialSettingData()
@@ -23,12 +25,15 @@ class initialSettingViewcontroller:UIViewController{
     var SexNo:Int? = nil
     
     override func viewDidLoad() {
+        ///Viewのインスタンス化
+        initialSettingView = InitialSettingView()
+        ///各ボタンを格納
+        initialSettingView.buttons = [initialSettingView.femalebutton,initialSettingView.malebutton,initialSettingView.unknownSexbutton]
+        ///Viewを設定
         self.view = initialSettingView
         ///デリゲート委譲
         initialSettingView.delegate = self
         initialSettingView.nicknameTextField.delegate = self
-        ///画像初期設定
-        imageSetUp()
         
         ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
         NotificationCenter.default.addObserver(self,
@@ -44,7 +49,6 @@ class initialSettingViewcontroller:UIViewController{
 
 //※文字制限を行うオブザーバー処理及び、ボタン活性化処理※
 extension initialSettingViewcontroller{
-
     ///    ///オブザーバー処理
     /// - Parameters:
     ///   - notification: オブザーバーから渡されたオブジェクト（ここではテキストフィールドに関するもの）
@@ -59,19 +63,6 @@ extension initialSettingViewcontroller{
             textField.text = text.prefix(10).description
         }
       }
-    }
-}
-
-//※Viewのオブジェクトに画像挿入※
-extension initialSettingViewcontroller{
-    ///    ///ボタン画像セットアップ
-    /// - Parameters:
-    /// - Returns: none
-    func imageSetUp(){
-        ///ボタンの初期画像挿入
-        initialSettingView.malebutton.setImage(initialSettingData.maleBlackImage, for: .normal)
-        initialSettingView.femalebutton.setImage(initialSettingData.femaleBlackImage, for: .normal)
-        initialSettingView.unknownSexbutton.setImage(initialSettingData.unknownSexBlackImage, for: .normal)
     }
 }
 
@@ -90,7 +81,6 @@ extension initialSettingViewcontroller:UITextFieldDelegate{
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         initialSettingView.endEditing(true)
     }
-
 }
 
 extension initialSettingViewcontroller{
@@ -114,90 +104,49 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
     ///   - button: 呼び出し元Viewの押下されたボタン
     ///   - view: 呼び出し元View
     /// - Returns: none
-    func SexButtonTappedAction(button: UIButton,view: InitialSettingView) {
-        let Button = button
+    func SexButtonTappedAction(button: SexButton,view: InitialSettingView) {
+        ///性別ボタンが押されているか判断する変数
         buttonPushingFlg = 1
-        switch Button.tag {
-        case 0:
-            Button.setImage(initialSettingData.unknownSexOrangeImage, for: .normal)
-            ChangeToUnchecked(num: 0,argView:view)
-        case 1:
-            Button.setImage(initialSettingData.maleOrangeImage, for: .normal)
-            ChangeToUnchecked(num: 1,argView:view)
-        case 2:
-            Button.setImage(initialSettingData.femaleOrangeImage, for: .normal)
-            ChangeToUnchecked(num: 2,argView:view)
-        default: break
-        }
-        SexNo = Button.tag
+        ///ボタンの画像変更
+        button.ChangeImage()
+        ///サーバー送信用性別判断変数
+        SexNo = button.tag
+        /// ボタン活性化チェック
         textFieldBrankCheck_ButtonActive()
     }
     
-    ///    /// 変更された画像以外の画像を初期値の画像に戻す処理
-    /// - Parameters:
-    ///   - num: 呼び出し元Viewの押下されたボタンのtagのナンバー
-    ///   - argView: 呼び出し元View
-    /// - Returns: none
-    func ChangeToUnchecked(num:Int,argView:InitialSettingView){
-        for v in argView.subviews {
-            if let v = v as? UIButton, num == 0{
-                switch v.tag {
-                case 1:
-                    v.setImage(initialSettingData.maleBlackImage, for: .normal)
-                case 2:
-                    v.setImage(initialSettingData.femaleBlackImage, for: .normal)
-                default: break
-                }
-            } else if let v = v as? UIButton, num == 1{
-                switch v.tag {
-                case 0:
-                    v.setImage(initialSettingData.unknownSexBlackImage, for: .normal)
-                case 2:
-                    v.setImage(initialSettingData.femaleBlackImage, for: .normal)
-                default: break
-                }
-            } else if let v = v as? UIButton, num == 2{
-                switch v.tag {
-                case 0:
-                    v.setImage(initialSettingData.unknownSexBlackImage, for: .normal)
-                case 1:
-                    v.setImage(initialSettingData.maleBlackImage, for: .normal)
-                default: break
-                }
-            }
-        }
-    }
     ///    /// 決定ボタンを押下した際の処理
     /// - Parameters:
     ///   - button: 呼び出し元Viewの押下されたボタン
     ///   - view: 呼び出し元View
     /// - Returns: none
     func dicisionButtonTappedAction(button: UIButton, view: InitialSettingView) {
-        ///一回ボタンを押したら二回目は押せなくする。
+        ///サーバー接続中のローディング画面
+        let LOADINGVIEW = LOADINGVIEW()
+        ///ローディング画面表示
+        LOADINGVIEW.loadingViewIndicator(isVisible: true)
+        ///決定ボタンの重複タップは押せなくする。
         button.isEnabled = false
         ///匿名登録処理
-        userDataManagedData.signInAnonymously(callback: {errorFlg in
-            if errorFlg == nil {
+        userDataManagedData.signInAnonymously(callback: {errorDescription in
+            if let errorDescription = errorDescription {
+                ///コールバック関数でエラーが返ってきた場合は全てこちらで警告アラート
+                let dialog = actionSheets(title01: "ユーザー情報の登録に失敗しました。", message: errorDescription, buttonMessage: "OK")
+                dialog.showAlertAction(SelfViewController: self)
+            } else {
                 ///自身のloadingView をメイン Window の Subview に追加して画面に表示
-                UIApplication.shared.windows.filter{$0.isKeyWindow}.first?.addSubview(self.loadingView)
+                LOADINGVIEW.loadingViewIndicator(isVisible: false)
                 ///遷移先ページのインスタンス
                 let mainTabBarController = MainTabBarController()
                 //.partialCurlにするとバグるのでflipHorizontalに変更
                 mainTabBarController.modalTransitionStyle = .flipHorizontal
                 mainTabBarController.modalPresentationStyle = .fullScreen
-                ///3秒後に execute のコードが実行されるようにする。
-                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3), execute: {
-                    ///ローカルデータ保存
-                    let REALM = try! Realm()
-                    userProfileLocalDataRegist(Realm: REALM, UID: Auth.auth().currentUser!.uid, nickname: self.initialSettingView.nicknameTextField.text!, sex: self.SexNo!, aboutMassage: "よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃", age: 0, area: "未設定", createdAt: Date(), updatedAt: Date())
-                    
-                    self.present(mainTabBarController, animated: true, completion: nil)
-                })
-            } else {
-                ///コールバック関数でエラーが返ってきた場合は全てこちらで警告アラート
-                let dialog = actionSheets(title01: "ユーザー情報の登録に失敗", message: "もう一度やり直してください\(errorFlg)", buttonMessage: "OK")
-                dialog.showAlertAction(SelfViewController: self)
-
-            }},nickName: self.initialSettingView.nicknameTextField.text, SexNo: self.SexNo)
+                ///ローカルデータ保存
+                let REALM = try! Realm()
+                userProfileLocalDataRegist(Realm: REALM, UID: Auth.auth().currentUser!.uid, nickname: self.initialSettingView.nicknameTextField.text!, sex: self.SexNo!, aboutMassage: "よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃", age: 0, area: "未設定", createdAt: Date(), updatedAt: Date())
+                
+                self.present(mainTabBarController, animated: true, completion: nil)
+            }},
+        nickName: self.initialSettingView.nicknameTextField.text, SexNo: self.SexNo)
     }
 }

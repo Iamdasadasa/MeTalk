@@ -20,13 +20,15 @@ struct UserDataManage{
     func signInAnonymously(callback: @escaping (String?) -> Void,nickName:String?,SexNo:Int?) {
         ///引数のデータがどちらかでもNilだった場合Return
         guard let nickName = nickName,let SexNo  = SexNo else {
+            callback("ニックネームと性別が選択されていない可能性があります。正しく選択されているにも関わらずこのメッセージが表示される場合、開発者に問い合わせできます。")
             return
         }
         ///匿名登録処理
         Auth.auth().signInAnonymously { authResult, error in
+
             ///匿名登録自体の失敗（Authentication）
             guard let user = authResult?.user else {
-                callback("ユーザー登録処理で失敗しました\(error?.localizedDescription)")
+                callback("サーバー側で登録時エラーが発生しましたもう一度試してください。【Error Message】\(error?.localizedDescription)")
                 return
             }
             
@@ -43,7 +45,7 @@ struct UserDataManage{
             ], completion: { error in
                 if let error = error {
                     ///失敗した場合
-                    callback("ユーザー情報の登録処理で失敗しました\(error.localizedDescription)")
+                    callback("サーバー側で登録時エラーが発生しましたもう一度試してください。【Error Message】\(error.localizedDescription)")
                     return
                 } else {
                     ///成功した場合遷移

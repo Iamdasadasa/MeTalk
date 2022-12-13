@@ -6,11 +6,64 @@
 //
 
 import UIKit
-protocol InitialSettingViewDelegateProtcol:AnyObject {
-    func SexButtonTappedAction(button:UIButton,view:InitialSettingView)
-    func dicisionButtonTappedAction(button:UIButton,view:InitialSettingView)
+
+///性別ボタンのプロトコル
+protocol sexImageChangeable{
+    var buttons: [UIButton] {get set}
+    func ChangeImage()
+    func setButtons(buttons: [UIButton])
 }
 
+///性別ボタンクラス
+class SexButton:UIButton,sexImageChangeable {
+    ///決定された際の画像の名前
+    var sexButtonDecidedImageName:String
+    ///未決定の画像の名前
+    var sexButtonUnDecidedImageName:String
+    ///各ボタンを保持する配列
+    var buttons: [UIButton] = []
+    
+    ///決定された際の画像の名称と未決定の画像の名称を初期化値で決定する。
+    init (sexButtonDecidedImageName:String,sexButtonUnDecidedImageName:String) {
+        self.sexButtonDecidedImageName = sexButtonDecidedImageName
+        self.sexButtonUnDecidedImageName = sexButtonUnDecidedImageName
+        super.init(frame: .zero)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    ///各ボタンをセットする処理
+    func setButtons(buttons:[UIButton]) {
+        self.buttons = buttons
+    }
+    ///画像を変更する処理
+    private func selfChangeImage(imageName:String?,button:SexButton) {
+        if let imageName = imageName {
+            let image = UIImage(named: imageName)
+            button.setImage(image, for: .normal)
+        }
+    }
+    ///自身のボタンか他のボタンかを判断し、画像変更処理に渡す
+    func ChangeImage() {
+        for button in buttons {
+            if let button = button as? SexButton{
+                if button == self {
+                    selfChangeImage(imageName: button.sexButtonDecidedImageName, button: button)
+                } else {
+                    selfChangeImage(imageName: button.sexButtonUnDecidedImageName, button: button)
+                }
+            }
+        }
+    }
+}
+
+
+protocol InitialSettingViewDelegateProtcol:AnyObject {
+    func SexButtonTappedAction(button:SexButton,view:InitialSettingView)
+    func dicisionButtonTappedAction(button:UIButton,view:InitialSettingView)
+}
+///初期Viewクラス
 class  InitialSettingView:UIView{
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -18,10 +71,11 @@ class  InitialSettingView:UIView{
         autoLayoutSetUp()
         autoLayout()
     }
-//※初期化処理※
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
 //※各定義※
     ///変数宣言
     weak var delegate:InitialSettingViewDelegateProtcol?
@@ -95,47 +149,56 @@ class  InitialSettingView:UIView{
         returnLabel.textAlignment = NSTextAlignment.left
         return returnLabel
     }()
-    ///性別イメージ
-    let maleUIImage:UIImage = {
-        let returnImage = UIImage()
-        return returnImage
-    }() 
-    let femaleUIImage:UIImage = {
-        let returnImage = UIImage()
-        return returnImage
-    }()
-    let unknownSexUIImage:UIImage = {
-        let returnImage = UIImage()
-        return returnImage
-    }()
-    ///性別ボタン
-    let malebutton:UIButton = {
-        let returnButton = UIButton()
+    ///各ボタンの所持配列　セットされたら各ボタンにセットするようにする
+    var buttons:[UIButton] = [] {
+        didSet {
+            self.malebutton.setButtons(buttons: buttons)
+            self.femalebutton.setButtons(buttons: buttons)
+            self.unknownSexbutton.setButtons(buttons: buttons)
+        }
+    }
+    
+    ///性別ボタン（男性）サブクラス
+    let malebutton:SexButton = {
+        let returnButton = SexButton(sexButtonDecidedImageName: "Male_Orange", sexButtonUnDecidedImageName: "Male_Black")
+        returnButton.setImage(UIImage(named: "Male_Black"), for: .normal)
         returnButton.tag = 1
         returnButton.backgroundColor = .white
         returnButton.addTarget(self, action: #selector(butttonClicked(_:)), for: UIControl.Event.touchUpInside)
         return returnButton
     }()
-    let femalebutton:UIButton = {
-        let returnButton = UIButton()
+    ///性別ボタン（女性）サブクラス
+    let femalebutton:SexButton = {
+        let returnButton = SexButton(sexButtonDecidedImageName: "Female_Orange", sexButtonUnDecidedImageName: "Female_Black")
+        returnButton.setImage(UIImage(named: "Female_Black"), for: .normal)
         returnButton.tag = 2
         returnButton.backgroundColor = .white
         returnButton.addTarget(self, action: #selector(butttonClicked(_:)), for: UIControl.Event.touchUpInside)
         return returnButton
     }()
-    let unknownSexbutton:UIButton = {
-        let returnButton = UIButton()
+    ///性別ボタン（不明）サブクラス
+    let unknownSexbutton:SexButton = {
+        let returnButton = SexButton(sexButtonDecidedImageName: "Unknown_Sex_Orange", sexButtonUnDecidedImageName: "Unknown_Sex_Black")
+        returnButton.setImage(UIImage(named: "Unknown_Sex_Black"), for: .normal)
         returnButton.tag = 0
         returnButton.backgroundColor = .white
         returnButton.addTarget(self, action: #selector(butttonClicked(_:)), for: UIControl.Event.touchUpInside)
         return returnButton
     }()
     ///性別ボタンが押下された際の挙動
-    @objc func butttonClicked(_ sender: UIButton) {
-        if let delegate = delegate {
-            self.delegate?.SexButtonTappedAction(button: sender, view: self)
+    @objc func butttonClicked(_ sender: SexButton) {
+        if let delegate = self.delegate {
+            delegate.SexButtonTappedAction(button: sender, view: self)
         }
     }
+    ///各性別ボタンが別のボタンをセットする処理（親から呼び出される想定）
+//    func setButtons(buttons: [UIButton]) {
+//        malebutton.setButtons(buttons: buttons)
+//        femalebutton.setButtons(buttons: buttons)
+//        unknownSexbutton.setButtons(buttons: buttons)
+//    }
+    
+    
     ///性別ラベル
     let maleLabel:UILabel = {
         let returnLabel = UILabel()
