@@ -127,26 +127,68 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
         LOADINGVIEW.loadingViewIndicator(isVisible: true)
         ///決定ボタンの重複タップは押せなくする。
         button.isEnabled = false
-        ///匿名登録処理
-        userDataManagedData.signInAnonymously(callback: {errorDescription in
-            if let errorDescription = errorDescription {
-                ///コールバック関数でエラーが返ってきた場合は全てこちらで警告アラート
-                let dialog = actionSheets(title01: "ユーザー情報の登録に失敗しました。", message: errorDescription, buttonMessage: "OK")
-                dialog.showAlertAction(SelfViewController: self)
-            } else {
-                ///自身のloadingView をメイン Window の Subview に追加して画面に表示
+        ///Viewから取得したテキスト
+        guard let nickName = self.initialSettingView.nicknameTextField.text,let SexNo = self.SexNo else {
+            ///エラー対応
+            let action = actionSheets(title01: "ニックネームもしくは性別が選択されていません", message: "もう一度お試しください", buttonMessage: "OK")
+            action.showAlertAction(SelfViewController: self)
+            ///ローディング画面非表示
+            LOADINGVIEW.loadingViewIndicator(isVisible: false)
+            return
+        }
+        ///ユーザー情報用構造体
+        let USER = FireStoreRegistUserData(nickName: nickName, sex: SexNo)
+
+        ///ユーザー情報登録(権限登録処理が完了してから実行)
+        var USERUID:String? {
+            ///USERUIDに値が入ってから実行
+            didSet {
+                ///ユーザー情報登録
+                FireStoreUserInfoRegister(callback: { FireBaseResult in
+                    ///情報登録成功
+                    if case.Success(let successMessage) = FireBaseResult {
+                        ///ローディングビュー非表示
+                        LOADINGVIEW.loadingViewIndicator(isVisible: false)
+                        ///遷移先ページのインスタンス
+                        let mainTabBarController = MainTabBarController()
+                        //.partialCurlにするとバグるのでflipHorizontalに変更
+                        mainTabBarController.modalTransitionStyle = .flipHorizontal
+                        mainTabBarController.modalPresentationStyle = .fullScreen
+                        
+                        ///ローカルデータ保存
+                        let REALM = try! Realm()
+                        userProfileLocalDataRegist(Realm: REALM, UID: Auth.auth().currentUser!.uid, nickname: USER.nickName, sex: USER.sex, aboutMassage: USER.aboutMessage, age: USER.age, area: USER.area, createdAt: Date(), updatedAt:Date())
+                        
+                        self.present(mainTabBarController, animated: true, completion: nil)
+                    }
+                    ///情報登録失敗
+                    if case .failure(let error) = FireBaseResult {
+                        ///エラー対応
+                        print(error.localizedDescription)
+                        let action = actionSheets(title01: "ユーザー情報登録処理に失敗しました", message: "もう一度お試しください", buttonMessage: "OK")
+                        action.showAlertAction(SelfViewController: self)
+                        ///ローディング画面非表示
+                        LOADINGVIEW.loadingViewIndicator(isVisible: false)
+                    }
+                }, USER: USER, uid: USERUID!)
+            }
+        }
+        
+        ///権限登録処理
+        FireStoreSignUpAuthRegister(callback: { FireBaseResult in
+            if case.Success(let UID) = FireBaseResult {
+                USERUID = UID
+            }
+            
+            if case .failure(let error) = FireBaseResult {
+                ///エラー対応
+                print(error.localizedDescription)
+                let action = actionSheets(title01: "ユーザー権限登録処理に失敗しました", message: "もう一度お試しください", buttonMessage: "OK")
+                action.showAlertAction(SelfViewController: self)
+                ///ローディング画面非表示
                 LOADINGVIEW.loadingViewIndicator(isVisible: false)
-                ///遷移先ページのインスタンス
-                let mainTabBarController = MainTabBarController()
-                //.partialCurlにするとバグるのでflipHorizontalに変更
-                mainTabBarController.modalTransitionStyle = .flipHorizontal
-                mainTabBarController.modalPresentationStyle = .fullScreen
-                ///ローカルデータ保存
-                let REALM = try! Realm()
-                userProfileLocalDataRegist(Realm: REALM, UID: Auth.auth().currentUser!.uid, nickname: self.initialSettingView.nicknameTextField.text!, sex: self.SexNo!, aboutMassage: "よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃", age: 0, area: "未設定", createdAt: Date(), updatedAt: Date())
-                
-                self.present(mainTabBarController, animated: true, completion: nil)
-            }},
-        nickName: self.initialSettingView.nicknameTextField.text, SexNo: self.SexNo)
+                return
+            }
+        })
     }
 }

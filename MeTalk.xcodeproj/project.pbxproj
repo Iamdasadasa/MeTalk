@@ -39,6 +39,7 @@
 		D655505127EADC7C00C86E34 /* chatUserListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655505027EADC7C00C86E34 /* chatUserListTableViewCell.swift */; };
 		D65BD34828EFE2BC00DDAFA4 /* UserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */; };
 		D65BD34A28EFE2D100DDAFA4 /* UserListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BD34928EFE2D100DDAFA4 /* UserListTableViewCell.swift */; };
+		D663007F2950471D00C59657 /* FireBaseDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D663007E2950471D00C59657 /* FireBaseDataController.swift */; };
 		D67C27D028F88B2F00C25BA3 /* UserListStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */; };
 		D67C27D428F88CDA00C25BA3 /* UserListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27D328F88CDA00C25BA3 /* UserListManager.swift */; };
 		D67C27D628FE959100C25BA3 /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27D528FE959100C25BA3 /* Extension.swift */; };
@@ -126,6 +127,7 @@
 		D655505027EADC7C00C86E34 /* chatUserListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = chatUserListTableViewCell.swift; sourceTree = "<group>"; };
 		D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListViewController.swift; sourceTree = "<group>"; };
 		D65BD34928EFE2D100DDAFA4 /* UserListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListTableViewCell.swift; sourceTree = "<group>"; };
+		D663007E2950471D00C59657 /* FireBaseDataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FireBaseDataController.swift; sourceTree = "<group>"; };
 		D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListStruct.swift; sourceTree = "<group>"; };
 		D67C27D328F88CDA00C25BA3 /* UserListManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListManager.swift; sourceTree = "<group>"; };
 		D67C27D528FE959100C25BA3 /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
@@ -221,6 +223,7 @@
 		D631EBEC27A581BE00800693 /* MeTalk */ = {
 			isa = PBXGroup;
 			children = (
+				D663007D295046FA00C59657 /* FireBase */,
 				D6A8C0D5286345610017171A /* RealM */,
 				D68FB3A727D87ECE00E57F5A /* TableViewTemplete */,
 				D655503E27E20F5300C86E34 /* Default */,
@@ -444,6 +447,14 @@
 				D6E1F778292B419C0005212C /* userListFunctionStruct.swift */,
 			);
 			path = Controller;
+			sourceTree = "<group>";
+		};
+		D663007D295046FA00C59657 /* FireBase */ = {
+			isa = PBXGroup;
+			children = (
+				D663007E2950471D00C59657 /* FireBaseDataController.swift */,
+			);
+			path = FireBase;
 			sourceTree = "<group>";
 		};
 		D67C27D228F88B9E00C25BA3 /* Model */ = {
@@ -776,6 +787,7 @@
 				D68FB3AD27D9D65400E57F5A /* BlockListViewController.swift in Sources */,
 				D68FB39427D5C6CC00E57F5A /* GeneralTableView.swift in Sources */,
 				D67C27D028F88B2F00C25BA3 /* UserListStruct.swift in Sources */,
+				D663007F2950471D00C59657 /* FireBaseDataController.swift in Sources */,
 				D67C27DC2908FAAF00C25BA3 /* TargetProfileViewController.swift in Sources */,
 				D67C27D628FE959100C25BA3 /* Extension.swift in Sources */,
 				D6543DC127B7B61500444454 /* SemiModalViewController.swift in Sources */,

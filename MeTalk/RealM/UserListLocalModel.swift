@@ -33,8 +33,8 @@ class profileInfoLocal: Object {
         return "UID"
     }
     
-    @objc dynamic var createdAt: Date?
-    @objc dynamic var updatedAt: Date?
+    @objc dynamic var localDateCreatedAt: Date?
+    @objc dynamic var localDateUpdatedAt: Date?
     @objc dynamic var Sex: Int = 0
     @objc dynamic var aboutMeMassage: String = ""
     @objc dynamic var nickName: String?
@@ -136,8 +136,8 @@ func userProfileDatalocalGet(callback: @escaping ([String:Any]) -> Void,UID:Stri
     ///自身のプロフィール情報を取得
     if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
         ///Firebaseの形式に合わせて辞書型で保存する
-        profileData = [ "createdAt":SELFPROFILEDATA.createdAt,
-                        "updatedAt":SELFPROFILEDATA.updatedAt,
+        profileData = [ "createdAt":SELFPROFILEDATA.localDateCreatedAt,
+                        "updatedAt":SELFPROFILEDATA.localDateCreatedAt,
                         "Sex":SELFPROFILEDATA.Sex,
                         "aboutMeMassage":SELFPROFILEDATA.aboutMeMassage,
                         "nickname":SELFPROFILEDATA.nickName,
@@ -225,14 +225,14 @@ func userProfileLocalDataRegist(Realm:Realm,UID:String,nickname:String?,sex:Int,
         profileInfoLocalObject.area = "未設定"
     }
     if let createdAt = createdAt {
-        profileInfoLocalObject.createdAt = createdAt
+        profileInfoLocalObject.localDateCreatedAt = createdAt
     } else {
-        profileInfoLocalObject.createdAt = Date()
+        profileInfoLocalObject.localDateCreatedAt = Date()
     }
     if let updatedAt = updatedAt {
-        profileInfoLocalObject.updatedAt = updatedAt
+        profileInfoLocalObject.localDateUpdatedAt = updatedAt
     } else {
-        profileInfoLocalObject.updatedAt = Date()
+        profileInfoLocalObject.localDateUpdatedAt = Date()
     }
     ///必ず値が入っているものは直接投入
     profileInfoLocalObject.UID = UID
@@ -278,11 +278,11 @@ func userProfileLocalDataExtraRegist(Realm:Realm,UID:String,nickname:String?,sex
               } else {///値が入ってこない場合は何もしない
               }
               if let createdAt = createdAt {
-                  user.createdAt = createdAt
+                  user.localDateCreatedAt = createdAt
               } else {///値が入ってこない場合は何もしない
               }
               if let updatedAt = updatedAt {
-                  user.updatedAt = updatedAt
+                  user.localDateCreatedAt = updatedAt
               } else {///値が入ってこない場合は何もしない
               }
               if let sex = sex {
