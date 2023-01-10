@@ -471,6 +471,7 @@
 			children = (
 				D68FB39D27D73F6D00E57F5A /* SideMenuItem */,
 				D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */,
+				D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */,
 			);
 			path = SideMenu;
 			sourceTree = "<group>";
@@ -498,7 +499,6 @@
 			children = (
 				D698A0CA27E0BA66002C64DE /* WebViewTempleteController.swift */,
 				D68FB3A127D7410800E57F5A /* NotificationViewController.swift */,
-				D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */,
 				D68FB3AC27D9D65400E57F5A /* BlockListViewController.swift */,
 			);
 			path = Controller;

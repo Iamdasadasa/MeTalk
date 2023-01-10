@@ -14,9 +14,9 @@ protocol SideMenuViewControllerDelegate:AnyObject{
     func pushViewController(nextViewController:UIViewController,sideMenuViewcontroller:SideMenuViewcontroller)
 }
 
-
 ///セルを制御するためのEnum構造体
 enum menuCellItem:Int,CaseIterable {
+    
     ///Item
     case notification
     case blockList
@@ -34,14 +34,14 @@ enum menuCellItem:Int,CaseIterable {
         let dialog = actionSheets(title01: "テスト的ログアウトボタン", title02: "テストデータ大量作成")
         dialog.showTwoActionSheets(callback: { actionFLAG in
             switch actionFLAG {
-                ///画像を表示
+                ///
                 case 1:
                     do {
                         try Auth.auth().signOut()
                     } catch let signOutError as NSError {
                         print("SignOut Error: %@", signOutError)
                     }
-                ///トーク画面に遷移
+                ///
                 case 2:
                     let kaihatu = kaihatutouroku()
                     let ramdom = "テストデータ\(Int.random(in: 1..<100000))"
@@ -190,6 +190,9 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
         
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
       let cell = tableView.dequeueReusableCell(withIdentifier: "SideMenuTableViewCell", for: indexPath ) as! SideMenuTableViewCell
+        
+        
+        
         guard let menusectionitem = menuCellItem(rawValue: returnNumber(sectionNo: indexPath.section, itemNo: indexPath.row)) else { return cell }
         
         cell.setCell(Item: menusectionitem.info.cellTitle)
