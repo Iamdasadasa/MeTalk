@@ -26,7 +26,6 @@ class NotificationTableViewCell: UITableViewCell {
         returnLabel.textColor = .white
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
-//        returnLabel.font = returnLabel.font.withSize(returnLabel.font.pointSize*3)
         returnLabel.adjustsFontSizeToFitWidth = true
         return returnLabel
     }()

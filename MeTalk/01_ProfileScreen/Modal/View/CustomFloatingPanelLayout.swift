@@ -22,10 +22,6 @@ class CustomFloatingPanelLayout: FloatingPanelLayout {
             .full: FloatingPanelLayoutAnchor(absoluteInset: 16.0, edge: .top, referenceGuide: .safeArea),
             // 半モーダル時のレイアウト
             .half: FloatingPanelLayoutAnchor(absoluteInset: 15.0, edge: .top, referenceGuide: .safeArea)
-//            .tip: FloatingPanelLayoutAnchor(fractionalInset: 0.1, edge: .bottom, referenceGuide: .safeArea),
         ]
-    }
-
-    
-    
+    } 
 }

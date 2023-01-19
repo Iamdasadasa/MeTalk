@@ -66,6 +66,7 @@
 		D6A8C0D8286345AD0017171A /* UserListLocalModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */; };
 		D6DE5C1F28085CB4006C6236 /* TalkUsersListMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */; };
 		D6E1F779292B419C0005212C /* userListFunctionStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6E1F778292B419C0005212C /* userListFunctionStruct.swift */; };
+		D6EA09F12976ACA0003801F7 /* ModalBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6EA09F02976ACA0003801F7 /* ModalBaseView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -152,6 +153,7 @@
 		D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListLocalModel.swift; sourceTree = "<group>"; };
 		D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkUsersListMock.swift; sourceTree = "<group>"; };
 		D6E1F778292B419C0005212C /* userListFunctionStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = userListFunctionStruct.swift; sourceTree = "<group>"; };
+		D6EA09F02976ACA0003801F7 /* ModalBaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalBaseView.swift; sourceTree = "<group>"; };
 		DC56F677BBCA503621EE7776 /* Pods-MeTalk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalk.release.xcconfig"; path = "Target Support Files/Pods-MeTalk/Pods-MeTalk.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -304,6 +306,7 @@
 			children = (
 				D6543DC427B7F49800444454 /* SemiModalTranslucentView.swift */,
 				D6543DC227B7BE7400444454 /* CustomFloatingPanelLayout.swift */,
+				D6EA09F02976ACA0003801F7 /* ModalBaseView.swift */,
 				D6543DC827BA268200444454 /* NickNameTextFieldModalView.swift */,
 				D6543DCC27BF6BC900444454 /* AboutMeTextFieldModalView.swift */,
 				D6543DD327C500D800444454 /* AreaPickerModalView.swift */,
@@ -810,6 +813,7 @@
 				D696850827D24100006D85DC /* ShowImageView.swift in Sources */,
 				D65BD34A28EFE2D100DDAFA4 /* UserListTableViewCell.swift in Sources */,
 				D65BD34828EFE2BC00DDAFA4 /* UserListViewController.swift in Sources */,
+				D6EA09F12976ACA0003801F7 /* ModalBaseView.swift in Sources */,
 				D655504B27E3630400C86E34 /* Mock.swift in Sources */,
 				D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */,
 				D631EC2527A7E26D00800693 /* InitialSettingData.swift in Sources */,

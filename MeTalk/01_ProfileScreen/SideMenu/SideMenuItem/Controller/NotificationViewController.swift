@@ -56,7 +56,6 @@ class NotificationViewController:UIViewController{
     @objc func backButtonPressed(_ sender: UIBarButtonItem) {
         self.dismiss(animated: true, completion: nil)
      }
-
 }
 
 ///TableView関連の処理

@@ -121,8 +121,6 @@ func localMessageDataRegist(roomID:String,listend:Bool,message:String,sender:Str
     try! REALM.write{
         REALM.add(MESSAGELOCAL)
     }
-    
-    
 }
 
 ///ローカルDBより自身のプロフィール情報を取得して辞書型で返却する

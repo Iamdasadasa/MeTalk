@@ -13,11 +13,57 @@ import MessageUI
 protocol SideMenuViewControllerDelegate:AnyObject{
     func pushViewController(nextViewController:UIViewController,sideMenuViewcontroller:SideMenuViewcontroller)
 }
-
-///セルを制御するためのEnum構造体
-enum menuCellItem:Int,CaseIterable {
-    
+///セクションを制御するためのEnum構造体
+enum Section:Int,CaseIterable {
     ///Item
+    case basicSetting
+    case app
+    case user
+    ///セクションに対する情報項目(適宜増やしてOK)
+    struct SectionItem{
+        var sectionTitle:String
+        var numberOfRowsInSection:Int
+    }
+    
+    ///アイテムに対して適切なセクション情報を投入
+    var Items:SectionItem {
+        switch self {
+        case .basicSetting:
+            let SectionItem = SectionItem(sectionTitle: "基本設定", numberOfRowsInSection: 2)
+            return SectionItem
+        case .app:
+            let SectionItem = SectionItem(sectionTitle: "アプリケーション", numberOfRowsInSection: 2)
+            return SectionItem
+        case .user:
+            let SectionItem = SectionItem(sectionTitle: "ユーザー関連", numberOfRowsInSection: 1)
+            return SectionItem
+        }
+    }
+    
+}
+///セルを制御するためのEnum構造体
+enum CellItem:Int,CaseIterable {
+    
+    ///CellItemを実態化する際にこれを呼び出して正しいCaseを決定すること。
+    static func dicidedCase (section:Int,Row:Int) -> CellItem {
+        let sectionAndRow = [section,Row]
+        switch sectionAndRow {
+        case [0,0]:
+            return .notification
+        case [0,1]:
+            return.blockList
+        case [1,0]:
+            return.inquiry
+        case [1,1]:
+            return.aboutApp
+        case[2,0]:
+            return.cancelTheMembership
+        default:
+            preconditionFailure("Sectionの数が多すぎているか、セルの数が多すぎているためにenum Sectionを要確認")
+        }
+    }
+    
+    ///cellの状態
     case notification
     case blockList
     case inquiry
@@ -25,102 +71,33 @@ enum menuCellItem:Int,CaseIterable {
     case cancelTheMembership
     
     ///セルに対する情報項目(適宜増やしてOK)
-    struct  Menudata{
+    struct CELLDATA{
+        ///セル表示名
         let cellTitle:String
+        ///タップしたときの移行画面
         let viewController:UIViewController?
-    }
-    ///メンバーシップ削除のためのFunction
-    func deleteMemberShipActionSheet(UIVIEWCONTROLLER:UIViewController){
-        let dialog = actionSheets(title01: "テスト的ログアウトボタン", title02: "テストデータ大量作成")
-        dialog.showTwoActionSheets(callback: { actionFLAG in
-            switch actionFLAG {
-                ///
-                case 1:
-                    do {
-                        try Auth.auth().signOut()
-                    } catch let signOutError as NSError {
-                        print("SignOut Error: %@", signOutError)
-                    }
-                ///
-                case 2:
-                    let kaihatu = kaihatutouroku()
-                    let ramdom = "テストデータ\(Int.random(in: 1..<100000))"
-                    kaihatu.tesutotairyou(callback: { document in
-                        print(document)
-                    }, nickName: ramdom, SexNo: 99, ramdomString: ramdom, jibunUID: Auth.auth().currentUser!.uid)
-                    
-                default:
-                    break
-            }
-        }, SelfViewController: UIVIEWCONTROLLER)
-    }
-    
-    ///利用規約かプライバシーポリシー選択のためのFunction
-    func chooseAboutAppActionSheet(callback: @escaping (Int) -> Void,UIVIEWCONTROLLER:UIViewController){
-        let dialog = actionSheets(title01: "利用規約", title02: "プライバシーポリシー")
-        dialog.showTwoActionSheets(callback: { actionFLAG in
-            switch actionFLAG {
-                ///画像を表示
-                case 1:
-                    callback(1)
-                ///トーク画面に遷移
-                case 2:
-                    callback(2)
-                default:
-                    break
-            }
-        }, SelfViewController: UIVIEWCONTROLLER)
     }
     
     ///アイテムに対して適切なセル情報を投入
-    var info:Menudata {
+    var CELLITEMS:CELLDATA {
         switch self {
         case .notification:
-            let menudata = Menudata(cellTitle: "通知", viewController: NotificationViewController())
-            return menudata
+            let CELLDATA = CELLDATA(cellTitle: "通知", viewController: NotificationViewController())
+            return CELLDATA
         case .blockList:
-            let menudata = Menudata(cellTitle: "ブロックリスト", viewController: BlockListViewController())
-            return menudata
+            let CELLDATA = CELLDATA(cellTitle: "ブロックリスト", viewController: BlockListViewController())
+            return CELLDATA
         case .inquiry:
-            let menudata = Menudata(cellTitle: "問い合わせ", viewController: NotificationViewController())
-            return menudata
+            let CELLDATA = CELLDATA(cellTitle: "問い合わせ", viewController: NotificationViewController())
+            return CELLDATA
         case .aboutApp:
-            let menudata = Menudata(cellTitle: "このアプリについて", viewController: nil)
-            return menudata
+            let CELLDATA = CELLDATA(cellTitle: "このアプリについて", viewController: nil)
+            return CELLDATA
         case .cancelTheMembership:
-            let menudata = Menudata(cellTitle: "メンバーシップの削除", viewController: nil)
-            return menudata
+            let CELLDATA = CELLDATA(cellTitle: "メンバーシップの削除", viewController: nil)
+            return CELLDATA
         }
     }
-    
-}
-///セクションを制御するためのEnum構造体
-enum menuSectionItem:Int,CaseIterable {
-    ///Item
-    case basicSetting
-    case app
-    case user
-    ///セクションに対する情報項目(適宜増やしてOK)
-    struct  Menudata{
-        var sectionTitle:String
-        var numberOfRowsInSection:Int
-    }
-    
-    ///アイテムに対して適切なセクション情報を投入
-    var info:Menudata {
-        switch self {
-        case .basicSetting:
-            let menudata = Menudata(sectionTitle: "基本設定", numberOfRowsInSection: 2)
-            return menudata
-        case .app:
-            let menudata = Menudata(sectionTitle: "アプリケーション", numberOfRowsInSection: 2)
-            return menudata
-        case .user:
-            let menudata = Menudata(sectionTitle: "ユーザー関連", numberOfRowsInSection: 1)
-            return menudata
-        }
-    }
-    
 }
 
 class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewDataSource {
@@ -146,42 +123,32 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
         
     }
     
-    ///セルの位置を計算する関数
-    func returnNumber(sectionNo:Int,itemNo:Int) -> Int{
-        if sectionNo == 0 && itemNo == 0 {
-            return 0
-        } else if sectionNo == 0 && itemNo == 1 {
-            return 1
-        } else if sectionNo == 1 && itemNo == 0 {
-            return 2
-        } else if sectionNo == 1 && itemNo == 1 {
-            return 3
-        } else if sectionNo == 2 && itemNo == 0 {
-            return 4
-        } else if sectionNo == 2 && itemNo == 1 {
-            return 5
-        }
-        ///例外
-        return 0
-    }
-
-    
     @objc func backButtonPressed(_ sender: UIBarButtonItem) {
         self.dismiss(animated: true, completion: nil)
      }
     
     func numberOfSections(in tableView: UITableView) -> Int {
-        return menuSectionItem.allCases.count
+        return Section.allCases.count
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        guard let menusectionitem = menuSectionItem(rawValue: section) else { return 0 }
-        return menusectionitem.info.numberOfRowsInSection
+        guard let SECTION = Section(rawValue: section) else {
+            ///Section(列挙型)のすべてのCaseの数よりSection数が上回っている（発生しないはず）
+            precondition(Section.allCases.count < section)
+            return 0
+        }
+        ///Caseが所持しているセクションが持つセルの数を返却
+        return SECTION.Items.numberOfRowsInSection
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        guard let menusectionitem = menuSectionItem(rawValue: section) else { return "" }
-        return menusectionitem.info.sectionTitle
+        guard let Section = Section(rawValue: section) else {
+            ///Section(列挙型)のすべてのCaseの数よりSection数が上回っている（発生しないはず）
+            precondition(Section.allCases.count < section)
+            return ""
+        }
+        ///Caseが所持しているセクションが持つセルのタイトルを返却
+        return Section.Items.sectionTitle
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -189,38 +156,99 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
     }
         
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-      let cell = tableView.dequeueReusableCell(withIdentifier: "SideMenuTableViewCell", for: indexPath ) as! SideMenuTableViewCell
-        
-        
-        
-        guard let menusectionitem = menuCellItem(rawValue: returnNumber(sectionNo: indexPath.section, itemNo: indexPath.row)) else { return cell }
-        
-        cell.setCell(Item: menusectionitem.info.cellTitle)
-
-      return cell
+        ///カスタムセルをインスタンス化(再利用)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "SideMenuTableViewCell", for: indexPath ) as! SideMenuTableViewCell
+        ///セル列挙型をIndexpathとSectionに合わせてパターンを決定
+        let CELLITEM = CellItem.dicidedCase(section: indexPath.section, Row: indexPath.row)
+        ///セルタイトルを設定
+        cell.setCell(Item: CELLITEM.CELLITEMS.cellTitle)
+        return cell
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let menusectionitem = menuCellItem(rawValue: returnNumber(sectionNo: indexPath.section, itemNo: indexPath.row)) else { return }
+        ///セル列挙型をIndexpathとSectionに合わせてパターンを決定
+        let CELLITEM = CellItem.dicidedCase(section: indexPath.section, Row: indexPath.row)
         
-        switch (indexPath.section,indexPath.row){
-        case (1,0):
+        switch CELLITEM {
+        ///通知
+        case .notification:
+            if let nextViewController = CELLITEM.CELLITEMS.viewController {
+                self.delegate?.pushViewController(nextViewController: nextViewController, sideMenuViewcontroller: self)
+            } else {
+                ///エラーによる強制終了
+                preconditionFailure("Cell列挙型の構造体viewControllerに実態が設置されていない")
+            }
+        ///ブロックリスト
+        case .blockList:
+            if let nextViewController = CELLITEM.CELLITEMS.viewController {
+                self.delegate?.pushViewController(nextViewController: nextViewController, sideMenuViewcontroller: self)
+            } else {
+                preconditionFailure("Cell列挙型の構造体viewControllerに実態が設置されていない")
+            }
+        ///問い合わせ
+        case .inquiry:
             ///メール送信画面生成及び遷移
             mailViewControllerSet()
-            print("メール問い合わせが押下されました。")
-        case(2,0):
-            menusectionitem.deleteMemberShipActionSheet(UIVIEWCONTROLLER: self)
-        case(1,1):
-            menusectionitem.chooseAboutAppActionSheet(callback: {viewFlg in
-                self.delegate?.pushViewController(nextViewController: WebViewTempleteController(webPageFlg: viewFlg), sideMenuViewcontroller: self)
+        ///アプリについて
+        case .aboutApp:
+            chooseAboutAppActionSheet(callback: { webPage in
+                self.delegate?.pushViewController(nextViewController: WebViewTempleteController(webPageItem: webPage), sideMenuViewcontroller: self)
             }, UIVIEWCONTROLLER: self)
-
-        default:
-        guard let nextViewController = menusectionitem.info.viewController else { return }
-            self.delegate?.pushViewController(nextViewController: nextViewController, sideMenuViewcontroller: self)
+        ///メンバーシップ削除
+        case .cancelTheMembership:
+            deleteMemberShipActionSheet(UIVIEWCONTROLLER: self)
         }
     }
 }
+///列挙型に関連する関数
+extension SideMenuViewcontroller {
+    
+    ///メンバーシップ削除のためのFunction
+    func deleteMemberShipActionSheet(UIVIEWCONTROLLER:UIViewController){
+        let dialog = actionSheets(title01: "テスト的ログアウトボタン", title02: "テストデータ大量作成")
+        dialog.showTwoActionSheets(callback: { actionFLAG in
+            switch actionFLAG {
+                ///
+                case 1:
+                    do {
+                        try Auth.auth().signOut()
+                    } catch let signOutError as NSError {
+                        print("SignOut Error: %@", signOutError)
+                    }
+                ///
+                case 2:
+                    let kaihatu = kaihatutouroku()
+                    let ramdom = "テストデータ\(Int.random(in: 1..<100000))"
+                    kaihatu.tesutotairyou(callback: { document in
+                    }, nickName: ramdom, SexNo: 99, ramdomString: ramdom, jibunUID: Auth.auth().currentUser!.uid)
+                    
+                default:
+                    break
+            }
+        }, SelfViewController: UIVIEWCONTROLLER)
+    }
+    
+    ///利用規約かプライバシーポリシー選択のためのFunction
+    func chooseAboutAppActionSheet(callback: @escaping (WebPage) -> Void,UIVIEWCONTROLLER:UIViewController){
+        ///カスタム列挙型インスタンス化
+        let webPageTermsOfService = WebPage.TermsOfService
+        let webPageprivacyPolicy = WebPage.privacyPolicy
+        let dialog = actionSheets(title01: webPageprivacyPolicy.info.title, title02: webPageTermsOfService.info.title)
+        dialog.showTwoActionSheets(callback: { selectedWebItem in
+            switch selectedWebItem {
+            ///プライバシーポリシー用のカスタム列挙型を返却
+            case 1:
+                callback(webPageprivacyPolicy)
+            ///利用規約用のカスタム列挙型を返却
+            case 2:
+                callback(webPageTermsOfService)
+            default:
+                return
+            }
+        }, SelfViewController: UIVIEWCONTROLLER)
+    }
+}
+
 
 ///メール送信画面についてはViewのレイアウトとかも存在しないためここで完結させる
 extension SideMenuViewcontroller:MFMailComposeViewControllerDelegate{
