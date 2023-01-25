@@ -206,22 +206,22 @@ extension ProfileViewController:ProfileChildViewDelegate{
         self.view.addSubview(SEMIMODALTRANSLUCENTVIEW)
         switch tag{
         case 1:
-            let semiModalViewController = SemiModalViewController(viewFlg: 1)
+            let semiModalViewController = SemiModalViewController(dicidedModal: .nickName)
             FPC.set(contentViewController: semiModalViewController)
             semiModalViewController.delegate = self
             FPC.addPanel(toParent: self, at: -1, animated: true, completion: nil)
         case 2:
-            let semiModalViewController = SemiModalViewController(viewFlg: 2)
+            let semiModalViewController = SemiModalViewController(dicidedModal: .aboutMe)
             FPC.set(contentViewController: semiModalViewController)
             semiModalViewController.delegate = self
             FPC.addPanel(toParent: self, at: -1, animated: true, completion: nil)
         case 3:
-            let semiModalViewController = SemiModalViewController(viewFlg: 3)
+            let semiModalViewController = SemiModalViewController(dicidedModal: .Age)
             FPC.set(contentViewController: semiModalViewController)
             semiModalViewController.delegate = self
             FPC.addPanel(toParent: self, at: -1, animated: true, completion: nil)
         case 4:
-            let semiModalViewController = SemiModalViewController(viewFlg: 4)
+            let semiModalViewController = SemiModalViewController(dicidedModal: .Area)
             FPC.set(contentViewController: semiModalViewController)
             semiModalViewController.delegate = self
             FPC.addPanel(toParent: self, at: -1, animated: true, completion: nil)
