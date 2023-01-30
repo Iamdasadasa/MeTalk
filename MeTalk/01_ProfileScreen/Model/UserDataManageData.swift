@@ -198,7 +198,7 @@ struct UserDataManage{
     //    /// - dataFlg: どのデータかを判断する 1="nickname",2="aboutMeMassage"
     //    /// - callback:コールバック。エラーを返す。エラーにならなかったら返さない。
     //    /// - Returns:
-    func userInfoDataUpload(userData:Any?,dataFlg:Int?,UID:String?) {
+    func userInfoDataUpload(userData:Any?,dataFlg:ModalItems,UID:String?) {
         ///ローカルデータ保存用インスタンス
         let realm = try! Realm()
         let localDBGetData = realm.objects(profileInfoLocal.self)
@@ -207,9 +207,10 @@ struct UserDataManage{
             print("UIDが確認できませんでした")
             return
         }
+        
         ///フラグによってアップデートする項目を仕分け
         switch dataFlg {
-        case 1: ///ニックネーム及び更新日時
+        case .nickName: ///ニックネーム及び更新日時
             guard let userData = userData as? String else {
                 return
             }
@@ -219,7 +220,7 @@ struct UserDataManage{
             ///ローカルDB更新処理
             userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: userData, sex: nil, aboutMassage: nil, age: nil, area: nil, createdAt: nil, updatedAt: Date())
 
-        case 2: ///ひとこと及び更新日時
+        case .aboutMe: ///ひとこと及び更新日時
             guard let userData = userData as? String else {
                 return
             }
@@ -229,7 +230,7 @@ struct UserDataManage{
             ///ローカルDB更新処理
             userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: nil, sex: nil, aboutMassage: userData, age: nil, area: nil, createdAt: nil, updatedAt: Date())
 
-        case 3: ///年齢及び更新日時
+        case .Age: ///年齢及び更新日時
             guard let userData = userData as? Int else {
                 return
             }
@@ -239,7 +240,7 @@ struct UserDataManage{
             ///ローカルDB更新処理
             userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: nil, sex: nil, aboutMassage: nil, age: userData, area: nil, createdAt: nil, updatedAt: Date())
 
-        case 4: ///出身地及び更新日時
+        case .Area: ///出身地及び更新日時
             guard let userData = userData as? String else {
                 return
             }
@@ -249,7 +250,6 @@ struct UserDataManage{
             ///ローカルDB更新処理
             userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: nil, sex: nil, aboutMassage: nil, age: nil, area: userData, createdAt: nil, updatedAt: Date())
 
-        default:break
         }
     }
     

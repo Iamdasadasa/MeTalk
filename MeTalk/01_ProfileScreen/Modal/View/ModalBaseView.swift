@@ -79,14 +79,6 @@ enum ModalItems {
         let LIST:[String]
         switch self {
         case.Age:
-            LIST = ["選択しない",
-                    "北海道", "青森", "岩手", "宮城", "秋田", "山形", "福島", "茨城", "栃木", "群馬",
-                    "埼玉", "千葉", "東京", "神奈川", "新潟", "富山", "石川", "福井", "山梨", "長野",
-                    "岐阜", "静岡", "愛知", "三重", "滋賀", "京都", "大阪", "兵庫", "奈良", "和歌山",
-                    "鳥取", "島根", "岡山", "広島", "山口", "徳島", "香川", "愛媛", "高知", "福岡",
-                    "佐賀", "長崎", "熊本", "大分", "宮崎", "鹿児島", "沖縄"]
-            return pickerObject(list: LIST)
-        case.Area:
             LIST = ["18", "19", "20",
                     "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
                     "31", "32", "33", "34", "35", "36", "37", "38", "39", "40",
@@ -96,18 +88,22 @@ enum ModalItems {
                     "71", "72", "73", "74", "75", "76", "77", "78", "79", "80",
                     "81", "82", "83", "84", "85", "86", "87", "88", "89", "90",
                     "91", "92", "93", "94", "95", "96", "97", "98", "99", "100"]
+
+            return pickerObject(list: LIST)
+        case.Area:
+            LIST = ["選択しない",
+                    "北海道", "青森", "岩手", "宮城", "秋田", "山形", "福島", "茨城", "栃木", "群馬",
+                    "埼玉", "千葉", "東京", "神奈川", "新潟", "富山", "石川", "福井", "山梨", "長野",
+                    "岐阜", "静岡", "愛知", "三重", "滋賀", "京都", "大阪", "兵庫", "奈良", "和歌山",
+                    "鳥取", "島根", "岡山", "広島", "山口", "徳島", "香川", "愛媛", "高知", "福岡",
+                    "佐賀", "長崎", "熊本", "大分", "宮崎", "鹿児島", "沖縄"]
+
             return pickerObject(list: LIST)
         default:
             preconditionFailure("不正なCaseの型が指定されています。コード修正が必要です。")
         }
     }
 }
-
-
-
-
-
-
 
 class ModalBaseView:UIView{
     ///使用する列挙型
@@ -117,6 +113,8 @@ class ModalBaseView:UIView{
     var decisionButton:UIButton
     var CloseModalButton:UIButton
     var itemTextField:UITextField
+    ///PICKER
+    var pickerView:UIPickerView?
     
     
     init(ModalItems:ModalItems,frame:CGRect) {
@@ -125,7 +123,14 @@ class ModalBaseView:UIView{
         self.itemTextField = MODALITEMS.objectInfo.itemTextField
         self.decisionButton = MODALITEMS.objectInfo.decisionButton
         self.CloseModalButton = MODALITEMS.objectInfo.CloseModalButton
-        
+        switch ModalItems {
+        case .Age:
+            self.pickerView = ModalItems.pickerInfo.pickerView
+        case .Area:
+            self.pickerView = ModalItems.pickerInfo.pickerView
+        default:
+            break
+        }
         super.init(frame: frame)
         autoLayoutSetUp()
         autoLayout()
@@ -238,7 +243,10 @@ extension ModalBaseView{
 extension ModalBaseView:UIPickerViewDelegate,UIPickerViewDataSource{
 
     func piceker() {
-        let pickerView = MODALITEMS.pickerInfo.pickerView
+        guard let pickerView = self.pickerView else {
+            print("pickerViewが設定されていません。正しいケース状態か確認してください。")
+            return
+        }
         pickerView.delegate = self
         pickerView.dataSource = self
         
@@ -260,7 +268,7 @@ extension ModalBaseView:UIPickerViewDelegate,UIPickerViewDataSource{
     // 1. 決定ボタンのアクション指定
     @objc func done() {
         self.itemTextField.endEditing(true)
-        self.itemTextField.text = "\(MODALITEMS.pickerInfo.list[MODALITEMS.pickerInfo.pickerView.selectedRow(inComponent: 0)])"
+        self.itemTextField.text = "\(MODALITEMS.pickerInfo.list[pickerView!.selectedRow(inComponent: 0)])"
     }
     // 2. キャンセルボタンのアクション指定
     @objc func cancel(){
