@@ -9,20 +9,15 @@ import Foundation
 import UIKit
 import FloatingPanel
 import Firebase
-import RealmSwift
 import CoreAudio
 
 
 class ChatUserListViewController:UIViewController, UINavigationControllerDelegate{
     ///インスタンス化(View)
     let CHATUSERLISTTABLEVIEW = GeneralTableView()
-    ///RealMからデータを受け取るようの変数
-    var itemList: Results<ListUsersInfoLocal>!
     ///インスタンス化(Model)
     let USERDATAMANAGE = UserDataManage()
     let UID = Auth.auth().currentUser?.uid
-    ///RealMオブジェクトをインスタンス化
-    let REALM = try! Realm()
     ///自身の画像View
     var selfProfileImageView = UIImageView()
     ///自身のユーザー情報格納変数
@@ -111,7 +106,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         print("USERINFODATA.userNickName:\(USERINFODATA.userNickName),USERINFODATA.UID:\(USERINFODATA.UID)")
         
         ///ローカル保存処理
-        chatUserListInfoLocalExstraRegist(Realm: REALM, UID: USERINFODATA.UID, usernickname: USERINFODATA.userNickName, newMessage: USERINFODATA.NewMessage, updateDate: USERINFODATA.upDateDate, listend: USERINFODATA.listend, SendUID: USERINFODATA.sendUID, blockedFLAG: USERINFODATA.blocked)
+        chatUserListInfoLocalExstraRegist(UID: USERINFODATA.UID, usernickname: USERINFODATA.userNickName, newMessage: USERINFODATA.NewMessage, updateDate: USERINFODATA.upDateDate, listend: USERINFODATA.listend, SendUID: USERINFODATA.sendUID, blockedFLAG: USERINFODATA.blocked)
 
         ///ユーザーネーム設定処理
         if let nickname = USERINFODATA.userNickName {
@@ -125,7 +120,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         let newMessage = USERINFODATA.NewMessage
         cell.newMessageSetCell(Item: newMessage)
         ///ローカルDBインスタンス化
-        let IMAGELOCALDATASTRUCT = chatUserListLocalImageInfoGet(Realm: REALM, UID: USERINFODATA.UID)
+        let IMAGELOCALDATASTRUCT = chatUserListLocalImageInfoGet(UID: USERINFODATA.UID)
         ///プロファイルイメージをセルに反映(ローカルDB)
         cell.talkListUserProfileImageView.image = IMAGELOCALDATASTRUCT.image ?? UIImage(named: "InitIMage")
         ///サーバーに対して画像取得要求
@@ -135,7 +130,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             if imageStruct.image != nil,cell.cellUID == USERINFODATA.UID{
                 cell.talkListUserProfileImageView.image = imageStruct.image ?? UIImage(named: "InitIMage")
                 ///ローカルDBに取得したデータを上書き保存
-                chatUserListLocalImageRegist(Realm: self.REALM, UID: USERINFODATA.UID, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
+                chatUserListLocalImageRegist(UID: USERINFODATA.UID, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
             }
         }, UID: USERINFODATA.UID, UpdateTime: IMAGELOCALDATASTRUCT.upDateDate)
          
@@ -167,8 +162,13 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         let YouUID = self.talkListUsersMock[indexPath.row].UID
         
         guard let CELLUID = cell.cellUID  else {
-            let dialog = actionSheets(title01: "ユーザーに異常が発生しました", message: "このユーザーとトークすることはできません。", buttonMessage: "OK")
-            dialog.showAlertAction(SelfViewController: self)
+            let alert = actionSheets(dicidedOrOkOnlyTitle: "ユーザーに異常が発生しました", message: "このユーザーとトークすることはできません。", buttonMessage:  "OK")
+            alert .okOnlyAction(callback: { result in
+                switch result {
+                case .one:
+                    return
+                }
+            }, SelfViewController: self)
             return
         }
         
@@ -190,7 +190,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             cell.nortificationImageRemove()
             self.talkListUsersMock[indexPath.row].listend = false
             ///ローカルDBにニックネームの最新情報のみ更新
-            chatUserListInfoLocalExstraRegist(Realm: self.REALM, UID: YouUID, usernickname: targetUserInfo.userNickName, newMessage: targetUserInfo.NewMessage, updateDate: targetUserInfo.upDateDate, listend: targetUserInfo.listend, SendUID: targetUserInfo.sendUID, blockedFLAG: targetUserInfo.blocked)
+            chatUserListInfoLocalExstraRegist(UID: YouUID, usernickname: targetUserInfo.userNickName, newMessage: targetUserInfo.NewMessage, updateDate: targetUserInfo.upDateDate, listend: targetUserInfo.listend, SendUID: targetUserInfo.sendUID, blockedFLAG: targetUserInfo.blocked)
            ///ブロックされている場合
             if targetUserInfo.blocked {
                 CHATVIEWCONTROLLER.blocked = true
@@ -270,7 +270,6 @@ extension ChatUserListViewController {
     }
     ///自身の情報を取得
     func userInfoDataGet() {
-        ///自身のプロフィール取得(ローカルデータを取得)
         userProfileDatalocalGet(callback: { document in
             ////ドキュメントにデータが入るまではセルを選択できないようにする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = false
@@ -278,7 +277,7 @@ extension ChatUserListViewController {
             self.meInfoData = document
             ///セル選択を可能にする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = true
-        }, UID: UID!, ViewFLAG: 1)
+        }, UID:UID!, hostiong: .hosting, ViewController: self)
     }
     ///自分の画像を取得してくる()
     func contentOfFIRStorageGet() {
@@ -302,12 +301,18 @@ extension ChatUserListViewController {
     func talkListListner() {
         ///初回インスタンス時にここでトークリストを更新
         ///ローカルDBにデータが入っている場合はデータをユーザー配列に投入する
-        let realm = try! Realm()
-        let localDBGetData = realm.objects(ListUsersInfoLocal.self)
+        let localDBGetData = localTalkListDataGet()
         
         for data in localDBGetData {
-            if let UID = data.UID,let userNickname = data.userNickName,let sendUID = data.sendUID {
-                self.talkListUsersMock.append(TalkListUserStruct(UID: UID, userNickName: userNickname, profileImage: nil,UpdateDate:data.upDateDate ?? Date(), NewMessage: data.NewMessage ?? "", listend: false, sendUID: sendUID))
+            if let UID = data.lcl_UID,let userNickname = data.lcl_UserNickName,let sendUID = data.lcl_SendUID{
+                self.talkListUsersMock.append(TalkListUserStruct(
+                    UID: UID,
+                    userNickName: userNickname,
+                    profileImage: nil,UpdateDate:data.lcl_UpdateDate ?? Date(),
+                    NewMessage: data.lcl_NewMessage ?? "",
+                    listend: false,
+                    sendUID: sendUID
+                ))
             }
         }
         ///トークリスト配列内で並び替え

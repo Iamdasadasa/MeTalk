@@ -10,7 +10,6 @@
 		333D0CDDC86CADB990AFCBAB /* Pods_MeTalk_MeTalkUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0C97C79AF021687F4CB77D1C /* Pods_MeTalk_MeTalkUITests.framework */; };
 		829D4F8A452FB3A80C9EC528 /* Pods_MeTalkTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4525AD4AD3C475377C4AB64A /* Pods_MeTalkTests.framework */; };
 		B4C33AA386E40690D6FFDF5F /* Pods_MeTalk.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 659AD8E54966BD0CAAA7A8ED /* Pods_MeTalk.framework */; };
-		D62FBE1327CDFBE500EE7768 /* AgePickerModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D62FBE1227CDFBE500EE7768 /* AgePickerModalView.swift */; };
 		D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBED27A581BE00800693 /* AppDelegate.swift */; };
 		D631EBF027A581BE00800693 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBEF27A581BE00800693 /* SceneDelegate.swift */; };
 		D631EBF527A581BE00800693 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D631EBF327A581BE00800693 /* Main.storyboard */; };
@@ -27,11 +26,8 @@
 		D6543DC127B7B61500444454 /* SemiModalViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DC027B7B61500444454 /* SemiModalViewController.swift */; };
 		D6543DC327B7BE7400444454 /* CustomFloatingPanelLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DC227B7BE7400444454 /* CustomFloatingPanelLayout.swift */; };
 		D6543DC527B7F49800444454 /* SemiModalTranslucentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DC427B7F49800444454 /* SemiModalTranslucentView.swift */; };
-		D6543DC927BA268200444454 /* NickNameTextFieldModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DC827BA268200444454 /* NickNameTextFieldModalView.swift */; };
 		D6543DCB27BA7AC200444454 /* UserDataManageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DCA27BA7AC200444454 /* UserDataManageData.swift */; };
-		D6543DCD27BF6BC900444454 /* AboutMeTextFieldModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DCC27BF6BC900444454 /* AboutMeTextFieldModalView.swift */; };
 		D6543DD027C4822300444454 /* ModalImageData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DCF27C4822300444454 /* ModalImageData.swift */; };
-		D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6543DD327C500D800444454 /* AreaPickerModalView.swift */; };
 		D655504927E3608900C86E34 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655504827E3608900C86E34 /* ChatViewController.swift */; };
 		D655504B27E3630400C86E34 /* Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655504A27E3630400C86E34 /* Mock.swift */; };
 		D655504D27E4260C00C86E34 /* ChatDataManagedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655504C27E4260C00C86E34 /* ChatDataManagedData.swift */; };
@@ -67,6 +63,7 @@
 		D6DE5C1F28085CB4006C6236 /* TalkUsersListMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */; };
 		D6E1F779292B419C0005212C /* userListFunctionStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6E1F778292B419C0005212C /* userListFunctionStruct.swift */; };
 		D6EA09F12976ACA0003801F7 /* ModalBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6EA09F02976ACA0003801F7 /* ModalBaseView.swift */; };
+		D6EEB0E02992BDA000EBDFA3 /* HostingMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6EEB0DF2992BDA000EBDFA3 /* HostingMock.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,7 +92,6 @@
 		4525AD4AD3C475377C4AB64A /* Pods_MeTalkTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MeTalkTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		659AD8E54966BD0CAAA7A8ED /* Pods_MeTalk.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MeTalk.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		796431D3D1E22AE1E4A2F1E9 /* Pods-MeTalkTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalkTests.debug.xcconfig"; path = "Target Support Files/Pods-MeTalkTests/Pods-MeTalkTests.debug.xcconfig"; sourceTree = "<group>"; };
-		D62FBE1227CDFBE500EE7768 /* AgePickerModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgePickerModalView.swift; sourceTree = "<group>"; };
 		D631EBEA27A581BE00800693 /* MeTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D631EBED27A581BE00800693 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D631EBEF27A581BE00800693 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -116,11 +112,8 @@
 		D6543DC027B7B61500444454 /* SemiModalViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemiModalViewController.swift; sourceTree = "<group>"; };
 		D6543DC227B7BE7400444454 /* CustomFloatingPanelLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomFloatingPanelLayout.swift; sourceTree = "<group>"; };
 		D6543DC427B7F49800444454 /* SemiModalTranslucentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SemiModalTranslucentView.swift; sourceTree = "<group>"; };
-		D6543DC827BA268200444454 /* NickNameTextFieldModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NickNameTextFieldModalView.swift; sourceTree = "<group>"; };
 		D6543DCA27BA7AC200444454 /* UserDataManageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDataManageData.swift; sourceTree = "<group>"; };
-		D6543DCC27BF6BC900444454 /* AboutMeTextFieldModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutMeTextFieldModalView.swift; sourceTree = "<group>"; };
 		D6543DCF27C4822300444454 /* ModalImageData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalImageData.swift; sourceTree = "<group>"; };
-		D6543DD327C500D800444454 /* AreaPickerModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AreaPickerModalView.swift; sourceTree = "<group>"; };
 		D655504827E3608900C86E34 /* ChatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
 		D655504A27E3630400C86E34 /* Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mock.swift; sourceTree = "<group>"; };
 		D655504C27E4260C00C86E34 /* ChatDataManagedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatDataManagedData.swift; sourceTree = "<group>"; };
@@ -154,6 +147,7 @@
 		D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkUsersListMock.swift; sourceTree = "<group>"; };
 		D6E1F778292B419C0005212C /* userListFunctionStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = userListFunctionStruct.swift; sourceTree = "<group>"; };
 		D6EA09F02976ACA0003801F7 /* ModalBaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalBaseView.swift; sourceTree = "<group>"; };
+		D6EEB0DF2992BDA000EBDFA3 /* HostingMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostingMock.swift; sourceTree = "<group>"; };
 		DC56F677BBCA503621EE7776 /* Pods-MeTalk.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MeTalk.release.xcconfig"; path = "Target Support Files/Pods-MeTalk/Pods-MeTalk.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -225,6 +219,7 @@
 		D631EBEC27A581BE00800693 /* MeTalk */ = {
 			isa = PBXGroup;
 			children = (
+				D6EEB0DE2992BD8B00EBDFA3 /* New Group */,
 				D663007D295046FA00C59657 /* FireBase */,
 				D6A8C0D5286345610017171A /* RealM */,
 				D68FB3A727D87ECE00E57F5A /* TableViewTemplete */,
@@ -266,9 +261,9 @@
 		D631EC1E27A5822900800693 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				D69EC37B27AA85C300290B18 /* loadingView.swift */,
 				D69EC38127AA952000290B18 /* ProfileView.swift */,
 				D6543DBC27B0DC6E00444454 /* ProfileChildView.swift */,
+				D69EC37B27AA85C300290B18 /* loadingView.swift */,
 				D696850727D24100006D85DC /* ShowImageView.swift */,
 			);
 			path = View;
@@ -307,10 +302,6 @@
 				D6543DC427B7F49800444454 /* SemiModalTranslucentView.swift */,
 				D6543DC227B7BE7400444454 /* CustomFloatingPanelLayout.swift */,
 				D6EA09F02976ACA0003801F7 /* ModalBaseView.swift */,
-				D6543DC827BA268200444454 /* NickNameTextFieldModalView.swift */,
-				D6543DCC27BF6BC900444454 /* AboutMeTextFieldModalView.swift */,
-				D6543DD327C500D800444454 /* AreaPickerModalView.swift */,
-				D62FBE1227CDFBE500EE7768 /* AgePickerModalView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -521,6 +512,14 @@
 				D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */,
 			);
 			path = RealM;
+			sourceTree = "<group>";
+		};
+		D6EEB0DE2992BD8B00EBDFA3 /* New Group */ = {
+			isa = PBXGroup;
+			children = (
+				D6EEB0DF2992BDA000EBDFA3 /* HostingMock.swift */,
+			);
+			path = "New Group";
 			sourceTree = "<group>";
 		};
 		EA1B404FC81B12ED36056CCA /* Frameworks */ = {
@@ -780,7 +779,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				D62FBE1327CDFBE500EE7768 /* AgePickerModalView.swift in Sources */,
 				D68FB3AF27D9EF6D00E57F5A /* blockListTableViewCell.swift in Sources */,
 				D6543DC327B7BE7400444454 /* CustomFloatingPanelLayout.swift in Sources */,
 				D67C27D829026A8200C25BA3 /* Tools.swift in Sources */,
@@ -806,8 +804,6 @@
 				D68FB3A227D7410800E57F5A /* NotificationViewController.swift in Sources */,
 				D6543DCB27BA7AC200444454 /* UserDataManageData.swift in Sources */,
 				D655504D27E4260C00C86E34 /* ChatDataManagedData.swift in Sources */,
-				D6543DCD27BF6BC900444454 /* AboutMeTextFieldModalView.swift in Sources */,
-				D6543DC927BA268200444454 /* NickNameTextFieldModalView.swift in Sources */,
 				D655504F27EADB7600C86E34 /* ChatUserListViewController.swift in Sources */,
 				D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */,
 				D696850827D24100006D85DC /* ShowImageView.swift in Sources */,
@@ -815,7 +811,6 @@
 				D65BD34828EFE2BC00DDAFA4 /* UserListViewController.swift in Sources */,
 				D6EA09F12976ACA0003801F7 /* ModalBaseView.swift in Sources */,
 				D655504B27E3630400C86E34 /* Mock.swift in Sources */,
-				D6543DD427C500D800444454 /* AreaPickerModalView.swift in Sources */,
 				D631EC2527A7E26D00800693 /* InitialSettingData.swift in Sources */,
 				D6543DC527B7F49800444454 /* SemiModalTranslucentView.swift in Sources */,
 				D696850627D23FBD006D85DC /* showImageViewController.swift in Sources */,
@@ -823,6 +818,7 @@
 				D69EC38227AA952000290B18 /* ProfileView.swift in Sources */,
 				D631EC2327A5831400800693 /* initialSettingView.swift in Sources */,
 				D631EBF027A581BE00800693 /* SceneDelegate.swift in Sources */,
+				D6EEB0E02992BDA000EBDFA3 /* HostingMock.swift in Sources */,
 				D63E275928CA4BF40013BE1E /* kaihatsu.swift in Sources */,
 				D698A0CB27E0BA66002C64DE /* WebViewTempleteController.swift in Sources */,
 				D6543DD027C4822300444454 /* ModalImageData.swift in Sources */,

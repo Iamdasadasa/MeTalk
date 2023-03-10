@@ -14,7 +14,6 @@ import FloatingPanel
 import CropViewController
 import SideMenu
 import RealmSwift
-import RealmSwift
 
 class ProfileViewController:UIViewController, CropViewControllerDelegate{
 
@@ -62,11 +61,10 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         ///初期画像設定
         self.PROFILEVIEW.settingButton.setImage(UIImage(named: "setting"), for: .normal)
         
-        ///自身のプロフィール取得(ローカルデータを取得)
         userProfileDatalocalGet(callback: { localDocument in
             ///ローカルデータを使って画面情報をセットアップ
             self.userInfoDataSetup(userInfoData: localDocument)
-        }, UID: UID!, ViewFLAG: 1)
+        }, UID: UID!, hostiong: .hosting, ViewController: self)
         
     }
     ///コードレイアウトで行う場合はLoadView
@@ -78,7 +76,7 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         super.viewWillAppear(animated)
         
         ///ローカルDBインスンス化
-        let IMAGELOCALDATASTRUCT = chatUserListLocalImageInfoGet(Realm: REALM, UID: UID!)
+        let IMAGELOCALDATASTRUCT = chatUserListLocalImageInfoGet(UID: UID!)
         ///プロフィール画像オブジェクトに画像セット（ローカル）
         self.PROFILEVIEW.profileImageButton.setImage(IMAGELOCALDATASTRUCT.image, for: .normal)
         self.profileImage = IMAGELOCALDATASTRUCT.image
@@ -93,7 +91,7 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
             ///イメージ画像をオブジェクトにセット（サーバー）
             self.PROFILEVIEW.profileImageButton.setImage(image, for: .normal)
             ///ローカルDBに取得したデータを上書き保存
-            chatUserListLocalImageRegist(Realm: self.REALM, UID: self.UID!, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
+            chatUserListLocalImageRegist(UID: self.UID!, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
             
         }, UID: UID, UpdateTime: IMAGELOCALDATASTRUCT.upDateDate)
         
@@ -102,7 +100,6 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     override func viewWillDisappear(_ animated: Bool) {
             super.viewWillDisappear(animated)
         }
-    
 }
 
 
@@ -113,25 +110,24 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
     /// - Parameters:
     /// - Returns: none
     func profileImageButtonTappedDelegate() {
-            ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
-            let dialog = actionSheets(title01: "画像を表示", title02: "画像を変更")
-            dialog.showTwoActionSheets(callback: { actionFLAG in
-                switch actionFLAG{
+        ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
+        let action = actionSheets(twoAtcionTitle1: "画像を表示", twoAtcionTitle2: "画像を変更")
+        
+        action.showTwoActionSheets(callback: { result in
+            switch result {
                 ///画像を表示
-                case 1:
-                    self.SHOWIMAGEVIEWCONTROLLER.profileImage = self.profileImage
-                    self.present(self.SHOWIMAGEVIEWCONTROLLER, animated: true, completion: nil)
+            case .one:
+                self.SHOWIMAGEVIEWCONTROLLER.profileImage = self.profileImage
+                self.present(self.SHOWIMAGEVIEWCONTROLLER, animated: true, completion: nil)
                 ///画像を変更
-                case 2:
-                    self.PICKER.delegate = self
-                    ///強制的にアルバム
-                    self.PICKER.sourceType = .photoLibrary
-                    ///カメラピッカー表示
-                    self.present(self.PICKER, animated: true, completion: nil)
-                default:
-                    break
-                }
-            }, SelfViewController: self)
+            case .two:
+                self.PICKER.delegate = self
+                ///強制的にアルバム
+                self.PICKER.sourceType = .photoLibrary
+                ///カメラピッカー表示
+                self.present(self.PICKER, animated: true, completion: nil)
+            }
+        }, SelfViewController: self)
     }
     
     ///カメラピッカーでキャンセルを押下した際の処理（デリゲートなので自動で呼ばれる）
@@ -164,8 +160,6 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
         let cropViewController = CropViewController(croppingStyle: .circular, image: selectedImage)
         cropViewController.delegate = self
         present(cropViewController, animated: true)
-        
-
     }
     ///CropView Controllerで画像切り取り処理を決定したら呼ばれる処理
     func cropViewController(_ cropViewController: CropViewController, didCropToCircularImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
@@ -177,7 +171,7 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
         USERDATAMANAGE.contentOfFIRStorageUpload(callback: { pressureImage in
             self.PROFILEVIEW.profileImageButton.setImage(pressureImage, for: .normal)
             ///ローカルDBに取得したデータを上書き保存
-            chatUserListLocalImageRegist(Realm: self.REALM, UID: self.UID!, profileImage: pressureImage!, updataDate: Date())
+            chatUserListLocalImageRegist(UID: self.UID!, profileImage: pressureImage!, updataDate: Date())
         }, UIimagedata: UIimageView, UID: UID)
         
         ///cropViewControllerを閉じる
@@ -187,7 +181,6 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
     ///設定ボタンをタップ後の処理
     func settingButtonTappedDelegate() {
         settingSidemenu()
-        print("設定ボタンが押下")
     }
     
 }
@@ -227,9 +220,7 @@ extension ProfileViewController:ProfileChildViewDelegate{
             FPC.addPanel(toParent: self, at: -1, animated: true, completion: nil)
         default:break
         }
-        
     }
-    
 }
 
 
@@ -317,21 +308,13 @@ extension ProfileViewController:FloatingPanelControllerDelegate{
     func floatingPanelWillRemove(_ fpc: FloatingPanelController) {
         ///後ろのブラービューを破棄
         SEMIMODALTRANSLUCENTVIEW.removeFromSuperview()
-        ///ローカルDBより情報を取得
-        ///ローカルDBをインスタンス化
-        let REALM = try! Realm()
-        let LOCALDBGETDATA = REALM.objects(profileInfoLocal.self)
-        let PREDICATE = NSPredicate(format: "UID == %@", UID!)
-        ///プロフィール情報を保存する辞書型変数
-        var profileData:[String:Any] = [:]
         
-        ///自身のプロフィール取得(ローカルデータを取得)
         userProfileDatalocalGet(callback: { localDocument in
             ///ローカルデータを使って画面情報をセットアップ
             self.userInfoDataSetup(userInfoData: localDocument)
-        }, UID: UID!, ViewFLAG: 1)
+        }, UID: UID!, hostiong: .hosting, ViewController: self)
+        
         self.tabBarController?.tabBar.isHidden = false
-
     }
 }
 
@@ -342,7 +325,6 @@ extension ProfileViewController:SideMenuViewControllerDelegate{
         
         let MenuNavigationController = SideMenuNavigationController(rootViewController: SIDEMENUVIEWCONTROLLER)
         MenuNavigationController.settings = makeSettings()
-//        MenuNavigationController.
         present(MenuNavigationController, animated: true, completion: nil)
     }
     

@@ -19,6 +19,7 @@ DerivedData
 MeTalk.xcworkspace/xcuserdata/kojiromaruyama.xcuserdatad/UserInterfaceState.xcuserstate
 *./xcschemes/xcschememanagement.plist
 *.xcbkptlist
+*.firebase-debug.log
 
 # CocoaPod
 Pods/*

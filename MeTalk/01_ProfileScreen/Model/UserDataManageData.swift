@@ -15,6 +15,10 @@ struct UserDataManage{
     let cloudDB = Firestore.firestore()
     let storage = Storage.storage()
     let host = "gs://metalk-f132e.appspot.com"
+//    let ViewController:UIViewController
+//    init(ViewController:UIViewController) {
+//        self.ViewController = ViewController
+//    }
     
     ///匿名登録処理で登録したユーザー情報を返す& DB登録も初回は一緒にやる
     func signInAnonymously(callback: @escaping (String?) -> Void,nickName:String?,SexNo:Int?) {
@@ -198,7 +202,7 @@ struct UserDataManage{
     //    /// - dataFlg: どのデータかを判断する 1="nickname",2="aboutMeMassage"
     //    /// - callback:コールバック。エラーを返す。エラーにならなかったら返さない。
     //    /// - Returns:
-    func userInfoDataUpload(userData:Any?,dataFlg:ModalItems,UID:String?) {
+    func userInfoDataUpload(userData:Any?,dataFlg:ModalItems,UID:String?,ViewController:UIViewController) {
         ///ローカルデータ保存用インスタンス
         let realm = try! Realm()
         let localDBGetData = realm.objects(profileInfoLocal.self)
@@ -218,7 +222,7 @@ struct UserDataManage{
             Firestore.firestore().collection("users").document(UID).updateData(["nickname":userData])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
             ///ローカルDB更新処理
-            userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: userData, sex: nil, aboutMassage: nil, age: nil, area: nil, createdAt: nil, updatedAt: Date())
+            userProfileLocalDataExtraRegist(UID: UID, nickname: userData, sex: nil, aboutMassage: nil, age: nil, area: nil, createdAt: nil, updatedAt: Date(),ViewController: ViewController)
 
         case .aboutMe: ///ひとこと及び更新日時
             guard let userData = userData as? String else {
@@ -228,7 +232,7 @@ struct UserDataManage{
             Firestore.firestore().collection("users").document(UID).updateData(["aboutMeMassage":userData])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
             ///ローカルDB更新処理
-            userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: nil, sex: nil, aboutMassage: userData, age: nil, area: nil, createdAt: nil, updatedAt: Date())
+            userProfileLocalDataExtraRegist(UID: UID, nickname: nil, sex: nil, aboutMassage: userData, age: nil, area: nil, createdAt: nil, updatedAt: Date(),ViewController: ViewController)
 
         case .Age: ///年齢及び更新日時
             guard let userData = userData as? Int else {
@@ -238,7 +242,7 @@ struct UserDataManage{
             Firestore.firestore().collection("users").document(UID).updateData(["age":userData])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
             ///ローカルDB更新処理
-            userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: nil, sex: nil, aboutMassage: nil, age: userData, area: nil, createdAt: nil, updatedAt: Date())
+            userProfileLocalDataExtraRegist(UID: UID, nickname: nil, sex: nil, aboutMassage: nil, age: userData, area: nil, createdAt: nil, updatedAt: Date(),ViewController: ViewController)
 
         case .Area: ///出身地及び更新日時
             guard let userData = userData as? String else {
@@ -248,7 +252,7 @@ struct UserDataManage{
             Firestore.firestore().collection("users").document(UID).updateData(["area":userData])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
             ///ローカルDB更新処理
-            userProfileLocalDataExtraRegist(Realm: realm, UID: UID, nickname: nil, sex: nil, aboutMassage: nil, age: nil, area: userData, createdAt: nil, updatedAt: Date())
+            userProfileLocalDataExtraRegist(UID: UID, nickname: nil, sex: nil, aboutMassage: nil, age: nil, area: userData, createdAt: nil, updatedAt: Date(),ViewController: ViewController)
 
         }
     }
@@ -294,8 +298,14 @@ struct UserDataManage{
                     talkListTargetUserInfo.blocker = DOCUMENTS["blocker"] as? Bool ?? false
                     callback(talkListTargetUserInfo)
                 } else {
-                    let alert = actionSheets(title01: "申し訳ありませんがこのユーザーに異常が発生しました", message: "このユーザーにメッセージを送ることはできません。", buttonMessage: "OK")
-                    alert.showAlertAction(SelfViewController: selfViewController)
+                    let alert = actionSheets(dicidedOrOkOnlyTitle: "申し訳ありませんがこのユーザーに異常が発生しました", message: "このユーザーにメッセージを送ることはできません。", buttonMessage: "OK")
+
+                    alert.okOnlyAction(callback: { result in
+                        switch result {
+                        case .one:
+                            return
+                        }
+                    }, SelfViewController: selfViewController)
                     return
                 }
 

@@ -205,27 +205,22 @@ extension SideMenuViewcontroller {
     
     ///メンバーシップ削除のためのFunction
     func deleteMemberShipActionSheet(UIVIEWCONTROLLER:UIViewController){
-        let dialog = actionSheets(title01: "テスト的ログアウトボタン", title02: "テストデータ大量作成")
-        dialog.showTwoActionSheets(callback: { actionFLAG in
-            switch actionFLAG {
-                ///
-                case 1:
-                    do {
-                        try Auth.auth().signOut()
-                    } catch let signOutError as NSError {
-                        print("SignOut Error: %@", signOutError)
-                    }
-                ///
-                case 2:
-                    let kaihatu = kaihatutouroku()
-                    let ramdom = "テストデータ\(Int.random(in: 1..<100000))"
-                    kaihatu.tesutotairyou(callback: { document in
-                    }, nickName: ramdom, SexNo: 99, ramdomString: ramdom, jibunUID: Auth.auth().currentUser!.uid)
-                    
-                default:
-                    break
+        let action = actionSheets(twoAtcionTitle1: "テスト的ログアウトボタン", twoAtcionTitle2: "テストデータ大量作成")
+        action.showTwoActionSheets(callback: { result in
+            switch result {
+            case .one:
+                do {
+                    try Auth.auth().signOut()
+                } catch let signOutError as NSError {
+                    print("SignOut Error: %@", signOutError)
+                }
+            case .two:
+                let kaihatu = kaihatutouroku()
+                let ramdom = "テストデータ\(Int.random(in: 1..<100000))"
+                kaihatu.tesutotairyou(callback: { document in
+                }, nickName: ramdom, SexNo: 99, ramdomString: ramdom, jibunUID: Auth.auth().currentUser!.uid)
             }
-        }, SelfViewController: UIVIEWCONTROLLER)
+        }, SelfViewController: self)
     }
     
     ///利用規約かプライバシーポリシー選択のためのFunction
@@ -233,19 +228,18 @@ extension SideMenuViewcontroller {
         ///カスタム列挙型インスタンス化
         let webPageTermsOfService = WebPage.TermsOfService
         let webPageprivacyPolicy = WebPage.privacyPolicy
-        let dialog = actionSheets(title01: webPageprivacyPolicy.info.title, title02: webPageTermsOfService.info.title)
-        dialog.showTwoActionSheets(callback: { selectedWebItem in
-            switch selectedWebItem {
-            ///プライバシーポリシー用のカスタム列挙型を返却
-            case 1:
+        
+        let action = actionSheets(twoAtcionTitle1: webPageprivacyPolicy.info.title, twoAtcionTitle2: webPageTermsOfService.info.title)
+        action.showTwoActionSheets(callback: { result in
+            switch result {
+                ///プライバシーポリシー用のカスタム列挙型を返却
+            case .one:
                 callback(webPageprivacyPolicy)
-            ///利用規約用のカスタム列挙型を返却
-            case 2:
+                ///利用規約用のカスタム列挙型を返却
+            case .two:
                 callback(webPageTermsOfService)
-            default:
-                return
             }
-        }, SelfViewController: UIVIEWCONTROLLER)
+        }, SelfViewController: self)
     }
 }
 
@@ -270,8 +264,13 @@ extension SideMenuViewcontroller:MFMailComposeViewControllerDelegate{
         //メール送信が不可能なら
         } else {
             //アラートで通知
-            let dialog = actionSheets(title01: "メールアカウントが存在しません", message: "問い合わせを行うにはメールアカウントのセットアップが必要です。", buttonMessage: "OK")
-            dialog.showAlertAction(SelfViewController: self)
+            let action = actionSheets(dicidedOrOkOnlyTitle: "メールアカウントが存在しません", message: "問い合わせを行うにはメールアカウントのセットアップが必要です。", buttonMessage: "OK")
+            action.okOnlyAction(callback: { result in
+                switch result {
+                case .one:
+                    return
+                }
+            }, SelfViewController: self)
         }
     }
     ///エラー処理

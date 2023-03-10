@@ -8,7 +8,7 @@
 import Foundation
 import Reachability
 import UIKit
-
+///ネットワーク状況判断
 struct Reachabiliting{
     func NetworkStatus() -> Int {
         let REACHABILITING = try! Reachability()
@@ -23,121 +23,91 @@ struct Reachabiliting{
             return 0
         }
     }
-
 }
 
 struct actionSheets{
+    ///必要なアクションシート要素変数
     let title01:String
     var title02:String?
-    var title03:String?
     var message:String?
     var buttonMessage:String?
-
-    init(title01:String) {
-        self.title01 = title01
+    ///返却アクションが1アクション用のカスタム列挙　結果用
+    enum oneActionResult {
+        case one
     }
-    
-    init(title01:String,title02:String) {
-        self.title01 = title01
-        self.title02 = title02
+    ///1アクション使用時のイニシャライザ
+    init(oneAtcionTitle1:String) {
+        self.title01 = oneAtcionTitle1
     }
-    
-    init(title01:String,title02:String,title03:String) {
-        self.title01 = title01
-        self.title02 = title02
-        self.title03 = title03
+    ///返却アクションが2アクション用のカスタム列挙　結果用
+    enum twoActionResult {
+        case one
+        case two
     }
-    
-    init(title01:String,message:String,buttonMessage:String) {
-        self.title01 = title01
+    ///2アクション使用時のイニシャライザ
+    init(twoAtcionTitle1:String,twoAtcionTitle2:String) {
+        self.title01 = twoAtcionTitle1
+        self.title02 = twoAtcionTitle2
+    }
+    ///OKボタンと決定ボタンアクションどちらかを使用するときのイニシャライザ
+    init(dicidedOrOkOnlyTitle:String,message:String,buttonMessage:String) {
+        self.title01 = dicidedOrOkOnlyTitle
         self.message = message
         self.buttonMessage = buttonMessage
     }
-    
-    func showOneActionSheets(callback:@escaping(Int) -> Void,SelfViewController:UIViewController) {
-        var actionFlg:Int = 0
+    ///タイトル・1ボタン・キャンセル　アクション
+    func showOneActionSheets(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
         //アクションシートを作る
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         //ボタン1
         alert.addAction(UIAlertAction(title: title01, style: .default, handler: {
             (action: UIAlertAction!) in
-            actionFlg = 1
-            callback(actionFlg)
+            callback(.one)
         }))
         //キャンセルボタン
         alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
         //アクションシートを表示する
         SelfViewController.present(alert, animated: true, completion: nil)
     }
-    
-    func showTwoActionSheets(callback:@escaping(Int) -> Void,SelfViewController:UIViewController) {
-        var actionFlg:Int = 0
+    ///タイトル・2ボタン・キャンセル　アクション
+    func showTwoActionSheets(callback:@escaping(twoActionResult) -> Void,SelfViewController:UIViewController) {
         //アクションシートを作る
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         //ボタン1
         alert.addAction(UIAlertAction(title: title01, style: .default, handler: {
             (action: UIAlertAction!) in
-            actionFlg = 1
-            callback(actionFlg)
+            callback(.one)
         }))
         //ボタン２
         alert.addAction(UIAlertAction(title: title02, style: .default, handler: {
             (action: UIAlertAction!) in
-            actionFlg = 2
-            callback(actionFlg)
+            callback(.two)
         }))
         //キャンセルボタン
         alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
         //アクションシートを表示する
         SelfViewController.present(alert, animated: true, completion: nil)
     }
-    
-    func showThreeActionSheets(callback:@escaping(Int) -> Void,SelfViewController:UIViewController) {
-        var actionFlg:Int = 0
-        //アクションシートを作る
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        //ボタン1
-        alert.addAction(UIAlertAction(title: title01, style: .default, handler: {
-            (action: UIAlertAction!) in
-            actionFlg = 1
-            callback(actionFlg)
-        }))
-        //ボタン２
-        alert.addAction(UIAlertAction(title: title02, style: .default, handler: {
-            (action: UIAlertAction!) in
-            actionFlg = 2
-            callback(actionFlg)
-        }))
-        //ボタン3
-        alert.addAction(UIAlertAction(title: title03, style: .default, handler: {
-            (action: UIAlertAction!) in
-            actionFlg = 2
-            callback(actionFlg)
-        }))
-        //キャンセルボタン
-        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
-        //アクションシートを表示する
-        SelfViewController.present(alert, animated: true, completion: nil)
-    }
-    
-    func showAlertActionChoise(callback:@escaping(Int) -> Void,SelfViewController:UIViewController) {
+    ///タイトル・メッセージ・1ボタン・キャンセル　アクション
+    func dicidedAction(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
         let alert = UIAlertController(title: title01, message: message, preferredStyle: UIAlertController.Style.alert)
         //ボタン1
         alert.addAction(UIAlertAction(title: buttonMessage, style: UIAlertAction.Style.default, handler: {
             (action: UIAlertAction!) in
-            callback(1)
+            callback(.one)
         }))
         //ボタン2
         alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
         //アクションシートを表示する
         SelfViewController.present(alert, animated: true, completion: nil)
     }
-    
-    func showAlertAction(SelfViewController:UIViewController) {
+    ///タイトル・メッセージ・OK　アクション
+    func okOnlyAction(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
         let alert = UIAlertController(title: title01, message: message, preferredStyle: UIAlertController.Style.alert)
         //ボタン1
         alert.addAction(UIAlertAction(title: buttonMessage, style: UIAlertAction.Style.default, handler: {
             (action: UIAlertAction!) in
+            callback(.one)
         }))
         //アクションシートを表示する
         SelfViewController.present(alert, animated: true, completion: nil)
@@ -145,15 +115,17 @@ struct actionSheets{
     
 }
 
-struct LOADINGVIEW {
+struct LOADING {
+    let loadingView:LoadingView
+    init(loadingView:LoadingView) {
+        self.loadingView = loadingView
+    }
+
     func loadingViewIndicator(isVisible:Bool){
-        let loadingView = LoadingView()
-        
         let scenes = UIApplication.shared.connectedScenes
         let windowScene = scenes.first as? UIWindowScene
         let window = windowScene?.windows.first
         
-        isVisible ? window?.addSubview(loadingView) : window?.removeFromSuperview()
-        
+        isVisible ? window?.addSubview(loadingView) : loadingView.removeFromSuperview()
     }
 }

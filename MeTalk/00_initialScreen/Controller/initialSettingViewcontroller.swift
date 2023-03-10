@@ -23,6 +23,9 @@ class initialSettingViewcontroller:UIViewController{
     var buttonPushingFlg:Int? = nil
     ///性別タグNo格納
     var SexNo:Int? = nil
+    ///ユーザーの基本的な通信処理をまとめた構造体（DIが行えるようにProtcol型とする)
+    let USERHOSTING:firebaseHostingProtocol = profileInitHosting()
+
     
     override func viewDidLoad() {
         ///Viewのインスタンス化
@@ -122,29 +125,36 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
     /// - Returns: none
     func dicisionButtonTappedAction(button: UIButton, view: InitialSettingView) {
         ///サーバー接続中のローディング画面
-        let LOADINGVIEW = LOADINGVIEW()
+        let LOADINGVIEW = LOADING(loadingView: LoadingView())
         ///ローディング画面表示
         LOADINGVIEW.loadingViewIndicator(isVisible: true)
+
         ///決定ボタンの重複タップは押せなくする。
         button.isEnabled = false
         ///Viewから取得したテキスト
         guard let nickName = self.initialSettingView.nicknameTextField.text,let SexNo = self.SexNo else {
             ///エラー対応
-            let action = actionSheets(title01: "ニックネームもしくは性別が選択されていません", message: "もう一度お試しください", buttonMessage: "OK")
-            action.showAlertAction(SelfViewController: self)
-            ///ローディング画面非表示
-            LOADINGVIEW.loadingViewIndicator(isVisible: false)
+            let action = actionSheets(dicidedOrOkOnlyTitle: "ニックネームもしくは性別が選択されていません", message: "もう一度お試しください", buttonMessage: "OK")
+            action.okOnlyAction(callback: { result in
+                switch result {
+                case .one:
+                    ///ローディング画面非表示
+                    LOADINGVIEW.loadingViewIndicator(isVisible: false)
+                }
+            }, SelfViewController: self)
             return
         }
         ///ユーザー情報用構造体
-        let USER = FireStoreRegistUserData(nickName: nickName, sex: SexNo)
+        let USERDATAS = ProfileUserData(nickName: nickName, sex: SexNo)
+        ///ユーザーの基本的な通信処理をまとめた構造体（DIが行えるようにProtcol型とする
+        ///let USERHOSTING = profileInitHosting()
 
         ///ユーザー情報登録(権限登録処理が完了してから実行)
         var USERUID:String? {
             ///USERUIDに値が入ってから実行
             didSet {
                 ///ユーザー情報登録
-                FireStoreUserInfoRegister(callback: { FireBaseResult in
+                USERHOSTING.FireStoreUserInfoRegister(callback: { FireBaseResult in
                     ///情報登録成功
                     if case.Success(let successMessage) = FireBaseResult {
                         ///ローディングビュー非表示
@@ -155,9 +165,7 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
                         mainTabBarController.modalTransitionStyle = .flipHorizontal
                         mainTabBarController.modalPresentationStyle = .fullScreen
                         
-                        ///ローカルデータ保存
-                        let REALM = try! Realm()
-                        userProfileLocalDataRegist(Realm: REALM, UID: Auth.auth().currentUser!.uid, nickname: USER.nickName, sex: USER.sex, aboutMassage: USER.aboutMessage, age: USER.age, area: USER.area, createdAt: Date(), updatedAt:Date())
+                        userProfileLocalDataRegist(UID: Auth.auth().currentUser!.uid, nickname: USERDATAS.nickName, sex: USERDATAS.sex, aboutMassage: USERDATAS.aboutMessage, age: USERDATAS.age, area: USERDATAS.area, createdAt: Date(), updatedAt: Date())
                         
                         self.present(mainTabBarController, animated: true, completion: nil)
                     }
@@ -165,17 +173,21 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
                     if case .failure(let error) = FireBaseResult {
                         ///エラー対応
                         print(error.localizedDescription)
-                        let action = actionSheets(title01: "ユーザー情報登録処理に失敗しました", message: "もう一度お試しください", buttonMessage: "OK")
-                        action.showAlertAction(SelfViewController: self)
-                        ///ローディング画面非表示
-                        LOADINGVIEW.loadingViewIndicator(isVisible: false)
+                        let action = actionSheets(dicidedOrOkOnlyTitle: "ユーザー情報登録処理に失敗しました", message: "もう一度お試しください", buttonMessage: "OK")
+                        action.okOnlyAction(callback: { result in
+                            switch result {
+                            case .one:
+                                ///ローディング画面非表示
+                                LOADINGVIEW.loadingViewIndicator(isVisible: false)
+                            }
+                        }, SelfViewController: self)
                     }
-                }, USER: USER, uid: USERUID!)
+                }, USER: USERDATAS, uid: USERUID!)
             }
         }
         
         ///権限登録処理
-        FireStoreSignUpAuthRegister(callback: { FireBaseResult in
+        USERHOSTING.FireStoreSignUpAuthRegister(callback: { FireBaseResult in
             if case.Success(let UID) = FireBaseResult {
                 USERUID = UID
             }
@@ -183,10 +195,15 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
             if case .failure(let error) = FireBaseResult {
                 ///エラー対応
                 print(error.localizedDescription)
-                let action = actionSheets(title01: "ユーザー権限登録処理に失敗しました", message: "もう一度お試しください", buttonMessage: "OK")
-                action.showAlertAction(SelfViewController: self)
-                ///ローディング画面非表示
-                LOADINGVIEW.loadingViewIndicator(isVisible: false)
+                let action = actionSheets(dicidedOrOkOnlyTitle: "ユーザー権限登録処理に失敗しました", message: "もう一度お試しください", buttonMessage: "OK")
+                
+                action.okOnlyAction(callback: { result in
+                    switch result {
+                    case .one:
+                        ///ローディング画面非表示
+                        LOADINGVIEW.loadingViewIndicator(isVisible: false)
+                    }
+                }, SelfViewController: self)
                 return
             }
         })

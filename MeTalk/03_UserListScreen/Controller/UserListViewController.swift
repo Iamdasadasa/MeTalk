@@ -63,7 +63,7 @@ class UserListViewController:UIViewController,UINavigationControllerDelegate{
         ///自身の情報をローカルから取得
         userProfileDatalocalGet(callback: { localData in
             self.meInfoData = localData
-        }, UID: UID!, ViewFLAG: 1)
+        }, UID: UID!, hostiong: .hosting, ViewController: self)
     }
 }
 
@@ -141,7 +141,8 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
                     cell.ImageView.image = UIImage(named: "LIKEBUTTON_IMAGE_Pushed")
                 }
             }
-        }, UID: cell.celluserStruct!.UID, ViewFLAG: 0)
+        }, UID: cell.celluserStruct!.UID, hostiong: .unHosting, ViewController: self)
+
 
         ///サーバーに対して画像取得要求
         USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
@@ -183,11 +184,11 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
                 return
             }
             
-            let PREDICATE = NSPredicate(format: "UID == %@", cellUID)
+            let PREDICATE = NSPredicate(format: "lcl_UID == %@", cellUID)
             let userStruct = localDBGetData.filter(PREDICATE).first
 
             if let userStruct = userStruct{
-                if userStruct.blockerFLAG{
+                if userStruct.lcl_BlockerFLAG{
                     self.blockPushed(UID1: self.UID!, UID2: cellUID, nickname: userStruct["userNickName"] as! String, blockerFLAG: true)
                     // 実行結果に関わらず記述
                     completionHandler(true)
@@ -312,7 +313,7 @@ extension UserListViewController:UserListTableViewCellDelegate{
                     ///ローカルとサーバーそれぞれにライクボタンデータ送信
                     self.LikeButtonPushedInfoUpdate(CELLUSERSTRUCT: CELLUSERSTRUCT)
                 }
-            }, UID: CELLUSERSTRUCT.UID, ViewFLAG: 0)
+            }, UID: CELLUSERSTRUCT.UID, hostiong: .unHosting,ViewController: self)
         }
     }
     
@@ -349,28 +350,28 @@ extension UserListViewController:UserListTableViewCellDelegate{
         let roomID = chatManageData.ChatRoomID(UID1: UID!, UID2: CELLUSERSTRUCT.UID)
         chatManageData.WriteLikeButtonInfo(message: "💓", messageId: UUID().uuidString, sender: UID!, Date: Date(), roomID: roomID)
         ///ローカルデータにライクボタン情報を保存
-        LikeUserDataRegist_Update(Realm: REALM, UID: CELLUSERSTRUCT.UID, nickname: CELLUSERSTRUCT.userNickName, sex: CELLUSERSTRUCT.Sex, aboutMassage: CELLUSERSTRUCT.aboutMessage, age: CELLUSERSTRUCT.Age, area: CELLUSERSTRUCT.From, createdAt: CELLUSERSTRUCT.createdAt,updatedAt: CELLUSERSTRUCT.updatedAt, LikeButtonPushedFLAG:1, LikeButtonPushedDate: Date())
+        LikeUserDataRegist_Update(UID: CELLUSERSTRUCT.UID, nickname: CELLUSERSTRUCT.userNickName, sex: CELLUSERSTRUCT.Sex, aboutMassage: CELLUSERSTRUCT.aboutMessage, age: CELLUSERSTRUCT.Age, area: CELLUSERSTRUCT.From, createdAt: CELLUSERSTRUCT.createdAt,updatedAt: CELLUSERSTRUCT.updatedAt, LikeButtonPushedFLAG:1, LikeButtonPushedDate: Date(),ViewController: self)
     }
 }
 
 extension UserListViewController {
     ///_プロフィール画像タップ時アクションシート_
     func profileImageButtonPushed(CELL: UserListTableViewCell, CELLUSERSTRUCT: UserListStruct) {
-        let dialog = actionSheets(title01: "画像を表示", title02: "プロフィールを表示")
-        dialog.showTwoActionSheets(callback: { actionFLAG in
-            switch actionFLAG {
+        ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
+        let action = actionSheets(twoAtcionTitle1: "画像を表示", twoAtcionTitle2: "プロフィールを表示")
+        
+        action.showTwoActionSheets(callback: { result in
+            switch result {
                 ///画像を表示
-                case 1:
-                    self.SHOWIMAGEVIEWCONTROLLER.profileImage = CELL.talkListUserProfileImageView.image
-                    self.present(self.SHOWIMAGEVIEWCONTROLLER, animated: true, completion: nil)
+            case .one:
+                self.SHOWIMAGEVIEWCONTROLLER.profileImage = CELL.talkListUserProfileImageView.image
+                self.present(self.SHOWIMAGEVIEWCONTROLLER, animated: true, completion: nil)
                 ///画像を変更
-                case 2:
-                    ///プロフィール画面遷移
-                    let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController(profileData: CELLUSERSTRUCT, profileImage: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
-                    ///遷移先のControllerに対してプロフィール画像データを渡す
-                    self.navigationController?.pushViewController(TARGETPROFILEVIEWCONTROLLER, animated: true)
-                default:
-                    break
+            case .two:
+                ///プロフィール画面遷移
+                let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController(profileData: CELLUSERSTRUCT, profileImage: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
+                ///遷移先のControllerに対してプロフィール画像データを渡す
+                self.navigationController?.pushViewController(TARGETPROFILEVIEWCONTROLLER, animated: true)
             }
         }, SelfViewController: self)
     }
@@ -378,21 +379,21 @@ extension UserListViewController {
     ///_セルタップ時アクションシート_
     ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
     func cellPushed(CELL: UserListTableViewCell, CELLUSERSTRUCT: UserListStruct) {
-        let dialog = actionSheets(title01: "プロフィールを表示", title02: "トークを表示")
-        dialog.showTwoActionSheets(callback: { actionFLAG in
-            switch actionFLAG {
+        ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
+        let action = actionSheets(twoAtcionTitle1: "プロフィールを表示", twoAtcionTitle2: "トークを表示")
+        
+        action.showTwoActionSheets(callback: { result in
+            switch result {
                 ///画像を表示
-                case 1:
-                    ///プロフィール画面遷移
-                    let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController(profileData: CELLUSERSTRUCT, profileImage: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
-                    ///遷移先のControllerに対してプロフィール画像データを渡す
-                    TARGETPROFILEVIEWCONTROLLER.profileData
-                    self.navigationController?.pushViewController(TARGETPROFILEVIEWCONTROLLER, animated: true)
-                ///トーク画面に遷移
-//                case 2:
-                    
-                default:
-                    break
+            case .one:
+                ///プロフィール画面遷移
+                let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController(profileData: CELLUSERSTRUCT, profileImage: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
+                ///遷移先のControllerに対してプロフィール画像データを渡す
+                TARGETPROFILEVIEWCONTROLLER.profileData
+                self.navigationController?.pushViewController(TARGETPROFILEVIEWCONTROLLER, animated: true)
+                ///トーク画面遷移
+            case .two:
+                break
             }
         }, SelfViewController: self)
     }
@@ -402,19 +403,22 @@ extension UserListViewController {
     func blockPushed(UID1:String,UID2:String,nickname:String,blockerFLAG:Bool) {
         ///すでにブロックしている場合
         if blockerFLAG {
-            let dialog = actionSheets(title01: "このユーザーは既にブロックされています。ブロックを解除しますか？", message: "解除した場合、相手はメッセージの送信が行えるようになります。", buttonMessage: "確定")
-            dialog.showAlertActionChoise(callback: { actionFLAG in
-                ///確定を押下した場合
-                if actionFLAG == 1 {
+            let alert = actionSheets(dicidedOrOkOnlyTitle: "このユーザーは既にブロックされています。ブロックを解除しますか？", message: "解除した場合、相手はメッセージの送信が行えるようになります。", buttonMessage: "確定")
+            
+            alert.okOnlyAction(callback: { result in
+                switch result {
+                case .one:
                     blockUserRegist(UID1: UID1, UID2: UID2, blockerFLAG: false, nickname: nickname)
                 }
             }, SelfViewController: self)
+            
         } else {
             ///ブロックされていない場合
-            let dialog = actionSheets(title01: "このユーザーをブロックしますか？（ブロック反映まで時間がかかる場合があります。）", message: "ブロックした場合、メッセージの送信ができない他、ユーザー一覧に表示されません", buttonMessage: "確定")
-            dialog.showAlertActionChoise(callback: { actionFLAG in
-                ///確定を押下した場合
-                if actionFLAG == 1 {
+            let alert = actionSheets(dicidedOrOkOnlyTitle: "このユーザーをブロックしますか？（ブロック反映まで時間がかかる場合があります。）", message: "ブロックした場合、メッセージの送信ができない他、ユーザー一覧に表示されません", buttonMessage: "確定")
+            
+            alert.okOnlyAction(callback: { result in
+                switch result {
+                case .one:
                     blockUserRegist(UID1: UID1, UID2: UID2, blockerFLAG: true, nickname: nickname)
                 }
             }, SelfViewController: self)

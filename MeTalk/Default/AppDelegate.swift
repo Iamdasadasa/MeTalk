@@ -28,6 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let uid = Auth.auth().currentUser?.uid {
             rootViewController = MainTabBarController()
         } else {
+            let USERHOSTING = profileInitHosting()
             rootViewController = initialSettingViewcontroller()
         }
         

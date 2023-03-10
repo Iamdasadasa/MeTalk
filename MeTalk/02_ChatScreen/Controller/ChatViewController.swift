@@ -101,8 +101,13 @@ class ChatViewController: MessagesViewController {
         ///ネットワーク確認
         let NETWORKSTATUS = Reachabiliting()
         if NETWORKSTATUS.NetworkStatus() == 0{
-            let dialog = actionSheets(title01: "ネットワーク接続がありません", message: "ネットワークを確認してからもう一度実行してください", buttonMessage: "OK")
-            dialog.showAlertAction(SelfViewController: self)
+            let alert = actionSheets(dicidedOrOkOnlyTitle: "ネットワーク接続がありません", message: "ネットワークを確認してからもう一度実行してください", buttonMessage:  "OK")
+            alert .okOnlyAction(callback: { result in
+                switch result {
+                case .one:
+                    return
+                }
+            }, SelfViewController: self)
             ///メッセージ追加
             messageListAppend()
         }
@@ -388,7 +393,7 @@ extension ChatViewController {
         ///ローカルデータからデータ抽出
         for localmessage in LOCALMESSAGEDATA {
             ///Date型をStringに変換
-            let messageSentDataString = ChatDataManagedData.dateToStringFormatt(date: localmessage["Date"] as? Date, formatFlg: 0)
+            let messageSentDataString = ChatDataManagedData.dateToStringFormatt(date: localmessage["lcl_Date"] as? Date, formatFlg: 0)
             ///日付を年月までで切り取り
             let YEARMONTHDATE = (messageSentDataString as NSString).substring(to: 10)
 
@@ -413,12 +418,12 @@ extension ChatViewController {
             
             ///メッセージ配列に適用
             func messageAppend(FLAG:Bool) {
-                let likeTrue = localmessage["likeButtonFLAG"] as? Bool ?? false
+                let likeTrue = localmessage["lcl_LikeButtonFLAG"] as? Bool ?? false
                 if likeTrue {
                     let mediaItem = MessageMediaEntity.new(image: UIImage(named: "LIKEBUTTON_IMAGE_Pushed"))
-                    messageArray.append(MockMessage.likeInfoLoad(photo: mediaItem, user: userTypeJudge(senderID: localmessage["sender"] as! String), data: localmessage["Date"] as! Date, messageID: localmessage["messageID"] as! String, messageDateGroupingFlag: FLAG))
+                    messageArray.append(MockMessage.likeInfoLoad(photo: mediaItem, user: userTypeJudge(senderID: localmessage["lcl_Sender"] as! String), data: localmessage["lcl_Date"] as! Date, messageID: localmessage["lcl_MessageID"] as! String, messageDateGroupingFlag: FLAG))
                 } else {
-                    messageArray.append(MockMessage.loadMessage(text: localmessage["message"] as! String, user: userTypeJudge(senderID: localmessage["sender"] as! String),data:localmessage["Date"] as! Date, messageID: localmessage["messageID"] as! String, messageDateGroupingFlag:FLAG))
+                    messageArray.append(MockMessage.loadMessage(text: localmessage["lcl_Message"] as! String, user: userTypeJudge(senderID: localmessage["lcl_Sender"] as! String),data:localmessage["lcl_Date"] as! Date, messageID: localmessage["lcl_MessageID"] as! String, messageDateGroupingFlag:FLAG))
                 }
             }
             ///一番最初のメッセージまでロードし終えていたらフラグにTrueを設定

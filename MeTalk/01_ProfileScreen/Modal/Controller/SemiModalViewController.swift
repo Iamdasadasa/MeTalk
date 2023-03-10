@@ -43,7 +43,6 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
         ///画面共通処理
         self.VIEW = ModalBaseView(ModalItems:self.dicidedModal, frame: self.view.frame)
         guard let VIEW = VIEW else {
-            ///ここで前の画面もどす処理を入れてもいいかもしれない
             return
         }
         ///デリゲート委譲
@@ -61,7 +60,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
             userProfileDatalocalGet(callback: { document in
                 ///ユーザー名情報をテキストフィールドにセット
                 VIEW.itemTextField.text = document["nickname"] as? String
-            }, UID: uid!, ViewFLAG: 1)
+            }, UID: uid!, hostiong: .hosting, ViewController: self)
 
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
             NotificationCenter.default.addObserver(self,
@@ -73,9 +72,9 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
             self.view = VIEW
             ///現在のひとことをローカルDBから取得
             userProfileDatalocalGet(callback: { document in
-                ///ユーザー名情報をテキストフィールドにセット
+                ///ひとことをテキストフィールドにセット
                 VIEW.itemTextField.text = document["aboutMeMassage"] as? String
-            }, UID: uid!, ViewFLAG: 1)
+            }, UID: uid!, hostiong: .hosting, ViewController: self)
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
             NotificationCenter.default.addObserver(self,
               selector: #selector(textFieldDidChange(notification:)),
@@ -94,7 +93,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
                     ///年齢情報をテキストフィールドにセット
                     VIEW.itemTextField.text = String(agedata!)
                 }
-            }, UID: uid!, ViewFLAG: 1)
+            }, UID: uid!, hostiong: .hosting, ViewController: self)
         ///住まい編集
         case .Area:
             self.view = VIEW
@@ -103,7 +102,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
             userProfileDatalocalGet(callback: { document in
                 ///住まいをテキストフィールドにセット
                 VIEW.itemTextField.text = document["area"] as? String
-            }, UID: uid!, ViewFLAG: 1)
+            }, UID: uid!, hostiong: .hosting, ViewController: self)
         }
     }
     ///オブザーバー破棄
@@ -121,7 +120,6 @@ extension SemiModalViewController{
     @objc func textFieldDidChange(notification: NSNotification) {
         ///画面共通処理
         guard let VIEW = VIEW else {
-            ///ここで前の画面もどす処理を入れてもいいかもしれない
             return
         }
         ///Selecterで受け取ったオブジェクトをUITextFieldに変換処理
@@ -158,53 +156,8 @@ extension SemiModalViewController{
         default:
             preconditionFailure("出身地と年齢のテキストが変更できるようになっています。コード修正してください")
         }
-        
-        
-        
-////        ///ボタン活性化チェック処理
-////        textFieldBrankCheck_ButtonActive(tag: textField.tag)
-//        if textField.tag == 1{
-//            ///nickNameModalView文字制限処理(10文字)
-//            if let text = textField.text {
-//                if textField.markedTextRange == nil && text.count > 10 {
-//                        textField.text = text.prefix(10).description
-//                }
-//            }
-//        } else if textField.tag == 2 {
-//            ///aboutMeModalView文字制限処理(10文字)
-//            if let text = textField.text {
-//                if textField.markedTextRange == nil && text.count > 30 {
-//                        textField.text = text.prefix(30).description
-//                }
-//            }
-//        }
     }
 }
-/////ボタン活性化処理行うオブザーバー処理
-//extension SemiModalViewController{
-//    ///    /// ボタン活性化及びテキスト入力チェック
-//    /// - Parameters:
-//    /// - Returns: none
-//    func textFieldBrankCheck_ButtonActive(tag:Int){
-//        if tag == 1 {
-//            if nickNameTextFieldModalView.itemTextField.text != ""{
-//                nickNameTextFieldModalView.decisionButton.isEnabled = true
-//                nickNameTextFieldModalView.decisionButton.backgroundColor = .orange
-//            } else {
-//                nickNameTextFieldModalView.decisionButton.isEnabled = false
-//                nickNameTextFieldModalView.decisionButton.backgroundColor = .gray
-//            }
-//        } else if tag == 2 {
-//            if aboutMeTextFieldModalView.itemTextField.text != ""{
-//                aboutMeTextFieldModalView.decisionButton.isEnabled = true
-//                aboutMeTextFieldModalView.decisionButton.backgroundColor = .orange
-//            } else {
-//                aboutMeTextFieldModalView.decisionButton.isEnabled = false
-//                aboutMeTextFieldModalView.decisionButton.backgroundColor = .gray
-//            }
-//        }
-//    }
-//}
 
 //※キーボードオプション※
 extension SemiModalViewController{
@@ -222,7 +175,6 @@ extension SemiModalViewController{
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         ///画面共通処理
         guard let VIEW = VIEW else {
-            ///ここで前の画面もどす処理を入れてもいいかもしれない
             return
         }
         VIEW.itemTextField.endEditing(true)
@@ -237,11 +189,10 @@ extension SemiModalViewController:ModalViewDelegateProtcol{
     func dicisionButtonTappedAction(button: UIButton, objects: ModalItems) {
         ///画面共通処理
         guard let VIEW = VIEW else {
-            ///ここで前の画面もどす処理を入れてもいいかもしれない
             return
         }
         ///データ代入
-        var data = VIEW.itemTextField.text
+        let data = VIEW.itemTextField.text
         ///年齢だった場合
         if objects == .Age {
             ///（年齢をIntに変換）
@@ -254,11 +205,11 @@ extension SemiModalViewController:ModalViewDelegateProtcol{
                 return
             }
             ///入力したユーザーデータをアップデート
-            userDataManageData.userInfoDataUpload(userData: AgeTypeInt, dataFlg: objects, UID: uid)
+            userDataManageData.userInfoDataUpload(userData: AgeTypeInt, dataFlg: objects, UID: uid, ViewController: self)
         }
         
         ///入力したユーザーデータをアップデート
-        userDataManageData.userInfoDataUpload(userData: data, dataFlg: objects, UID: uid)
+        userDataManageData.userInfoDataUpload(userData: data, dataFlg: objects, UID: uid, ViewController: self)
         self.delegate?.ButtonTappedActionChildDelegateAction()
     }
     
