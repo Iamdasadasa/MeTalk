@@ -3,6 +3,7 @@ import MessageKit
 import InputBarAccessoryView
 
 class ChatViewController: MessagesViewController {
+
     ///ブロック有無変数
     var blocked:Bool = false
     var blocker:Bool = false
@@ -313,7 +314,9 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
         if blocked {
             ///ブロックされているので自身のローカルデータに保存してテーブル更新後終了
             ///ローカルデータベースに保存
-            localMessageDataRegist(roomID: roomID, listend: true, message: text, sender: message.sender.senderId, Date: Date(), messageID: message.messageId, likeButtonFLAG: false)
+            ///MODEL
+            let LOCALDATASTRUCT = talKLocalDataStruct(roomID: roomID, listend: true, message: text, sender: message.sender.senderId, messageID: message.messageId)
+            LOCALDATASTRUCT.localMessageDataRegist()
             ///自身のデータベースのみ更新
             chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text, meNickName: self.MeInfo["nickname"] as! String, youNickname: YouInfo.userNickName!, LikeButtonFLAG: false, blockedFlag: 1)
             
@@ -377,7 +380,9 @@ extension ChatViewController {
                         var likeButtonFLAG:Bool = false
                         likeButtonFLAG = postDict["LikeButtonFLAG"] as? Bool ?? false
                         ///ローカルデータベースに保存
-                        localMessageDataRegist(roomID: roomID, listend: true, message: postDict["message"] as! String, sender: postDict["sender"] as! String, Date: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String, likeButtonFLAG: likeButtonFLAG)
+                        let LOCALDATASTRUCT = talKLocalDataStruct(roomID: roomID, listend: true, message: postDict["message"] as! String, sender: postDict["sender"] as! String,DateTime: ChatDataManagedData.stringToDateFormatte(date: postDict["Date"] as! String), messageID: postDict["messageID"] as! String,likeButtonFLAG: likeButtonFLAG)
+                        
+                        LOCALDATASTRUCT.localMessageDataRegist()
                     }
                 }
                 ///メッセージ追加
@@ -389,7 +394,8 @@ extension ChatViewController {
     func messageListAppend() {
         var messageArray:[MockMessage] = []
         ///ローカルDBからメッセージ取得
-        let LOCALMESSAGEDATA = localMessageDataGet(roomID: roomID)
+        let LOCALDATASTRUCT = talKLocalDataStruct()
+        let LOCALMESSAGEDATA = LOCALDATASTRUCT.localMessageDataGet(roomID: roomID)
         ///ローカルデータからデータ抽出
         for localmessage in LOCALMESSAGEDATA {
             ///Date型をStringに変換

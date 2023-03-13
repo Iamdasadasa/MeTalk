@@ -63,54 +63,119 @@ class messageLocal: Object {
     @objc dynamic var lcl_LikeButtonFLAG:Bool = false
 }
 
-///UserDefaultsの画像パス生成関数
-public func userDefaultsImageDataPathCreate(UID:String) -> URL {
-    let fileName = "\(UID)_profileimage.png"
-    var documentDirectoryFileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-    documentDirectoryFileURL = documentDirectoryFileURL.appendingPathComponent(fileName)
-    
-    return documentDirectoryFileURL
-}
-///トークリスト情報を返却
-func localTalkListDataGet() -> Results<ListUsersInfoLocal> {
-    let REALM = try! Realm()
-    let localDBGetData = REALM.objects(ListUsersInfoLocal.self)
-    return localDBGetData
-}
-
-///ローカルDBのメッセージ内容を返却。
-func localMessageDataGet(roomID:String) -> Results<messageLocal>{
-    let REALM = try! Realm()
-    let LOCALMESSAGEDATA = REALM.objects(messageLocal.self).sorted(byKeyPath: "lcl_Date",ascending: true)
-    let PREDICATE = NSPredicate(format: "lcl_RoomID == %@", roomID)
-    let LOCALMASSAGE = LOCALMESSAGEDATA.filter(PREDICATE)
-    
-    return LOCALMASSAGE
-}
-
-///メッセージ内容をローカルDBに保存
-func localMessageDataRegist(roomID:String,listend:Bool,message:String,sender:String,Date:Date,messageID:String,likeButtonFLAG:Bool){
-    let REALM = try! Realm()
-    let MESSAGELOCAL = messageLocal()
-    let LOCALDBGETDATA = REALM.objects(messageLocal.self)
-    ///重複回避
-    let PREDICATE = NSPredicate(format: "lcl_MessageID == %@", messageID)
-    if let noneUpdate = LOCALDBGETDATA.filter(PREDICATE).first{
-        return
-    }
-    
-    MESSAGELOCAL.lcl_RoomID = roomID
-    MESSAGELOCAL.lcl_Message = message
-    MESSAGELOCAL.lcl_Sender = sender
-    MESSAGELOCAL.lcl_Date = Date
-    MESSAGELOCAL.lcl_MessageID = messageID
-    MESSAGELOCAL.lcl_Listend = listend
-    MESSAGELOCAL.lcl_LikeButtonFLAG = likeButtonFLAG
-
-    try! REALM.write{
-        REALM.add(MESSAGELOCAL)
+struct localUserToolsStruct {
+    ///UserDefaultsの画像パス生成関数
+    func userDefaultsImageDataPathCreate(UID:String) -> URL {
+        let fileName = "\(UID)_profileimage.png"
+        var documentDirectoryFileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        documentDirectoryFileURL = documentDirectoryFileURL.appendingPathComponent(fileName)
+        
+        return documentDirectoryFileURL
     }
 }
+
+struct talKLocalDataStruct {
+    let REALM = try! Realm()
+    ///オブジェクト物理名管理
+    let lcl_MessageID:String = "lcl_MessageID"
+    let lcl_RoomID:String = "lcl_RoomID"
+    let lcl_Message:String = "lcl_Message"
+    let lcl_Sender:String = "lcl_Sender"
+    let lcl_Date:String = "lcl_Date"
+    let lcl_Listend:String = "lcl_Listend"
+    let lcl_LikeButtonFLAG:String = "lcl_LikeButtonFLAG"
+    ///ユーザー情報プロパティ
+    var roomID:String
+    var listend:Bool
+    var message:String
+    var sender:String
+    var DateTime:Date
+    var messageID:String
+    var likeButtonFLAG:Bool
+    
+    init(roomID:String = talKLocalDataStruct.defaults()
+         ,listend:Bool = false
+         ,message:String = talKLocalDataStruct.defaults()
+         ,sender:String = talKLocalDataStruct.defaults()
+         ,DateTime:Date = Date()
+         ,messageID:String = talKLocalDataStruct.defaults()
+         ,likeButtonFLAG:Bool = false
+    )
+    {
+        self.roomID = roomID
+        self.listend = listend
+        self.message = message
+        self.sender = sender
+        self.DateTime = DateTime
+        self.messageID = messageID
+        self.likeButtonFLAG = likeButtonFLAG
+    }
+    
+    static func defaults() -> String {
+        return "defaults"
+    }
+    
+    static private func defaultValueErrChecker(Value:String) {
+        if Value == "defaults" {
+            ///初期値設定のまま値が使用されようとしているために下記のFunctionの呼び出し元で正しい引数を使用していない関数を調査してください。
+            preconditionFailure("エラーCode101")
+        }
+    }
+    
+    
+    ///トークリスト情報を返却
+    func localTalkListDataGet() -> Results<ListUsersInfoLocal> {
+        let localDBGetData = REALM.objects(ListUsersInfoLocal.self)
+        return localDBGetData
+    }
+    ///ローカルDBのメッセージ内容を返却。
+    func localMessageDataGet(roomID:String) -> Results<messageLocal>{
+        let LOCALMESSAGEDATA = REALM.objects(messageLocal.self).sorted(byKeyPath: lcl_Date,ascending: true)
+        let PREDICATE = NSPredicate(format: "\(lcl_RoomID) == %@", roomID)
+        let LOCALMASSAGE = LOCALMESSAGEDATA.filter(PREDICATE)
+        
+        return LOCALMASSAGE
+    }
+    ///メッセージ内容をローカルDBに保存
+    func localMessageDataRegist(){
+        talKLocalDataStruct.defaultValueErrChecker(Value: self.roomID)
+        talKLocalDataStruct.defaultValueErrChecker(Value: self.message)
+        talKLocalDataStruct.defaultValueErrChecker(Value: self.sender)
+        talKLocalDataStruct.defaultValueErrChecker(Value: self.messageID)
+
+        let REALM = try! Realm()
+        let MESSAGELOCAL = messageLocal()
+        let LOCALDBGETDATA = REALM.objects(messageLocal.self)
+        ///重複回避
+        let PREDICATE = NSPredicate(format: "\(lcl_MessageID) == %@", messageID)
+        if LOCALDBGETDATA.filter(PREDICATE).first != nil{
+            return
+        }
+        
+        MESSAGELOCAL.lcl_RoomID = self.roomID
+        MESSAGELOCAL.lcl_Message = self.message
+        MESSAGELOCAL.lcl_Sender = self.sender
+        MESSAGELOCAL.lcl_Date = self.DateTime
+        MESSAGELOCAL.lcl_MessageID = self.messageID
+        MESSAGELOCAL.lcl_Listend = self.listend
+        MESSAGELOCAL.lcl_LikeButtonFLAG = self.likeButtonFLAG
+
+        try! REALM.write{
+            REALM.add(MESSAGELOCAL)
+        }
+    }
+}
+
+
+ここから上記の構造体を参考にイニシャライザで初期値を設定して初期値で更新したり新規保存しようとしていたりしたら
+エラー処理、イニシャライザは初期値があるので初期値がなくてもインスタンス化は可能。好きなプロパティのみで更新や保存ができる仕組みのプロフィールバージョンの構造体作成する
+
+
+
+
+
+
+
 
 ///返却種類カスタムenum
 enum HostingManage {
@@ -335,7 +400,8 @@ func chatUserListLocalImageRegist(UID:String,profileImage:UIImage,updataDate:Dat
     let localDBGetData = REALM.objects(ListUsersImageLocal.self)
     let LISTUSERSIMAGELOCAL = ListUsersImageLocal()
     let userDefaults = UserDefaults.standard
-    let documentDirectoryFileURL = userDefaultsImageDataPathCreate(UID: UID)
+    let USERTOOLS = localUserToolsStruct()
+    let documentDirectoryFileURL = USERTOOLS.userDefaultsImageDataPathCreate(UID: UID)
     let UID = UID
     let predicate = NSPredicate(format: "lcl_UID == %@", UID)
     
@@ -379,6 +445,7 @@ func chatUserListLocalImageInfoGet(UID:String) -> listUserImageStruct{
     let REALM = try! Realm()
     let localDBGetData = REALM.objects(ListUsersImageLocal.self)
     let UID = UID
+    let USERTOOLS = localUserToolsStruct()
     let predicate = NSPredicate(format: "lcl_UID == %@", UID)
     
     guard let imageData = localDBGetData.filter(predicate).first else {
@@ -386,7 +453,7 @@ func chatUserListLocalImageInfoGet(UID:String) -> listUserImageStruct{
         let newUserimageStruct = listUserImageStruct(UID: UID, UpdateDate: ChatDataManagedData.pastTimeGet(), UIimage: nil)
         return newUserimageStruct
     }
-    let fileURL = userDefaultsImageDataPathCreate(UID: UID)
+    let fileURL = USERTOOLS.userDefaultsImageDataPathCreate(UID: UID)
     let filePath = fileURL.path
     if FileManager.default.fileExists(atPath: filePath) {
        print(filePath)

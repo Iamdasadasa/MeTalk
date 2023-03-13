@@ -18,6 +18,7 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
     ///インスタンス化(Model)
     let USERDATAMANAGE = UserDataManage()
     let UID = Auth.auth().currentUser?.uid
+    let TALKLOCAL = talKLocalDataStruct()
     ///自身の画像View
     var selfProfileImageView = UIImageView()
     ///自身のユーザー情報格納変数
@@ -299,9 +300,8 @@ extension ChatUserListViewController {
     
     ///トークリストのリアルタイムリスナー
     func talkListListner() {
-        ///初回インスタンス時にここでトークリストを更新
         ///ローカルDBにデータが入っている場合はデータをユーザー配列に投入する
-        let localDBGetData = localTalkListDataGet()
+        let localDBGetData = TALKLOCAL.localTalkListDataGet()
         
         for data in localDBGetData {
             if let UID = data.lcl_UID,let userNickname = data.lcl_UserNickName,let sendUID = data.lcl_SendUID{
