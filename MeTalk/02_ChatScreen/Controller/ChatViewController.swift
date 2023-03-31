@@ -10,8 +10,9 @@ class ChatViewController: MessagesViewController {
     ///init変数　自分のUIDと相手のUID
     var MeUID:String!
     var YouUID:String!
-    var MeInfo:[String:Any]!
-    var YouInfo:TalkListUserStruct
+    var MeInfo:profileInfoLocal
+    var YouInfo:profileInfoLocal
+    var YouNickName:String
     ///init変数　自分のプロフィール画像と相手のプロフィール画像
     var meProfileImage:UIImage!
     var youProfileImage:UIImage!
@@ -31,8 +32,9 @@ class ChatViewController: MessagesViewController {
     ///時間まとめ用のKeyValue
     var DateGrouping:[String] = []
     
-    init (Youinfo:TalkListUserStruct) {
+    init (Youinfo:profileInfoLocal) {
         self.YouInfo = Youinfo
+        self.YouNickName = Youinfo.lcl_NickName ?? "不明なユーザー"
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -95,7 +97,7 @@ class ChatViewController: MessagesViewController {
         maintainPositionOnKeyboardFrameChanged = false
         
         ///タイトルラベル追加
-        navigationItem.title = "\(YouInfo.userNickName!)"
+        navigationItem.title = "\(self.YouNickName)"
     }
     ///Did Load内でメッセージ追加するとView表示前なのでメッセージ表示が行われないのでDidApper内で追加
     override func viewDidAppear(_ animated: Bool) {
@@ -159,7 +161,7 @@ extension ChatViewController: MessagesDataSource {
     }
 
     func otherSender() -> SenderType {
-        return userType.you(UID: self.YouUID, displayName: YouInfo.userNickName!).data
+        return userType.you(UID: self.YouUID, displayName: self.YouNickName).data
     }
 
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
@@ -315,10 +317,10 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
             ///ブロックされているので自身のローカルデータに保存してテーブル更新後終了
             ///ローカルデータベースに保存
             ///MODEL
-            let LOCALDATASTRUCT = talKLocalDataStruct(roomID: roomID, listend: true, message: text, sender: message.sender.senderId, messageID: message.messageId)
+            let LOCALDATASTRUCT = localTalkDataStruct(roomID: roomID,listend: true,message: text,sender: message.sender.senderId,messageID: message.messageId)
             LOCALDATASTRUCT.localMessageDataRegist()
             ///自身のデータベースのみ更新
-            chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text, meNickName: self.MeInfo["nickname"] as! String, youNickname: YouInfo.userNickName!, LikeButtonFLAG: false, blockedFlag: 1)
+            chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text, meNickName: self.MeInfo["nickname"] as! String, youNickname: YouNickName, LikeButtonFLAG: false, blockedFlag: 1)
             
             self.messageInputBar.inputTextView.text = String()
             self.messageInputBar.invalidatePlugins()
@@ -328,7 +330,7 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
             ///FireBaseにデータ書き込み（書き込みした時点で読み込みリロードhandlerが呼ばれる）
             chatManageData.writeMassageData(mockMassage: message, text: text, roomID: self.roomID)
             ///最初のメッセージが存在していない場合のみそれぞれのAuthにUIDを登録、存在していたらデータ更新
-            chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text, meNickName: self.MeInfo["nickname"] as! String, youNickname: YouInfo.userNickName!, LikeButtonFLAG: false, blockedFlag: nil)
+            chatManageData.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID,NewMessage: text, meNickName: self.MeInfo["nickname"] as! String, youNickname: YouNickName, LikeButtonFLAG: false, blockedFlag: nil)
         }
 
     
@@ -394,12 +396,12 @@ extension ChatViewController {
     func messageListAppend() {
         var messageArray:[MockMessage] = []
         ///ローカルDBからメッセージ取得
-        let LOCALDATASTRUCT = talKLocalDataStruct()
-        let LOCALMESSAGEDATA = LOCALDATASTRUCT.localMessageDataGet(roomID: roomID)
+        let LOCALDATASTRUCT = talKLocalDataStruct(roomID: roomID)
+        let LOCALMESSAGEDATA = LOCALDATASTRUCT.localMessageDataGet()
         ///ローカルデータからデータ抽出
         for localmessage in LOCALMESSAGEDATA {
             ///Date型をStringに変換
-            let messageSentDataString = ChatDataManagedData.dateToStringFormatt(date: localmessage["lcl_Date"] as? Date, formatFlg: 0)
+            let messageSentDataString = ChatDataManagedData.dateToStringFormatt(date: localmessage.lcl_Date, formatFlg: 0)
             ///日付を年月までで切り取り
             let YEARMONTHDATE = (messageSentDataString as NSString).substring(to: 10)
 
@@ -424,12 +426,12 @@ extension ChatViewController {
             
             ///メッセージ配列に適用
             func messageAppend(FLAG:Bool) {
-                let likeTrue = localmessage["lcl_LikeButtonFLAG"] as? Bool ?? false
+                let likeTrue = localmessage.lcl_LikeButtonFLAG
                 if likeTrue {
                     let mediaItem = MessageMediaEntity.new(image: UIImage(named: "LIKEBUTTON_IMAGE_Pushed"))
-                    messageArray.append(MockMessage.likeInfoLoad(photo: mediaItem, user: userTypeJudge(senderID: localmessage["lcl_Sender"] as! String), data: localmessage["lcl_Date"] as! Date, messageID: localmessage["lcl_MessageID"] as! String, messageDateGroupingFlag: FLAG))
+                    messageArray.append(MockMessage.likeInfoLoad(photo: mediaItem, user: userTypeJudge(senderID: localmessage.lcl_Sender), data: localmessage.lcl_Date!, messageID: localmessage.lcl_MessageID!, messageDateGroupingFlag: FLAG))
                 } else {
-                    messageArray.append(MockMessage.loadMessage(text: localmessage["lcl_Message"] as! String, user: userTypeJudge(senderID: localmessage["lcl_Sender"] as! String),data:localmessage["lcl_Date"] as! Date, messageID: localmessage["lcl_MessageID"] as! String, messageDateGroupingFlag:FLAG))
+                    messageArray.append(MockMessage.loadMessage(text: localmessage.lcl_Message, user: userTypeJudge(senderID: localmessage.lcl_Sender),data:localmessage.lcl_Date!, messageID: localmessage.lcl_MessageID!, messageDateGroupingFlag:FLAG))
                 }
             }
             ///一番最初のメッセージまでロードし終えていたらフラグにTrueを設定

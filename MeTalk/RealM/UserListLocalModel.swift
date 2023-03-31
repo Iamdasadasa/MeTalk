@@ -9,6 +9,43 @@ import Foundation
 import Realm
 import RealmSwift
 import Firebase
+
+///ユーザー情報初期値
+enum USERINFODEFAULTVALUE {
+    case Sex
+    case AboutMeMassage
+    case NickName
+    case Age
+    case area
+    
+    var NumObjec:Int {
+        switch self {
+        case .Age:
+            return 20
+        case .Sex:
+            return 0
+        default :
+            ///使用しては行けないCaseの値が渡されています。呼び出し元のコードを確認してAboutMeMassageかNickName、areaが選択されていたら修正してください。
+            preconditionFailure("エラーCode301")
+        }
+    }
+    
+    var StrObjec:String {
+        switch self {
+        case .AboutMeMassage:
+            return "よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃"
+        case .NickName:
+            return "未設定"
+        case .area:
+            return "未設定"
+        default :
+            ///使用しては行けないCaseの値が渡されています。呼び出し元のコードを確認してAgeかSexが選択されていたら修正してください。
+            preconditionFailure("エラーCode301")
+        }
+    }
+}
+
+
 ///リストユーザーの情報を保存するローカルオブジェクト
 class ListUsersInfoLocal: Object{
     @objc dynamic var lcl_UID:String?
@@ -36,7 +73,7 @@ class profileInfoLocal: Object {
     @objc dynamic var lcl_NickName: String?
     @objc dynamic var lcl_Age: Int = 0
     @objc dynamic var lcl_Area: String = "未設定"
-    @objc dynamic var lcl_LikeButtonPushedFLAG:Int = 0
+    @objc dynamic var lcl_LikeButtonPushedFLAG:Bool = false
     @objc dynamic var lcl_LikeButtonPushedDate:Date?
 }
 
@@ -48,6 +85,7 @@ class ListUsersImageLocal: Object{
     }
     @objc dynamic var lcl_ProfileImageURL:String?
     @objc dynamic var lcl_UpdataDate:Date?
+    @objc dynamic var lcl_ProfileImage:UIImage?
 }
 ///メッセージ内容のローカルデータオブジェクト
 class messageLocal: Object {
@@ -74,7 +112,7 @@ struct localUserToolsStruct {
     }
 }
 
-struct talKLocalDataStruct {
+struct localTalkDataStruct {
     let REALM = try! Realm()
     ///オブジェクト物理名管理
     let lcl_MessageID:String = "lcl_MessageID"
@@ -85,20 +123,20 @@ struct talKLocalDataStruct {
     let lcl_Listend:String = "lcl_Listend"
     let lcl_LikeButtonFLAG:String = "lcl_LikeButtonFLAG"
     ///ユーザー情報プロパティ
-    var roomID:String
+    var roomID:String?
     var listend:Bool
-    var message:String
-    var sender:String
-    var DateTime:Date
-    var messageID:String
+    var message:String?
+    var sender:String?
+    var DateTime:Date = Date()
+    var messageID:String?
     var likeButtonFLAG:Bool
     
-    init(roomID:String = talKLocalDataStruct.defaults()
+    init(roomID:String? = nil
          ,listend:Bool = false
-         ,message:String = talKLocalDataStruct.defaults()
-         ,sender:String = talKLocalDataStruct.defaults()
+         ,message:String? = nil
+         ,sender:String? = nil
          ,DateTime:Date = Date()
-         ,messageID:String = talKLocalDataStruct.defaults()
+         ,messageID:String? = nil
          ,likeButtonFLAG:Bool = false
     )
     {
@@ -111,17 +149,13 @@ struct talKLocalDataStruct {
         self.likeButtonFLAG = likeButtonFLAG
     }
     
-    static func defaults() -> String {
-        return "defaults"
-    }
-    
-    static private func defaultValueErrChecker(Value:String) {
-        if Value == "defaults" {
-            ///初期値設定のまま値が使用されようとしているために下記のFunctionの呼び出し元で正しい引数を使用していない関数を調査してください。
+    static private func defaultValueErrChecker(Value:String?) -> String {
+        guard let Value = Value else {
+            ///NULLのまま値が使用されようとしているために下記のFunctionの呼び出し元で正しい引数を使用していない関数を調査してください。
             preconditionFailure("エラーCode101")
         }
+        return Value
     }
-    
     
     ///トークリスト情報を返却
     func localTalkListDataGet() -> Results<ListUsersInfoLocal> {
@@ -129,34 +163,30 @@ struct talKLocalDataStruct {
         return localDBGetData
     }
     ///ローカルDBのメッセージ内容を返却。
-    func localMessageDataGet(roomID:String) -> Results<messageLocal>{
+    func localMessageDataGet() -> Results<messageLocal>{
         let LOCALMESSAGEDATA = REALM.objects(messageLocal.self).sorted(byKeyPath: lcl_Date,ascending: true)
-        let PREDICATE = NSPredicate(format: "\(lcl_RoomID) == %@", roomID)
+        let PREDICATE = NSPredicate(format: "\(lcl_RoomID) == %@", localTalkDataStruct.defaultValueErrChecker(Value: self.roomID))
         let LOCALMASSAGE = LOCALMESSAGEDATA.filter(PREDICATE)
         
         return LOCALMASSAGE
     }
     ///メッセージ内容をローカルDBに保存
     func localMessageDataRegist(){
-        talKLocalDataStruct.defaultValueErrChecker(Value: self.roomID)
-        talKLocalDataStruct.defaultValueErrChecker(Value: self.message)
-        talKLocalDataStruct.defaultValueErrChecker(Value: self.sender)
-        talKLocalDataStruct.defaultValueErrChecker(Value: self.messageID)
-
+        
         let REALM = try! Realm()
         let MESSAGELOCAL = messageLocal()
         let LOCALDBGETDATA = REALM.objects(messageLocal.self)
         ///重複回避
-        let PREDICATE = NSPredicate(format: "\(lcl_MessageID) == %@", messageID)
+        let PREDICATE = NSPredicate(format: "\(lcl_MessageID) == %@", localTalkDataStruct.defaultValueErrChecker(Value: self.messageID))
         if LOCALDBGETDATA.filter(PREDICATE).first != nil{
             return
         }
         
-        MESSAGELOCAL.lcl_RoomID = self.roomID
-        MESSAGELOCAL.lcl_Message = self.message
-        MESSAGELOCAL.lcl_Sender = self.sender
+        MESSAGELOCAL.lcl_RoomID = localTalkDataStruct.defaultValueErrChecker(Value: self.roomID)
+        MESSAGELOCAL.lcl_Message = localTalkDataStruct.defaultValueErrChecker(Value: self.message)
+        MESSAGELOCAL.lcl_Sender = localTalkDataStruct.defaultValueErrChecker(Value: self.sender)
         MESSAGELOCAL.lcl_Date = self.DateTime
-        MESSAGELOCAL.lcl_MessageID = self.messageID
+        MESSAGELOCAL.lcl_MessageID = localTalkDataStruct.defaultValueErrChecker(Value: self.messageID)
         MESSAGELOCAL.lcl_Listend = self.listend
         MESSAGELOCAL.lcl_LikeButtonFLAG = self.likeButtonFLAG
 
@@ -167,375 +197,475 @@ struct talKLocalDataStruct {
 }
 
 
-ここから上記の構造体を参考にイニシャライザで初期値を設定して初期値で更新したり新規保存しようとしていたりしたら
-エラー処理、イニシャライザは初期値があるので初期値がなくてもインスタンス化は可能。好きなプロパティのみで更新や保存ができる仕組みのプロフィールバージョンの構造体作成する
+struct localProfileDataStruct{
+    ///オブジェクト物理名管理
+    private let lcl_UID:String = "lcl_UID"
+    private let lcl_DateCreatedAt:String = "lcl_DateCreatedAt"
+    private let lcl_DateUpdatedAt:String = "lcl_DateUpdatedAt"
+    private let lcl_Sex:String = "lcl_Sex"
+    private let lcl_AboutMeMassage:String = "lcl_AboutMeMassage"
+    private let lcl_NickName:String = "lcl_NickName"
+    private let lcl_Age:String = "lcl_Age"
+    private let lcl_Area:String = "lcl_Area"
+    private let lcl_LikeButtonPushedFLAG:String = "lcl_LikeButtonPushedFLAG"
+    private let lcl_LikeButtonPushedDate:String = "lcl_LikeButtonPushedDate"
 
-
-
-
-
-
-
-
-///返却種類カスタムenum
-enum HostingManage {
-    case hosting
-    case unHosting
-}
-///自身のプロフィール情報を返却
-func userProfileDatalocalGet(callback: @escaping ([String:Any]) -> Void,UID:String,hostiong:HostingManage,ViewController:UIViewController) {
-    let REALM = try! Realm()
-    let LOCALDBGETDATA = REALM.objects(profileInfoLocal.self)
-    let PREDICATE = NSPredicate(format: "lcl_UID == %@", UID)
-    var profileData:[String:Any] = [:]
-    ///ローカルに存在
-    if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
-        profileData = [ "createdAt":SELFPROFILEDATA.lcl_DateCreatedAt,
-                        "updatedAt":SELFPROFILEDATA.lcl_DateUpdatedAt,
-                        "Sex":SELFPROFILEDATA.lcl_Sex,
-                        "aboutMeMassage":SELFPROFILEDATA.lcl_AboutMeMassage,
-                        "nickname":SELFPROFILEDATA.lcl_NickName,
-                        "age":SELFPROFILEDATA.lcl_Age,
-                        "area":SELFPROFILEDATA.lcl_Area,
-                        "LikeButtonPushedDate":SELFPROFILEDATA.lcl_LikeButtonPushedDate,
-                        "LikeButtonPushedFLAG":SELFPROFILEDATA.lcl_LikeButtonPushedFLAG
-        ]
-        ///サーバー通信が必要
-        if hostiong == .hosting {
-            guard let nickName = profileData["nickname"] as? String else {
-
-                let USERDATAMANAGE = UserDataManage()
-                USERDATAMANAGE.userInfoDataGet(callback: {document in
-                    guard let document = document else {
-                        return
-                    }
-                    userProfileLocalDataExtraRegist(
-                        UID: UID,
-                        nickname: document["nickname"] as? String,
-                        sex: document["Sex"] as? Int,
-                        aboutMassage: document["aboutMeMassage"] as? String,
-                        age: document["age"] as? Int, area: document["area"] as? String,
-                        createdAt: document["createdAt"] as? Date,
-                        updatedAt: document["updatedAt"] as? Date, ViewController: ViewController
-                    )
-
-                    callback (document)
-
-                }, UID: UID)
-                return
-            }
-        }
-        callback (profileData)
-    ///ローカルに存在無し
-    } else {
-        if hostiong == .hosting {
-            let USERDATAMANAGE = UserDataManage()
-            USERDATAMANAGE.userInfoDataGet(callback: {document in
-                guard let document = document else {
-                    return
-                }
-                userProfileLocalDataExtraRegist(
-                    UID: UID,
-                    nickname: document["nickname"] as? String,
-                    sex: document["Sex"] as? Int,
-                    aboutMassage: document["aboutMeMassage"] as? String,
-                    age: document["age"] as? Int, area: document["area"] as? String,
-                    createdAt: document["createdAt"] as? Date,
-                    updatedAt: document["updatedAt"] as? Date,
-                    ViewController: ViewController
-                )
-                
-                callback (document)
-
-            }, UID: UID)
-        }
+    ///プロパティ
+    var UID:String
+    var nickName:String?
+    var sex:Int?
+    var aboutMassage:String?
+    var age:Int?
+    var area:String?
+    var createdAt:Date
+    var updatedAt:Date
+    var LikeButtonPushedDate:Date?
+    var LikeButtonPushedFLAG:Bool
+    ///初期値有りイニシャライザ
+    init(
+        UID:String,
+        nickName:String? = nil,
+        sex:Int? = nil,
+        aboutMessage:String? = nil,
+        age:Int? = nil,
+        area:String? = nil,
+        createdAt:Date = Date(),
+        updateAt:Date = Date(),
+        LikeButtonPushedDate:Date? = nil,
+        LikeButtonPushedFLAG:Bool = false
+    ) {
+        self.UID = UID
+        self.nickName = nickName
+        self.sex = sex
+        self.aboutMassage = aboutMessage
+        self.age = age
+        self.area = area
+        self.createdAt = createdAt
+        self.updatedAt = updateAt
+        self.LikeButtonPushedDate = LikeButtonPushedDate
+        self.LikeButtonPushedFLAG = LikeButtonPushedFLAG
     }
-}
-
-
-///ローカルDBへのユーザープロフィール新規データ保存
-func userProfileLocalDataRegist(UID:String,nickname:String,sex:Int,aboutMassage:String,age:Int,area:String,createdAt:Date,updatedAt:Date){
-    ///ローカルデータ保存
-    let REALM = try! Realm()
-    let profileInfoLocalObject = profileInfoLocal()
-    ///構造体に合わせて各項目を入力
-    profileInfoLocalObject.lcl_UID = UID
-    profileInfoLocalObject.lcl_NickName = nickname
-    profileInfoLocalObject.lcl_Sex = sex
-    profileInfoLocalObject.lcl_AboutMeMassage = aboutMassage
-    profileInfoLocalObject.lcl_Age = age
-    profileInfoLocalObject.lcl_Area = area
-    profileInfoLocalObject.lcl_DateCreatedAt = createdAt
-    profileInfoLocalObject.lcl_DateUpdatedAt = updatedAt
-    ///ローカルDBに登録
-    try! REALM.write {
-        REALM.add(profileInfoLocalObject)
+    ///新規Or追加enum
+    enum registerKind {
+        case new
+        case extra
     }
-}
+    ///エラーカスタムEnum
+    enum customResults {
+        case localNoting
+    }
     
     ///ローカルDBへのユーザープロフィール更新データ保存
-func userProfileLocalDataExtraRegist(UID:String,nickname:String?,sex:Int?,aboutMassage:String?,age:Int?,area:String?,createdAt:Date?,updatedAt:Date?,ViewController:UIViewController){
+    func userProfileLocalDataExtraRegist() -> customResults?{
+        
         let REALM = try! Realm()
         let localDBGetData = REALM.objects(profileInfoLocal.self)
-        let UID = UID
-        let USER:profileInfoLocal
-        let predicate = NSPredicate(format: "lcl_UID == %@", UID)
+        let UID = self.UID
+        let predicate = NSPredicate(format: "\(lcl_UID) == %@", UID)
         ///ローカルDB内に渡されたUIDが存在していなければ新規ローカル保存関数呼び出し
         if let user = localDBGetData.filter(predicate).first{
-            USER = user
+            Register(profileObject: user, REALM: REALM,Kind: .extra)
         } else {
-            let PROFILEHOSTING = profileHosting()
-            PROFILEHOSTING.FireStoreProfileDataGetter(callback: { data in
-                data
-            }, UID: UID)
+            var tempUser = profileInfoLocal()
+            Register(profileObject: tempUser, REALM: REALM,Kind: .new)
+            return .localNoting
         }
-        // UID以外のデータを更新する
-        do{
-          try REALM.write{
-              if let nickname = nickname {
-                  USER.lcl_NickName = nickname
-              }
-              if let aboutMessage = aboutMassage {
-                  USER.lcl_AboutMeMassage = aboutMessage
-              }
-              if let age = age {
-                  USER.lcl_Age = age
-              }
-              if let area = area {
-                  USER.lcl_Area = area
-              }
-              if let createdAt = createdAt {
-                  USER.lcl_DateCreatedAt = createdAt
-              }
-              if let updatedAt = updatedAt {
-                  USER.lcl_DateUpdatedAt = updatedAt
-              }
-              if let sex = sex {
-                  USER.lcl_Sex = sex
-              }
-          }
-        }catch {
-          print("Error \(error)")
-        }
+        return nil
     }
-
-
-///ローカルDBへのリストユーザー新規データ保存
-private func chatUserListInfoLocalDataRegist(UID:String,usernickname:String?,newMessage:String?,updateDate:Date?,listend:Bool?,SendUID:String?,blockedFLAG:Bool){
-    let REALM = try! Realm()
-    let UserListLocalObject = ListUsersInfoLocal()
-
-    UserListLocalObject.lcl_UID = UID
-    UserListLocalObject.lcl_UserNickName = usernickname
-    UserListLocalObject.lcl_NewMessage = newMessage
-    UserListLocalObject.lcl_UpdateDate = updateDate
-    UserListLocalObject.lcl_Listend = listend ?? false
-    UserListLocalObject.lcl_SendUID = SendUID
-    UserListLocalObject.lcl_BlockedFLAG = blockedFLAG
-
-    try! REALM.write {
-         REALM.add(UserListLocalObject)
-    }
-}
-
-///ローカルDBへのリストユーザー更新データ保存
-func chatUserListInfoLocalExstraRegist(UID:String,usernickname:String?,newMessage:String?,updateDate:Date?,listend:Bool?,SendUID:String?,blockedFLAG:Bool){
-    let REALM = try! Realm()
-    let localDBGetData = REALM.objects(ListUsersInfoLocal.self)
-    let UID = UID
-    let predicate = NSPredicate(format: "lcl_UID == %@", UID)
-    ///ローカルDB内に渡されたUIDが存在していなければ新規ローカル保存関数呼び出し
-    guard let user = localDBGetData.filter(predicate).first else {
-        chatUserListInfoLocalDataRegist(
-            UID: UID,
-            usernickname: usernickname,
-            newMessage: newMessage,
-            updateDate: Date(), listend: listend,
-            SendUID: SendUID,
-            blockedFLAG: blockedFLAG
-        )
-        return
-    }
-    // UID以外のデータを更新する（存在していない項目は何もしない）
-    do{
-      try REALM.write{
-          if let usernickname = usernickname {
-              user.lcl_UserNickName = usernickname
-          }
-          if let newMessage = newMessage {
-              user.lcl_NewMessage = newMessage
-          }
-          if let updateDate = updateDate {
-              user.lcl_UpdateDate = updateDate
-          }
-          if let listend = listend {
-              user.lcl_Listend = listend
-          }
-          if let SendUID = SendUID {
-              user.lcl_SendUID = SendUID
-          }
-          user.lcl_BlockedFLAG = blockedFLAG
-      }
-    }catch {
-      print("Error \(error)")
-    }
-    return
-}
-
-///ローカルDBに保存してあるトークリストユーザーデータの中で最新の時間を取得して返す
-func chatUserListInfoLocalLastestTimeGet() -> Date{
-    let REALM = try! Realm()
-    let localDBGetData = REALM.objects(ListUsersInfoLocal.self).sorted(byKeyPath: "lcl_UpdateDate", ascending: false)
-    let result = localDBGetData.first
-//        もしも一件もローカルにデータが入っていなかった時はものすごい前の時間を設定して値を返す
-    guard let result = result?.lcl_UpdateDate else {
-        return ChatDataManagedData.pastTimeGet()
-    }
-    return result
-}
-
-///ローカルDBにイメージを保存
-func chatUserListLocalImageRegist(UID:String,profileImage:UIImage,updataDate:Date){
-    let REALM = try! Realm()
-    let localDBGetData = REALM.objects(ListUsersImageLocal.self)
-    let LISTUSERSIMAGELOCAL = ListUsersImageLocal()
-    let userDefaults = UserDefaults.standard
-    let USERTOOLS = localUserToolsStruct()
-    let documentDirectoryFileURL = USERTOOLS.userDefaultsImageDataPathCreate(UID: UID)
-    let UID = UID
-    let predicate = NSPredicate(format: "lcl_UID == %@", UID)
     
-    ///もしも既にUIDがローカルDBに存在していたらUID以外の情報を更新保存
-    if let imageData = localDBGetData.filter(predicate).first{
-        // UID以外のデータを更新する
-        do{
-          try REALM.write{
-              imageData.lcl_ProfileImageURL  = documentDirectoryFileURL.absoluteString
-              imageData.lcl_UpdataDate = updataDate
-          }
-        }catch {
-          print("Error \(error)")
+    
+    ///登録処理
+    private func Register(profileObject:profileInfoLocal,REALM:Realm,Kind:registerKind){
+        var STR = {(CS:USERINFODEFAULTVALUE) -> String in
+            return CS.StrObjec
         }
-    ///存在していない場合新規なのでUIDも含め新規保存
-    } else {
+        var INT = {(CS:USERINFODEFAULTVALUE) -> Int in
+            return CS.NumObjec
+        }
         
-        do{
-            try REALM.write{
-                LISTUSERSIMAGELOCAL.lcl_ProfileImageURL = documentDirectoryFileURL.absoluteString
-                LISTUSERSIMAGELOCAL.lcl_UpdataDate = updataDate
-                LISTUSERSIMAGELOCAL.lcl_UID = UID
+        switch Kind {
+        case .new:
+            ///ローカルデータ保存
+            let profileInfoLocalObject = profileInfoLocal()
+            ///構造体に合わせて各項目を入力
+            profileInfoLocalObject.lcl_UID = UID
+            profileInfoLocalObject.lcl_NickName = self.nickName ?? STR(.NickName)
+            profileInfoLocalObject.lcl_Sex = self.sex ?? INT(.Sex)
+            profileInfoLocalObject.lcl_AboutMeMassage = self.aboutMassage ?? STR(.AboutMeMassage)
+            profileInfoLocalObject.lcl_Age = self.age ?? INT(.Age)
+            profileInfoLocalObject.lcl_Area = self.area ?? STR(.area)
+            profileInfoLocalObject.lcl_DateCreatedAt = self.createdAt
+            profileInfoLocalObject.lcl_DateUpdatedAt = self.updatedAt
+            profileInfoLocalObject.lcl_LikeButtonPushedDate = self.LikeButtonPushedDate
+            profileInfoLocalObject.lcl_LikeButtonPushedFLAG = self.LikeButtonPushedFLAG
+            ///ローカルDBに登録
+            try! REALM.write {
+                REALM.add(profileInfoLocalObject)
             }
-        }catch{
-            print("画像の保存に失敗しました")
+        case .extra:
+            do{
+                try REALM.write{
+                    if let nickname = self.nickName {
+                        profileObject.lcl_NickName = nickname
+                    }
+                    if let aboutMessage = self.aboutMassage {
+                        profileObject.lcl_AboutMeMassage = aboutMessage
+                    }
+                    if let age = self.age {
+                        profileObject.lcl_Age = age
+                    }
+                    if let area = self.area {
+                        profileObject.lcl_Area = area
+                    }
+                    if let sex = self.sex {
+                        profileObject.lcl_Sex = sex
+                    }
+                    if let LikeButtonPushedDate = self.LikeButtonPushedDate {
+                        profileObject.lcl_LikeButtonPushedDate = LikeButtonPushedDate
+                    }
+                    profileObject.lcl_LikeButtonPushedFLAG = LikeButtonPushedFLAG
+                    profileObject.lcl_DateCreatedAt = createdAt
+                    profileObject.lcl_DateUpdatedAt = updatedAt
+                }
+            }catch {
+                print("Error \(error)")
+            }
         }
-        try! REALM.write{REALM.add(LISTUSERSIMAGELOCAL)}
     }
-     //png保存
-    let pngImageData = profileImage.pngData()
-     do {
-         try pngImageData!.write(to: documentDirectoryFileURL)
-         userDefaults.set(documentDirectoryFileURL, forKey: "\(UID)_profileimage")
-     } catch {
-         print("エラー")
-     }
-}
-
-///ローカルDBの画像情報取得
-func chatUserListLocalImageInfoGet(UID:String) -> listUserImageStruct{
-    let REALM = try! Realm()
-    let localDBGetData = REALM.objects(ListUsersImageLocal.self)
-    let UID = UID
-    let USERTOOLS = localUserToolsStruct()
-    let predicate = NSPredicate(format: "lcl_UID == %@", UID)
     
-    guard let imageData = localDBGetData.filter(predicate).first else {
-        ///ローカルデータに入っていなかったら初期時間及び画像をNilで返却
-        let newUserimageStruct = listUserImageStruct(UID: UID, UpdateDate: ChatDataManagedData.pastTimeGet(), UIimage: nil)
-        return newUserimageStruct
+    func userProfileDatalocalGet(callback: @escaping (profileInfoLocal,customResults?) -> Void){
+        let REALM = try! Realm()
+        let LOCALDBGETDATA = REALM.objects(profileInfoLocal.self)
+        let UID = self.UID
+        let PREDICATE = NSPredicate(format: "\(lcl_UID)  == %@", UID)
+        var PROFILEINFOLOCAL = profileInfoLocal()
+        ///ローカルに存在
+        guard LOCALDBGETDATA.filter(PREDICATE).first != nil else {
+            callback(PROFILEINFOLOCAL,.localNoting)
+            return
+        }
+        
+        if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
+            PROFILEINFOLOCAL = SELFPROFILEDATA
+            
+            callback(PROFILEINFOLOCAL,nil)
+            
+        }
     }
-    let fileURL = USERTOOLS.userDefaultsImageDataPathCreate(UID: UID)
-    let filePath = fileURL.path
-    if FileManager.default.fileExists(atPath: filePath) {
-       print(filePath)
-    }
-    let imageStrcut = listUserImageStruct(UID: UID, UpdateDate: imageData.lcl_UpdataDate!, UIimage: UIImage(contentsOfFile: filePath))
-    return imageStrcut
 }
 
-///ライクボタン押下時のローカルデータ保存および更新
-func LikeUserDataRegist_Update(UID:String,nickname:String?,sex:Int?,aboutMassage:String?,age:Int?,area:String?,createdAt:Date?,updatedAt:Date?,LikeButtonPushedFLAG:Int,LikeButtonPushedDate:Date?,ViewController:UIViewController){
-    let REALM = try! Realm()
-    let localDBGetData = REALM.objects(profileInfoLocal.self)
-    let UID = UID
-    let predicate = NSPredicate(format: "lcl_UID == %@", UID)
+struct localListUsersDataStruct {
+    var REALM:Realm
+    init(){
+        self.REALM = try! Realm()
+    }
+    
+    ///エラーカスタムEnum
+    enum customResults {
+        case localNoting
+    }
+    
+    func chatUserListInfoLocalDataRegist(USERLISTLOCALOBJECT:ListUsersInfoLocal) {
+        let localDBGetData = REALM.objects(ListUsersInfoLocal.self)
+        let predicate = NSPredicate(format: "lcl_UID == %@", USERLISTLOCALOBJECT.lcl_UID!)
 
-    ///ローカルDB内に渡されたUIDが存在していなければ新規ローカル保存関数呼び出し
-    guard let user = localDBGetData.filter(predicate).first else {
-            userProfileLocalDataRegist(
-                UID: UID,
-                nickname: nickname ?? "名称未設定",
-                sex: sex ?? 0,
-                aboutMassage: aboutMassage ?? "よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃",
-                age: age ?? 18,
-                area: area ?? "未設定",
-                createdAt: createdAt ?? Date(),
-                updatedAt: updatedAt ?? Date()
-            )
-        
-        ///ここで今まさに新規登録したユーザーのLike送信情報だけ更新する
-        let ExistUser = localDBGetData.filter(predicate).first
+        if let ExtraUser = localDBGetData.filter(predicate).first{
+            Register(NewUser: USERLISTLOCALOBJECT, ExtraUser: ExtraUser)
+        } else {
+            Register(NewUser: USERLISTLOCALOBJECT, ExtraUser: nil)
+        }
+    }
+    
+    ///ローカルDBへのリストユーザー新規データ保存
+    private func Register(NewUser:ListUsersInfoLocal,ExtraUser:ListUsersInfoLocal?){
+        guard let ExtraUser = ExtraUser else {
+            try! REALM.write {
+                REALM.add(NewUser)
+            }
+            return
+        }
         do{
             try REALM.write{
-                ExistUser?.lcl_LikeButtonPushedDate = LikeButtonPushedDate
-                ExistUser?.lcl_LikeButtonPushedFLAG = LikeButtonPushedFLAG
+                if let usernickname = NewUser.lcl_UserNickName {
+                    ExtraUser.lcl_UserNickName = usernickname
+                }
+                
+                if let newMessage = NewUser.lcl_NewMessage {
+                    ExtraUser.lcl_NewMessage = newMessage
+                }
+                if let updateDate = NewUser.lcl_UpdateDate {
+                    ExtraUser.lcl_UpdateDate = updateDate
+                }
+                if let SendUID = NewUser.lcl_SendUID {
+                    ExtraUser.lcl_SendUID = SendUID
+                }
+                ExtraUser.lcl_Listend = NewUser.lcl_Listend
+                ExtraUser.lcl_BlockedFLAG = NewUser.lcl_BlockedFLAG
             }
         } catch {
             print("Error \(error)")
         }
-        return
-    }
-    ///ローカルDB内に渡されたUIDが存在していれば更新
-    // Likeデータのみ更新する
-    do{
-        try REALM.write{
-            user.lcl_LikeButtonPushedDate = LikeButtonPushedDate
-            user.lcl_LikeButtonPushedFLAG = LikeButtonPushedFLAG
-        }
-    } catch {
-        print("Error \(error)")
     }
 }
 
-///ブロック処理(相手と自分に登録)(フラグによって解除も登録も)
-func blockUserRegist(UID1:String,UID2:String,blockerFLAG:Bool,nickname:String) {
-    ///ブロック登録(相手に自分がブロックしている情報を)
-    Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData(["blocked":blockerFLAG], merge: true)
-    ///ブロック登録(自分に相手のブロック情報を)
-    Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData(["blocker":blockerFLAG], merge: true)
-    ///自分のローカルデータに相手のブロック情報登録
-    blockUserDataRegist_Update(UID: UID2, blockerFLAG: blockerFLAG, nickname: nickname)
+struct localProfileContentsDataStruct {
+    ///ローカルDBにイメージを保存
+    func chatUserListLocalImageRegist(UID:String,profileImage:UIImage,updataDate:Date){
+        let REALM = try! Realm()
+        let localDBGetData = REALM.objects(ListUsersImageLocal.self)
+        let LISTUSERSIMAGELOCAL = ListUsersImageLocal()
+        let userDefaults = UserDefaults.standard
+        let USERTOOLS = localUserToolsStruct()
+        let documentDirectoryFileURL = USERTOOLS.userDefaultsImageDataPathCreate(UID: UID)
+        let UID = UID
+        let predicate = NSPredicate(format: "lcl_UID == %@", UID)
+        
+        ///もしも既にUIDがローカルDBに存在していたらUID以外の情報を更新保存
+        if let imageData = localDBGetData.filter(predicate).first{
+            // UID以外のデータを更新する
+            do{
+                try REALM.write{
+                    imageData.lcl_ProfileImageURL  = documentDirectoryFileURL.absoluteString
+                    imageData.lcl_UpdataDate = updataDate
+                }
+            }catch {
+                print("Error \(error)")
+            }
+            ///存在していない場合新規なのでUIDも含め新規保存
+        } else {
+            
+            do{
+                try REALM.write{
+                    LISTUSERSIMAGELOCAL.lcl_ProfileImageURL = documentDirectoryFileURL.absoluteString
+                    LISTUSERSIMAGELOCAL.lcl_UpdataDate = updataDate
+                    LISTUSERSIMAGELOCAL.lcl_UID = UID
+                }
+            }catch{
+                print("画像の保存に失敗しました")
+            }
+            try! REALM.write{REALM.add(LISTUSERSIMAGELOCAL)}
+        }
+        //png保存
+        let pngImageData = profileImage.pngData()
+        do {
+            try pngImageData!.write(to: documentDirectoryFileURL)
+            userDefaults.set(documentDirectoryFileURL, forKey: "\(UID)_profileimage")
+        } catch {
+            print("エラー")
+        }
+    }
     
+    ///ローカルDBの画像情報取得
+    func chatUserListLocalImageInfoGet(UID:String) -> ListUsersImageLocal{
+        let REALM = try! Realm()
+        let localDBGetData = REALM.objects(ListUsersImageLocal.self)
+        let TOOLS = localUserToolsStruct()
+        let TIME = TIME()
+        let LISTUSERSIMAGELOCAL = ListUsersImageLocal()
+        let predicate = NSPredicate(format: "lcl_UID == %@", UID)
+        
+        guard let imageData = localDBGetData.filter(predicate).first else {
+            ///ローカルデータに入っていなかったら初期時間及び画像をNilで返却
+            LISTUSERSIMAGELOCAL.lcl_UID = UID
+            LISTUSERSIMAGELOCAL.lcl_UpdataDate = TIME.pastTimeGet()
+            LISTUSERSIMAGELOCAL.lcl_ProfileImage = nil
+            return LISTUSERSIMAGELOCAL
+        }
+        let fileURL = TOOLS.userDefaultsImageDataPathCreate(UID: UID)
+        let filePath = fileURL.path
+        
+        return imageData
+    }
 }
 
-///ブロック登録時のローカルデータ保存および更新【blockUserRegistから呼び出すこと。】
- private func blockUserDataRegist_Update(UID:String,blockerFLAG:Bool,nickname:String){
-    ///REALMにてローカルDB生成
-    let realm = try! Realm()
-    let localDBGetData = realm.objects(ListUsersInfoLocal.self)
-    // UIDで検索
-    let predicate = NSPredicate(format: "lcl_UID == %@", UID)
-    ///ローカルDB内に渡されたUIDが存在していなければ新規ローカル保存関数呼び出し
-    guard let user = localDBGetData.filter(predicate).first else {
-        chatUserListInfoLocalExstraRegist(UID: UID, usernickname: nickname, newMessage: nil, updateDate: Date(), listend: nil, SendUID: nil, blockedFLAG: blockerFLAG)
-        return
-    }
-    ///ローカルDB内に渡されたUIDが存在していれば更新
-    // ブロック情報のみ更新する
-    do{
-        try realm.write{
-            user.lcl_BlockerFLAG = blockerFLAG
+    /////プロフィール情報を返却
+    //func userProfileDatalocalGet(callback: @escaping (Results<profileInfoLocal>) -> Void,UID:String,hostiong:HostingManage,ViewController:UIViewController) {
+    //    let REALM = try! Realm()
+    //    let LOCALDBGETDATA = REALM.objects(profileInfoLocal.self)
+    //    let PREDICATE = NSPredicate(format: "lcl_UID == %@", UID)
+    //    var profileData:profileInfoLocal
+    //    ///ローカルに存在
+    //    if let SELFPROFILEDATA = LOCALDBGETDATA.filter(PREDICATE).first{
+    //        profileData = SELFPROFILEDATA
+    ////        profileData = [ "createdAt":SELFPROFILEDATA.lcl_DateCreatedAt,
+    ////                        "updatedAt":SELFPROFILEDATA.lcl_DateUpdatedAt,
+    ////                        "Sex":SELFPROFILEDATA.lcl_Sex,
+    ////                        "aboutMeMassage":SELFPROFILEDATA.lcl_AboutMeMassage,
+    ////                        "nickname":SELFPROFILEDATA.lcl_NickName,
+    ////                        "age":SELFPROFILEDATA.lcl_Age,
+    ////                        "area":SELFPROFILEDATA.lcl_Area,
+    ////                        "LikeButtonPushedDate":SELFPROFILEDATA.lcl_LikeButtonPushedDate,
+    ////                        "LikeButtonPushedFLAG":SELFPROFILEDATA.lcl_LikeButtonPushedFLAG
+    ////        ]
+    //        ///サーバー通信が必要
+    //        if hostiong == .hosting {
+    //            guard let nickName = profileData["nickname"] as? String else {
+    //
+    //                let USERDATAMANAGE = UserDataManage()
+    //                USERDATAMANAGE.userInfoDataGet(callback: {document in
+    //                    guard let document = document else {
+    //                        return
+    //                    }
+    //                    userProfileLocalDataExtraRegist(
+    //                        UID: UID,
+    //                        nickname: document["nickname"] as? String,
+    //                        sex: document["Sex"] as? Int,
+    //                        aboutMassage: document["aboutMeMassage"] as? String,
+    //                        age: document["age"] as? Int, area: document["area"] as? String,
+    //                        createdAt: document["createdAt"] as? Date,
+    //                        updatedAt: document["updatedAt"] as? Date, ViewController: ViewController
+    //                    )
+    //
+    //                    callback (document)
+    //
+    //                }, UID: UID)
+    //                return
+    //            }
+    //        }
+    //        callback (profileData)
+    //    ///ローカルに存在無し
+    //    } else {
+    //        if hostiong == .hosting {
+    //            let USERDATAMANAGE = UserDataManage()
+    //            USERDATAMANAGE.userInfoDataGet(callback: {document in
+    //                guard let document = document else {
+    //                    return
+    //                }
+    //                userProfileLocalDataExtraRegist(
+    //                    UID: UID,
+    //                    nickname: document["nickname"] as? String,
+    //                    sex: document["Sex"] as? Int,
+    //                    aboutMassage: document["aboutMeMassage"] as? String,
+    //                    age: document["age"] as? Int, area: document["area"] as? String,
+    //                    createdAt: document["createdAt"] as? Date,
+    //                    updatedAt: document["updatedAt"] as? Date,
+    //                    ViewController: ViewController
+    //                )
+    //
+    //                callback (document)
+    //
+    //            }, UID: UID)
+    //        }
+    //    }
+    //}
+    
+    
+    
+//    ///ローカルDBへのユーザープロフィール新規データ保存
+//    func userProfileLocalDataRegist(UID:String,nickname:String,sex:Int,aboutMassage:String,age:Int,area:String,createdAt:Date,updatedAt:Date){
+//        ///ローカルデータ保存
+//        let REALM = try! Realm()
+//        let profileInfoLocalObject = profileInfoLocal()
+//        ///構造体に合わせて各項目を入力
+//        profileInfoLocalObject.lcl_UID = UID
+//        profileInfoLocalObject.lcl_NickName = nickname
+//        profileInfoLocalObject.lcl_Sex = sex
+//        profileInfoLocalObject.lcl_AboutMeMassage = aboutMassage
+//        profileInfoLocalObject.lcl_Age = age
+//        profileInfoLocalObject.lcl_Area = area
+//        profileInfoLocalObject.lcl_DateCreatedAt = createdAt
+//        profileInfoLocalObject.lcl_DateUpdatedAt = updatedAt
+//        ///ローカルDBに登録
+//        try! REALM.write {
+//            REALM.add(profileInfoLocalObject)
+//        }
+//    }
+    
+    
+    
+    
+
+    
+    ///ローカルDBに保存してあるトークリストユーザーデータの中で最新の時間を取得して返す
+    func chatUserListInfoLocalLastestTimeGet() -> Date{
+        let REALM = try! Realm()
+        let localDBGetData = REALM.objects(ListUsersInfoLocal.self).sorted(byKeyPath: "lcl_UpdateDate", ascending: false)
+        let result = localDBGetData.first
+        let TOOLS = TIME()
+        //        もしも一件もローカルにデータが入っていなかった時はものすごい前の時間を設定して値を返す
+        guard let result = result?.lcl_UpdateDate else {
+            return TOOLS.pastTimeGet()
         }
-    } catch {
-        print("Error \(error)")
+        return result
     }
-}
+    
+
+    
+    ///ライクボタン押下時のローカルデータ保存および更新
+//    func LikeUserDataRegist_Update(UID:String,nickname:String?,sex:Int?,aboutMassage:String?,age:Int?,area:String?,createdAt:Date?,updatedAt:Date?,LikeButtonPushedFLAG:Int,LikeButtonPushedDate:Date?,ViewController:UIViewController){
+//        let REALM = try! Realm()
+//        let localDBGetData = REALM.objects(profileInfoLocal.self)
+//        let UID = UID
+//        let predicate = NSPredicate(format: "lcl_UID == %@", UID)
+//        
+//        ///ローカルDB内に渡されたUIDが存在していなければ新規ローカル保存関数呼び出し
+//        guard let user = localDBGetData.filter(predicate).first else {
+//            
+//            userProfileLocalDataRegist(
+//                UID: UID,
+//                nickname: nickname ?? "名称未設定",
+//                sex: sex ?? 0,
+//                aboutMassage: aboutMassage ?? "よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃",
+//                age: age ?? 18,
+//                area: area ?? "未設定",
+//                createdAt: createdAt ?? Date(),
+//                updatedAt: updatedAt ?? Date()
+//            )
+//            
+//            ///ここで今まさに新規登録したユーザーのLike送信情報だけ更新する
+//            let ExistUser = localDBGetData.filter(predicate).first
+//            do{
+//                try REALM.write{
+//                    ExistUser?.lcl_LikeButtonPushedDate = LikeButtonPushedDate
+//                    ExistUser?.lcl_LikeButtonPushedFLAG = LikeButtonPushedFLAG
+//                }
+//            } catch {
+//                print("Error \(error)")
+//            }
+//            return
+//        }
+//        ///ローカルDB内に渡されたUIDが存在していれば更新
+//        // Likeデータのみ更新する
+//        do{
+//            try REALM.write{
+//                user.lcl_LikeButtonPushedDate = LikeButtonPushedDate
+//                user.lcl_LikeButtonPushedFLAG = LikeButtonPushedFLAG
+//            }
+//        } catch {
+//            print("Error \(error)")
+//        }
+//    }
+    
+    ///ブロック処理(相手と自分に登録)(フラグによって解除も登録も)
+    func blockUserRegist(UID1:String,UID2:String,blockerFLAG:Bool,nickname:String) {
+        ///ブロック登録(相手に自分がブロックしている情報を)
+        Firestore.firestore().collection("users").document(UID2).collection("TalkUsersList").document(UID1).setData(["blocked":blockerFLAG], merge: true)
+        ///ブロック登録(自分に相手のブロック情報を)
+        Firestore.firestore().collection("users").document(UID1).collection("TalkUsersList").document(UID2).setData(["blocker":blockerFLAG], merge: true)
+        ///自分のローカルデータに相手のブロック情報登録
+        blockUserDataRegist_Update(UID: UID2, blockerFLAG: blockerFLAG, nickname: nickname)
+        
+    }
+    
+    ///ブロック登録時のローカルデータ保存および更新【blockUserRegistから呼び出すこと。】
+    private func blockUserDataRegist_Update(UID:String,blockerFLAG:Bool,nickname:String){
+        ///REALMにてローカルDB生成
+        let realm = try! Realm()
+        let localDBGetData = realm.objects(ListUsersInfoLocal.self)
+        // UIDで検索
+        let predicate = NSPredicate(format: "lcl_UID == %@", UID)
+        ///ローカルDB内に渡されたUIDが存在していなければ新規ローカル保存関数呼び出し
+        guard let user = localDBGetData.filter(predicate).first else {
+            chatUserListInfoLocalExstraRegist(UID: UID, usernickname: nickname, newMessage: nil, updateDate: Date(), listend: nil, SendUID: nil, blockedFLAG: blockerFLAG)
+            return
+        }
+        ///ローカルDB内に渡されたUIDが存在していれば更新
+        // ブロック情報のみ更新する
+        do{
+            try realm.write{
+                user.lcl_BlockerFLAG = blockerFLAG
+            }
+        } catch {
+            print("Error \(error)")
+        }
+    }

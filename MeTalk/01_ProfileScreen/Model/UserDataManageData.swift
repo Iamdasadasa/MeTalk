@@ -20,44 +20,44 @@ struct UserDataManage{
 //        self.ViewController = ViewController
 //    }
     
-    ///匿名登録処理で登録したユーザー情報を返す& DB登録も初回は一緒にやる
-    func signInAnonymously(callback: @escaping (String?) -> Void,nickName:String?,SexNo:Int?) {
-        ///引数のデータがどちらかでもNilだった場合Return
-        guard let nickName = nickName,let SexNo  = SexNo else {
-            callback("ニックネームと性別が選択されていない可能性があります。正しく選択されているにも関わらずこのメッセージが表示される場合、開発者に問い合わせできます。")
-            return
-        }
-        ///匿名登録処理
-        Auth.auth().signInAnonymously { authResult, error in
-
-            ///匿名登録自体の失敗（Authentication）
-            guard let user = authResult?.user else {
-                callback("サーバー側で登録時エラーが発生しましたもう一度試してください。【Error Message】\(error?.localizedDescription)")
-                return
-            }
-            
-            ///各登録処理（Cloud Firestore）
-            Firestore.firestore().collection("users").document(user.uid).setData([
-                "nickname": nickName,
-                "Sex": SexNo,
-                "aboutMeMassage":"よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃",
-                "area":"未設定",
-                "age":0,
-                "signUpFlg":"SignUp",
-                "createdAt": FieldValue.serverTimestamp(),
-                "updatedAt": FieldValue.serverTimestamp()
-            ], completion: { error in
-                if let error = error {
-                    ///失敗した場合
-                    callback("サーバー側で登録時エラーが発生しましたもう一度試してください。【Error Message】\(error.localizedDescription)")
-                    return
-                } else {
-                    ///成功した場合遷移
-                    callback(nil)
-                }
-            })
-        }
-    }
+//    ///匿名登録処理で登録したユーザー情報を返す& DB登録も初回は一緒にやる
+//    func signInAnonymously(callback: @escaping (String?) -> Void,nickName:String?,SexNo:Int?) {
+//        ///引数のデータがどちらかでもNilだった場合Return
+//        guard let nickName = nickName,let SexNo  = SexNo else {
+//            callback("ニックネームと性別が選択されていない可能性があります。正しく選択されているにも関わらずこのメッセージが表示される場合、開発者に問い合わせできます。")
+//            return
+//        }
+//        ///匿名登録処理
+//        Auth.auth().signInAnonymously { authResult, error in
+//
+//            ///匿名登録自体の失敗（Authentication）
+//            guard let user = authResult?.user else {
+//                callback("サーバー側で登録時エラーが発生しましたもう一度試してください。【Error Message】\(error?.localizedDescription)")
+//                return
+//            }
+//
+//            ///各登録処理（Cloud Firestore）
+//            Firestore.firestore().collection("users").document(user.uid).setData([
+//                "nickname": nickName,
+//                "Sex": SexNo,
+//                "aboutMeMassage":"よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃",
+//                "area":"未設定",
+//                "age":0,
+//                "signUpFlg":"SignUp",
+//                "createdAt": FieldValue.serverTimestamp(),
+//                "updatedAt": FieldValue.serverTimestamp()
+//            ], completion: { error in
+//                if let error = error {
+//                    ///失敗した場合
+//                    callback("サーバー側で登録時エラーが発生しましたもう一度試してください。【Error Message】\(error.localizedDescription)")
+//                    return
+//                } else {
+//                    ///成功した場合遷移
+//                    callback(nil)
+//                }
+//            })
+//        }
+//    }
     
     ///サーバーに対して画像取得要求
     /// - Parameters:
@@ -66,6 +66,7 @@ struct UserDataManage{
     /// - Returns:
     /// -imageStruct:取得したイメージ情報
     func contentOfFIRStorageGet(callback: @escaping (listUserImageStruct) -> Void,UID:String?,UpdateTime:Date) {
+        let TOOL = TIME()
         guard let UID = UID else {
             print("UIDが確認できませんでした")
             return
@@ -78,7 +79,8 @@ struct UserDataManage{
             }
             
             guard let metadata = metadata else {
-                let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: ChatDataManagedData.pastTimeGet(), UIimage: nil)
+
+                let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: TOOL.pastTimeGet(), UIimage: nil)
                 callback(profileImageStruct)
                 return
             }
@@ -88,7 +90,7 @@ struct UserDataManage{
                     .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
                     ///ユーザーIDのプロフィール画像が取得できなかったらnilを返す
                     if error != nil {
-                        let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: ChatDataManagedData.pastTimeGet(), UIimage: nil)
+                        let profileImageStruct = listUserImageStruct(UID: UID, UpdateDate: TOOL.pastTimeGet(), UIimage: nil)
                         callback(profileImageStruct)
                         print(error?.localizedDescription)
                     }
@@ -221,8 +223,6 @@ struct UserDataManage{
             ///サーバーDB更新処理
             Firestore.firestore().collection("users").document(UID).updateData(["nickname":userData])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
-            ///ローカルDB更新処理
-            userProfileLocalDataExtraRegist(UID: UID, nickname: userData, sex: nil, aboutMassage: nil, age: nil, area: nil, createdAt: nil, updatedAt: Date(),ViewController: ViewController)
 
         case .aboutMe: ///ひとこと及び更新日時
             guard let userData = userData as? String else {
@@ -231,18 +231,20 @@ struct UserDataManage{
             ///サーバーDB更新処理
             Firestore.firestore().collection("users").document(UID).updateData(["aboutMeMassage":userData])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
-            ///ローカルDB更新処理
-            userProfileLocalDataExtraRegist(UID: UID, nickname: nil, sex: nil, aboutMassage: userData, age: nil, area: nil, createdAt: nil, updatedAt: Date(),ViewController: ViewController)
 
         case .Age: ///年齢及び更新日時
-            guard let userData = userData as? Int else {
+            ///（年齢をIntに変換）
+            guard let AgeTypeString = userData as? String else {
+                print("年齢が取得もしくはキャストできませんでした")
+                return
+            }
+            guard let AgeTypeInt = Int(AgeTypeString) else {
+                print("年齢が取得もしくはキャストできませんでした")
                 return
             }
             ///サーバーDB更新処理
-            Firestore.firestore().collection("users").document(UID).updateData(["age":userData])
+            Firestore.firestore().collection("users").document(UID).updateData(["age":AgeTypeInt])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
-            ///ローカルDB更新処理
-            userProfileLocalDataExtraRegist(UID: UID, nickname: nil, sex: nil, aboutMassage: nil, age: userData, area: nil, createdAt: nil, updatedAt: Date(),ViewController: ViewController)
 
         case .Area: ///出身地及び更新日時
             guard let userData = userData as? String else {
@@ -251,8 +253,6 @@ struct UserDataManage{
             ///サーバーDB更新処理
             Firestore.firestore().collection("users").document(UID).updateData(["area":userData])
             Firestore.firestore().collection("users").document(UID).updateData(["updatedAt":FieldValue.serverTimestamp()])
-            ///ローカルDB更新処理
-            userProfileLocalDataExtraRegist(UID: UID, nickname: nil, sex: nil, aboutMassage: nil, age: nil, area: userData, createdAt: nil, updatedAt: Date(),ViewController: ViewController)
 
         }
     }
@@ -283,36 +283,36 @@ struct UserDataManage{
     /// - callback:コールバック関数。document.dataはFirebaseのユーザー1人分を返している
     /// 　　　　　　（ニックネーム、性別等が含まれる）
     /// - Returns:
-    func talkListTargetUserDataGet(callback: @escaping  (TalkListUserStruct) -> Void,UID1:String,UID2:String,selfViewController:UIViewController) {
-        
-        ///ここでデータにアクセスしている（非同期処理）
-        let userDocuments = cloudDB.collection("users").document(UID1).collection("TalkUsersList").document(UID2)
-        userDocuments.getDocument(completion: { (querySnapshot, err) in
-            if let err = err {
-                print("Error getting documents: \(err)")
-            } else {
-                let DOCUMENTS = querySnapshot!
-                if let userNickname = DOCUMENTS["youNickname"] as? String,let UpdateDate = DOCUMENTS["UpdateAt"] as? Timestamp,let sendUID = DOCUMENTS["SendID"] as? String {
-                    var talkListTargetUserInfo:TalkListUserStruct = TalkListUserStruct(UID: UID2, userNickName: userNickname, profileImage: nil, UpdateDate: UpdateDate.dateValue(), NewMessage: DOCUMENTS["FirstMessage"] as? String ?? "", listend: true, sendUID: sendUID)
-                    talkListTargetUserInfo.blocked = DOCUMENTS["blocked"] as? Bool ?? false
-                    talkListTargetUserInfo.blocker = DOCUMENTS["blocker"] as? Bool ?? false
-                    callback(talkListTargetUserInfo)
-                } else {
-                    let alert = actionSheets(dicidedOrOkOnlyTitle: "申し訳ありませんがこのユーザーに異常が発生しました", message: "このユーザーにメッセージを送ることはできません。", buttonMessage: "OK")
-
-                    alert.okOnlyAction(callback: { result in
-                        switch result {
-                        case .one:
-                            return
-                        }
-                    }, SelfViewController: selfViewController)
-                    return
-                }
-
-            }
-        })
-
-    }
+//    func talkListTargetUserDataGet(callback: @escaping  (TalkListUserStruct) -> Void,UID1:String,UID2:String,selfViewController:UIViewController) {
+//        
+//        ///ここでデータにアクセスしている（非同期処理）
+//        let userDocuments = cloudDB.collection("users").document(UID1).collection("TalkUsersList").document(UID2)
+//        userDocuments.getDocument(completion: { (querySnapshot, err) in
+//            if let err = err {
+//                print("Error getting documents: \(err)")
+//            } else {
+//                let DOCUMENTS = querySnapshot!
+//                if let userNickname = DOCUMENTS["youNickname"] as? String,let UpdateDate = DOCUMENTS["UpdateAt"] as? Timestamp,let sendUID = DOCUMENTS["SendID"] as? String {
+//                    var talkListTargetUserInfo:TalkListUserStruct = TalkListUserStruct(UID: UID2, userNickName: userNickname, profileImage: nil, UpdateDate: UpdateDate.dateValue(), NewMessage: DOCUMENTS["FirstMessage"] as? String ?? "", listend: true, sendUID: sendUID)
+//                    talkListTargetUserInfo.blocked = DOCUMENTS["blocked"] as? Bool ?? false
+//                    talkListTargetUserInfo.blocker = DOCUMENTS["blocker"] as? Bool ?? false
+//                    callback(talkListTargetUserInfo)
+//                } else {
+//                    let alert = actionSheets(dicidedOrOkOnlyTitle: "申し訳ありませんがこのユーザーに異常が発生しました", message: "このユーザーにメッセージを送ることはできません。", buttonMessage: "OK")
+//
+//                    alert.okOnlyAction(callback: { result in
+//                        switch result {
+//                        case .one:
+//                            return
+//                        }
+//                    }, SelfViewController: selfViewController)
+//                    return
+//                }
+//
+//            }
+//        })
+//
+//    }
     
     ///【非同期】トークユーザーリスト情報取得関数(コレクションは"Users")
     /// - Parameters:

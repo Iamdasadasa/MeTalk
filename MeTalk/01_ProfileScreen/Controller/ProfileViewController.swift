@@ -32,10 +32,11 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     ///インスタンス化（Model）
     let USERDATAMANAGE = UserDataManage()
     let UID = Auth.auth().currentUser?.uid
+    let localData = profileDataStruct(UID: Auth.auth().currentUser!.uid)
     ///RealMオブジェクトをインスタンス化
     let REALM = try! Realm()
     ///プロフィール情報を保存する辞書型変数
-    var profileData:[String:Any] = [:]
+    var profileData:profileInfoLocal?
     var profileImage:UIImage?
     
     ///ライブラリのハンモーダルインスタンス
@@ -60,13 +61,27 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         FPC.backdropView.dismissalTapGestureRecognizer.isEnabled = true
         ///初期画像設定
         self.PROFILEVIEW.settingButton.setImage(UIImage(named: "setting"), for: .normal)
-        
-        userProfileDatalocalGet(callback: { localDocument in
-            ///ローカルデータを使って画面情報をセットアップ
-            self.userInfoDataSetup(userInfoData: localDocument)
-        }, UID: UID!, hostiong: .hosting, ViewController: self)
-        
+
+        ///ローカルデータを使って画面情報をセットアップ
+        localData.userProfileDatalocalGet { Ldata, err in
+            if err != nil {
+                self.hostingDataGetter()
+                return
+            }
+            self.userInfoDataSetup(userInfoData: Ldata)
+        }
     }
+    
+    func hostingDataGetter() {
+        let hosting = profileHosting()
+        hosting.FireStoreProfileDataGetter(callback: { info, err in
+            if err != nil {
+                print("サーバーにデータがないのに初期画面以外にいるのはありえない")
+            }
+            self.userInfoDataSetup(userInfoData: info)
+        }, UID: UID!)
+    }
+    
     ///コードレイアウトで行う場合はLoadView
     override func loadView() {
         self.view = PROFILEVIEW
@@ -229,7 +244,7 @@ extension ProfileViewController{
     /// - Parameters:
     /// - userInfoData:画面表示の際に取得してきているユーザーデータ
     /// - Returns:
-    func userInfoDataSetup(userInfoData:[String:Any]) {
+    func userInfoDataSetup(userInfoData:profileInfoLocal) {
         ///開始日をもってくる際の日付フォーマットの設定
         let dateFormatter = DateFormatter()
         dateFormatter.locale = .init(identifier: "en_US_POSIX")
@@ -309,10 +324,14 @@ extension ProfileViewController:FloatingPanelControllerDelegate{
         ///後ろのブラービューを破棄
         SEMIMODALTRANSLUCENTVIEW.removeFromSuperview()
         
-        userProfileDatalocalGet(callback: { localDocument in
-            ///ローカルデータを使って画面情報をセットアップ
-            self.userInfoDataSetup(userInfoData: localDocument)
-        }, UID: UID!, hostiong: .hosting, ViewController: self)
+        ///破棄時にデータセットアップ
+        localData.userProfileDatalocalGet { Ldata, err in
+            if err != nil {
+                self.hostingDataGetter()
+                return
+            }
+            self.userInfoDataSetup(userInfoData: Ldata)
+        }
         
         self.tabBarController?.tabBar.isHidden = false
     }

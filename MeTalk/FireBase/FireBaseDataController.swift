@@ -8,6 +8,7 @@
 import Foundation
 import Firebase
 import FirebaseStorage
+
 ///DIプロトコル
 protocol firebaseHostingProtocol {
     func FireStoreSignUpAuthRegister(callback: @escaping (FireBaseResult) -> Void)
@@ -18,14 +19,22 @@ enum FireBaseResult {
     case Success(String)
     case failure(Error)
 }
+///プロフィール初期値
+let STR = {(CS:USERINFODEFAULTVALUE) -> String in
+    return CS.StrObjec
+}
+
+let INT = {(CS:USERINFODEFAULTVALUE) -> Int in
+    return CS.NumObjec
+}
 
 ///登録時ユーザーデータ構造体
 struct ProfileUserData{
     let nickName:String
     let sex:Int
-    let aboutMessage:String = "よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃"
-    let area:String = "未設定"
-    let age:Int = 0
+    let aboutMessage:String = STR(.AboutMeMassage)
+    let area:String = STR(.area)
+    let age:Int = INT(.Age)
     let signUpFlg:String = "SignUp"
     let createdAt = FieldValue.serverTimestamp()
     let updatedAt = FieldValue.serverTimestamp()
@@ -71,23 +80,240 @@ struct profileInitHosting:firebaseHostingProtocol{
 
 struct profileHosting {
     ///ユーザー情報取得
-    func FireStoreProfileDataGetter(callback: @escaping  ([String:Any]?) -> Void,UID:String?) {
-        guard let UID = UID else {
-            print("UIDを確認できませんでした")
-            return
+    func FireStoreProfileDataGetter(callback: @escaping  (profileInfoLocal,Error?) -> Void,UID:String) {
+        let STR = {(CS:USERINFODEFAULTVALUE) -> String in
+            return CS.StrObjec
         }
+        let INT = {(CS:USERINFODEFAULTVALUE) -> Int in
+            return CS.NumObjec
+        }
+
+        var PROFILEINFOLOCAL:profileInfoLocal = profileInfoLocal()
+        PROFILEINFOLOCAL.lcl_NickName = STR(.NickName)
+        PROFILEINFOLOCAL.lcl_AboutMeMassage = STR(.AboutMeMassage)
+        PROFILEINFOLOCAL.lcl_Age = INT(.Age)
+        PROFILEINFOLOCAL.lcl_Age = INT(.Age)
+        PROFILEINFOLOCAL.lcl_Area = STR(.area)
+        PROFILEINFOLOCAL.lcl_DateCreatedAt = Date()
+        PROFILEINFOLOCAL.lcl_DateUpdatedAt = Date()
+        
         let userDocuments = Firestore.firestore().collection("users").document(UID)
         userDocuments.getDocument{ (QuerySnapshot,err) in
             if err != nil {
-                ///相手のトークリストに何らかの理由で存在しないORブロック変数がTrueはここにくる
-                var failedUserInfo = ["UID":"Block"]
-                callback(failedUserInfo)
+                callback(PROFILEINFOLOCAL,err)
             } else {
-                let DICTIONARYSNAPSHOT = QuerySnapshot
-                callback(DICTIONARYSNAPSHOT?.data())
+
+                
+                guard let QuerySnapshot = QuerySnapshot else {
+                    callback(PROFILEINFOLOCAL,err)
+                    return
+                }
+                
+                guard let nickname = QuerySnapshot["nickname"] as? String else {
+                    callback(PROFILEINFOLOCAL,err)
+                    return
+                }
+                guard let aboutMeMassage = QuerySnapshot["aboutMeMassage"] as? String else {
+                    callback(PROFILEINFOLOCAL,err)
+                    return
+                }
+                guard let age = QuerySnapshot["age"] as? Int else {
+                    callback(PROFILEINFOLOCAL,err)
+                    return
+                }
+                guard let area = QuerySnapshot["area"] as? String else {
+                    callback(PROFILEINFOLOCAL,err)
+                    return
+                }
+                guard let Sex = QuerySnapshot["Sex"] as? Int else {
+                    callback(PROFILEINFOLOCAL,err)
+                    return
+                }
+                guard let createdAt = QuerySnapshot["createdAt"] as? Timestamp else {
+                    callback(PROFILEINFOLOCAL,err)
+                    return
+                }
+                guard let updatedAt = QuerySnapshot["updatedAt"] as? Timestamp else {
+                    callback(PROFILEINFOLOCAL,err)
+                    return
+                }
+                
+                PROFILEINFOLOCAL.lcl_NickName = nickname
+                PROFILEINFOLOCAL.lcl_AboutMeMassage = aboutMeMassage
+                PROFILEINFOLOCAL.lcl_Age = age
+                PROFILEINFOLOCAL.lcl_Area = area
+                PROFILEINFOLOCAL.lcl_Sex = Sex
+                PROFILEINFOLOCAL.lcl_DateCreatedAt = createdAt.dateValue()
+                PROFILEINFOLOCAL.lcl_DateUpdatedAt = updatedAt.dateValue()
+                
+                callback(PROFILEINFOLOCAL,nil)
+            }
+        }
+    }
+}
+struct ContentsDatahosting {
+
+    let STORAGE = Storage.storage()
+    let host = "gs://metalk-f132e.appspot.com"
+    
+    func ImageDataGetter(callback: @escaping (ListUsersImageLocal,Error?) -> Void,UID:String,UpdateTime:Date) {
+        let ImageObject = ListUsersImageLocal()
+        ImageObject.lcl_ProfileImage = UIImage(named: "InitIMage")!
+        ImageObject.lcl_UID = UID
+        let TOOLS = TIME()
+        ImageObject.lcl_UpdataDate = TOOLS.pastTimeGet()
+        
+        STORAGE.reference(forURL: host).child("profileImage").child("\(UID).jpeg").getMetadata {metadata, error in
+            
+            if error != nil {
+                print("StorageのProfile画像取得の際にMetadataが取得できませんでした:\(error?.localizedDescription)")
+                callback(ImageObject,error)
+            }
+            
+            guard let metadata = metadata else {
+                callback(ImageObject, nil)
+                return
+            }
+            
+            if metadata.updated! > UpdateTime {
+                STORAGE.reference(forURL: host).child("profileImage").child("\(UID).jpeg")
+                    .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
+                    ///ユーザーIDのプロフィール画像が取得できなかったらnilを返す
+                    if error != nil {
+                        callback(ImageObject, error)
+                    }
+                    ///ユーザーIDのプロフィール画像を設定していたらその画像を取得してリターン
+                    if let imageData = data {
+                        let image = UIImage(data: imageData)
+                        ImageObject.lcl_UID = UID
+                        ImageObject.lcl_ProfileImage = image!
+                        ImageObject.lcl_UpdataDate = metadata.updated!
+                        callback(ImageObject,nil)
+                    }
+                }
             }
         }
     }
 }
 
+struct TalkDataHostingManager {
+    let cloudDB = Firestore.firestore()
+    var databaseRef: DatabaseReference! = Database.database().reference()
+    enum ERROR:Error {
+        case err
+    }
+    
+    enum MessageKind{
+        case block
+        case MyNew
+        case MyExtra
+        case YouNew
+        case YouExtra
+    }
 
+    func talkListTargetUserDataGet(callback: @escaping  (ListUsersInfoLocal,Error?) -> Void,UID1:String,UID2:String) {
+        var TARGETINFO = ListUsersInfoLocal()
+
+        let userDocuments = cloudDB.collection("users").document(UID1).collection("TalkUsersList").document(UID2)
+        userDocuments.getDocument(completion: { (querySnapshot, err) in
+            if let err = err {
+                callback(TARGETINFO,err)
+            } else {
+                let DOCUMENTS = querySnapshot!
+                if let userNickname = DOCUMENTS["youNickname"] as? String,
+                   let UpdateDate = DOCUMENTS["UpdateAt"] as? Timestamp,
+                   let sendUID = DOCUMENTS["SendID"] as? String {
+                    TARGETINFO.lcl_UID = UID2
+                    TARGETINFO.lcl_UserNickName = userNickname
+                    TARGETINFO.lcl_UpdateDate = UpdateDate.dateValue()
+                    TARGETINFO.lcl_NewMessage = DOCUMENTS["FirstMessage"] as? String ?? ""
+                    TARGETINFO.lcl_Listend = true
+                    TARGETINFO.lcl_SendUID = sendUID
+                    callback(TARGETINFO,nil)
+                } else {
+                    callback(TARGETINFO,ERROR.err)
+                }
+            }
+        })
+    }
+    
+    func likePushing(message:String,messageId:String,sender:String,Date:Date,roomID:String){
+        let date = ChatDataManagedData.dateToStringFormatt(date: Date, formatFlg: 0)
+        let messageStructData:[String : Any] = ["message":message,"messageID":messageId,"sender":sender,"Date":date,"listend":false,"LikeButtonFLAG":true]
+            databaseRef.child("Chat").child(roomID).childByAutoId().setValue(messageStructData)
+    }
+
+    
+    func talkListUserAuthUIDCreate(UID1:String,UID2:String,frtDocumentPath:String,scdDocumentPath:String,
+                 message:String,sender:String,nickName1:String,nickName2:String,like:Bool,blocked:Bool){
+        var TargetListUID:String
+        var TargetDocuUID:String
+        var frtCollectionPath:String = "users"
+        var scdCollectionPath:String = "TalkUsersList"
+        var data:[String:Any] = [ "UpdateAt":FieldValue.serverTimestamp(),
+                              "FirstMessage":message,
+                              "SendID":sender,
+                              "meNickname":nickName1,
+                              "youNickname":nickName2]
+        
+        var kindDeceid = {(KIND:MessageKind,TLU:String,TDU:String) in
+            switch KIND {
+            case .block,.MyExtra:
+                if like {
+                 data.updateValue(like, forKey: "likeButtonFLAG")
+                }
+            case .MyNew:
+                if !like {
+                 data.updateValue(FieldValue.serverTimestamp(), forKey: "createdAt")
+                } else {
+                 data.updateValue(FieldValue.serverTimestamp(), forKey: "createdAt")
+                 data.updateValue(like, forKey: "likeButtonFLAG")
+                }
+            case .YouNew:
+                data.updateValue(nickName2, forKey: "meNickname")
+                data.updateValue(nickName1, forKey: "youNickname")
+                if !like {
+                data.updateValue(FieldValue.serverTimestamp(), forKey: "createdAt")
+                } else {
+                data.updateValue(FieldValue.serverTimestamp(), forKey: "createdAt")
+                data.updateValue(like, forKey: "likeButtonFLAG")
+                }
+            case .YouExtra:
+                data.updateValue(nickName2, forKey: "meNickname")
+                data.updateValue(nickName1, forKey: "youNickname")
+                if like {
+                 data.updateValue(like, forKey: "likeButtonFLAG")
+                }
+            }
+            Firestore.firestore().collection(frtCollectionPath).document(TLU).collection(scdCollectionPath).document(TDU).setData(data,merge: true)
+        }
+        
+        TargetListUID = UID1
+        TargetDocuUID = UID2
+        
+        if blocked {
+            kindDeceid(.block,TargetListUID,TargetDocuUID)
+            return
+        }
+        
+        cloudDB.collection(frtCollectionPath).document(TargetListUID).collection(scdCollectionPath).document(TargetDocuUID).getDocument(completion: { (document,err) in
+            if let document = document,document.exists {
+                kindDeceid(.MyExtra,TargetListUID,TargetDocuUID)
+            } else {
+                kindDeceid(.MyNew,TargetListUID,TargetDocuUID)
+            }
+        })
+        
+        TargetListUID = UID2
+        TargetDocuUID = UID1
+        
+        cloudDB.collection(frtCollectionPath).document(TargetListUID).collection(scdCollectionPath).document(TargetDocuUID).getDocument(completion: { (document,err) in
+            if let document = document,document.exists {
+                kindDeceid(.YouExtra,TargetListUID,TargetDocuUID)
+            } else {
+                kindDeceid(.YouNew,TargetListUID,TargetDocuUID)
+            }
+        })
+     }
+
+}

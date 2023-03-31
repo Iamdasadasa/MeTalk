@@ -22,6 +22,14 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
     let userDataManageData = UserDataManage()
     let modalImageData = ModalImageData()
     let uid = Auth.auth().currentUser?.uid
+    var ProfileData = profileInfoLocal()
+    ///プロフィール初期値
+    let STR = {(CS:USERINFODEFAULTVALUE) -> String in
+        return CS.StrObjec
+    }
+    let INT = {(CS:USERINFODEFAULTVALUE) -> Int in
+        return CS.NumObjec
+    }
     ///Viewフラグ判断変数
     var dicidedModal:ModalItems
     
@@ -39,7 +47,6 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
         ///画面共通処理
         self.VIEW = ModalBaseView(ModalItems:self.dicidedModal, frame: self.view.frame)
         guard let VIEW = VIEW else {
@@ -50,17 +57,45 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
         ///クローズ画像データをセット
         VIEW.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
         
+        ///ローカルデータ取得
+        var LOCALDATA = profileDataStruct(UID: uid!)
+        LOCALDATA.userProfileDatalocalGet { profileInfoLocal, result in
+            if result == .localNoting {
+                let action = actionSheets(dicidedOrOkOnlyTitle: "端末にデータが見つかりませんでした", message: "デフォルトの値が反映されます", buttonMessage: "OK")
+                action.okOnlyAction(callback: { result in
+                    profileInfoLocal.lcl_NickName = self.STR(.NickName)
+                    profileInfoLocal.lcl_Age = self.INT(.Age)
+                    profileInfoLocal.lcl_Area = self.STR(.area)
+                    profileInfoLocal.lcl_AboutMeMassage = self.STR(.AboutMeMassage)
+                    profileInfoLocal.lcl_Sex = self.INT(.Sex)
+                    profileInfoLocal.lcl_DateUpdatedAt = Date()
+                    profileInfoLocal.lcl_DateCreatedAt = Date()
+                }, SelfViewController: self)
+            }
+            self.ProfileData = profileInfoLocal
+        }
+        ///サーバー通信してデータ取得
+        func hostingProfileDataGetter() {
+            var hosting = profileHosting()
+            hosting.FireStoreProfileDataGetter(callback: { info, err in
+                if err != nil {
+                    print("サーバにデータが存在していないのに初期以外の画面にいるのはありえない")
+                    return
+                }
+                self.ProfileData = info
+            }, UID: uid!)
+        }
+
+        
         ///決定された各編集ボタンによって処理
         switch dicidedModal {
         ///ニックネーム編集
         case .nickName:
             ///自身のView適用（ニックネーム)
             self.view = VIEW
-            ///現在のユーザー名をローカルDBから取得
-            userProfileDatalocalGet(callback: { document in
-                ///ユーザー名情報をテキストフィールドにセット
-                VIEW.itemTextField.text = document["nickname"] as? String
-            }, UID: uid!, hostiong: .hosting, ViewController: self)
+            
+            ///ユーザー名情報をテキストフィールドにセット
+            VIEW.itemTextField.text = ProfileData.lcl_NickName
 
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
             NotificationCenter.default.addObserver(self,
@@ -70,11 +105,8 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
         ///ひとこと編集
         case .aboutMe:
             self.view = VIEW
-            ///現在のひとことをローカルDBから取得
-            userProfileDatalocalGet(callback: { document in
-                ///ひとことをテキストフィールドにセット
-                VIEW.itemTextField.text = document["aboutMeMassage"] as? String
-            }, UID: uid!, hostiong: .hosting, ViewController: self)
+            ///ひとこと情報をテキストフィールドにセット
+            VIEW.itemTextField.text = ProfileData.lcl_AboutMeMassage
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
             NotificationCenter.default.addObserver(self,
               selector: #selector(textFieldDidChange(notification:)),
@@ -83,26 +115,20 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
         ///年齢編集
         case .Age:
             self.view = VIEW
-            
-            ///現在の年齢をローカルDBから取得
-            userProfileDatalocalGet(callback: { document in
-                let agedata = document["age"] as? Int
+            ///年齢情報をテキストフィールドにセット
+            let agedata = ProfileData.lcl_Age
                 if agedata == 0 {
                     VIEW.itemTextField.text = "未設定"
                 } else {
                     ///年齢情報をテキストフィールドにセット
-                    VIEW.itemTextField.text = String(agedata!)
+                    VIEW.itemTextField.text = String(agedata)
                 }
-            }, UID: uid!, hostiong: .hosting, ViewController: self)
         ///住まい編集
         case .Area:
             self.view = VIEW
 
-            ///現在の住まいをローカルDBから取得
-            userProfileDatalocalGet(callback: { document in
-                ///住まいをテキストフィールドにセット
-                VIEW.itemTextField.text = document["area"] as? String
-            }, UID: uid!, hostiong: .hosting, ViewController: self)
+            ///ひとこと情報をテキストフィールドにセット
+            VIEW.itemTextField.text = ProfileData.lcl_Area
         }
     }
     ///オブザーバー破棄
@@ -191,25 +217,41 @@ extension SemiModalViewController:ModalViewDelegateProtcol{
         guard let VIEW = VIEW else {
             return
         }
+        guard let uid = uid else {
+            return
+        }
         ///データ代入
         let data = VIEW.itemTextField.text
-        ///年齢だった場合
-        if objects == .Age {
-            ///（年齢をIntに変換）
-            guard let AgeTypeString = data else {
-                print("年齢が取得もしくはキャストできませんでした")
+        var localData:profileDataStruct
+        ///入力したユーザーデータをサーバへアップデート
+        userDataManageData.userInfoDataUpload(userData: data, dataFlg: objects, UID: uid, ViewController: self)
+
+        ///ローカルデータ登録
+        switch objects {
+        case .nickName:
+            localData = profileDataStruct(UID: uid,nickName: data)
+        case .Age:
+            guard let data = data else {
                 return
             }
-            guard let AgeTypeInt = Int(AgeTypeString) else {
-                print("年齢が取得もしくはキャストできませんでした")
+            guard let age = Int(data) else {
                 return
             }
-            ///入力したユーザーデータをアップデート
-            userDataManageData.userInfoDataUpload(userData: AgeTypeInt, dataFlg: objects, UID: uid, ViewController: self)
+            localData = profileDataStruct(UID: uid,age: age)
+        case .aboutMe:
+            localData = profileDataStruct(UID: uid,aboutMessage: data)
+        case .Area:
+            localData = profileDataStruct(UID: uid,area:data)
         }
         
-        ///入力したユーザーデータをアップデート
-        userDataManageData.userInfoDataUpload(userData: data, dataFlg: objects, UID: uid, ViewController: self)
+        let results = localData.userProfileLocalDataExtraRegist()
+        if results == .localNoting {
+            let action = actionSheets(dicidedOrOkOnlyTitle: "データが見つかりませんでした", message: "データが見つからないため入力されたデータ以外はデフォルトの値が保存されます", buttonMessage: "OK")
+            action.okOnlyAction(callback: { resukt in
+                return
+            }, SelfViewController: self)
+        }
+
         self.delegate?.ButtonTappedActionChildDelegateAction()
     }
     

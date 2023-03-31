@@ -16,13 +16,19 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
     ///インスタンス化(View)
     let CHATUSERLISTTABLEVIEW = GeneralTableView()
     ///インスタンス化(Model)
-    let USERDATAMANAGE = UserDataManage()
+    let PLOFILEHOSTING = profileHosting()
     let UID = Auth.auth().currentUser?.uid
-    let TALKLOCAL = talKLocalDataStruct()
+    let TALKLOCAL = localTalkDataStruct()
+    let TALKHOSTING = TalkDataHostingManager()
+    let CONTENTSHOSTING = ContentsDatahosting()
+    let LOCALCONTENTSSTRUCT = localProfileContentsDataStruct()
+    let LOCALLISTUSERS = localListUsersDataStruct()
+    ///ローカルデータ取得
+    let LOCALDATA = localProfileDataStruct(UID: Auth.auth().currentUser!.uid)
     ///自身の画像View
     var selfProfileImageView = UIImageView()
     ///自身のユーザー情報格納変数
-    var meInfoData:[String:Any]?
+    var meInfoData:profileInfoLocal?
     ///追加でロードする際のCount変数
     var loadToLimitCount:Int = 15
     ///重複してメッセージデータを取得しないためのフラグ
@@ -32,7 +38,7 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
     ///バックボタンで戻ってきた時に格納してあるUID
     var backButtonUID:String?
     ///トークリストユーザー情報格納配列
-    var talkListUsersMock:[TalkListUserStruct] = []
+    var talkListUsersMock:[ListUsersInfoLocal] = []
     
     ///ビューが表示されるたびに実行する処理群
     override func viewWillAppear(_ animated: Bool) {
@@ -103,49 +109,53 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         ///Mockのインデックス番号の中身を取得
         let USERINFODATA = self.talkListUsersMock[indexPath.row]
         ///セルUID変数に対してUIDを代入
-        cell.cellUID = USERINFODATA.UID
-        print("USERINFODATA.userNickName:\(USERINFODATA.userNickName),USERINFODATA.UID:\(USERINFODATA.UID)")
+        cell.cellUID = USERINFODATA.lcl_UID
+
         
         ///ローカル保存処理
-        chatUserListInfoLocalExstraRegist(UID: USERINFODATA.UID, usernickname: USERINFODATA.userNickName, newMessage: USERINFODATA.NewMessage, updateDate: USERINFODATA.upDateDate, listend: USERINFODATA.listend, SendUID: USERINFODATA.sendUID, blockedFLAG: USERINFODATA.blocked)
+        LOCALLISTUSERS.chatUserListInfoLocalDataRegist(USERLISTLOCALOBJECT: USERINFODATA)
 
         ///ユーザーネーム設定処理
-        if let nickname = USERINFODATA.userNickName {
+        if let nickname = USERINFODATA.lcl_UserNickName {
             ///セルのUIDと一致したらセット
-            if cell.cellUID == USERINFODATA.UID {
+            if cell.cellUID == USERINFODATA.lcl_UID {
                 cell.nickNameSetCell(Item: nickname)
             }
         }
         
         //最新メッセージをセルに反映する処理
-        let newMessage = USERINFODATA.NewMessage
-        cell.newMessageSetCell(Item: newMessage)
+        let newMessage = USERINFODATA.lcl_NewMessage
+        cell.newMessageSetCell(Item: newMessage!)
         ///ローカルDBインスタンス化
-        let IMAGELOCALDATASTRUCT = chatUserListLocalImageInfoGet(UID: USERINFODATA.UID)
+        let IMAGELOCALDATASTRUCT = LOCALCONTENTSSTRUCT.chatUserListLocalImageInfoGet(UID: USERINFODATA.lcl_UID!)
         ///プロファイルイメージをセルに反映(ローカルDB)
-        cell.talkListUserProfileImageView.image = IMAGELOCALDATASTRUCT.image ?? UIImage(named: "InitIMage")
+        cell.talkListUserProfileImageView.image = IMAGELOCALDATASTRUCT.lcl_ProfileImage
         ///サーバーに対して画像取得要求
-        USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
-            ///取得してきた画像がNilでない且つセルに設定してあるUIDとサーバー取得UIDが合致した場合
-            ///イメージ画像をオブジェクトにセット
-            if imageStruct.image != nil,cell.cellUID == USERINFODATA.UID{
-                cell.talkListUserProfileImageView.image = imageStruct.image ?? UIImage(named: "InitIMage")
-                ///ローカルDBに取得したデータを上書き保存
-                chatUserListLocalImageRegist(UID: USERINFODATA.UID, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
+        CONTENTSHOSTING.ImageDataGetter(callback: { data, err in
+            if cell.cellUID == USERINFODATA.lcl_UID {
+                ///エラー時ローカルデータ更新
+                if err != nil {
+                    cell.talkListUserProfileImageView.image = IMAGELOCALDATASTRUCT.lcl_ProfileImage
+                    self.LOCALCONTENTSSTRUCT.chatUserListLocalImageRegist(UID: USERINFODATA.lcl_UID!, profileImage: IMAGELOCALDATASTRUCT.lcl_ProfileImage!, updataDate: IMAGELOCALDATASTRUCT.lcl_UpdataDate!)
+                }
+                
+                cell.talkListUserProfileImageView.image = data.lcl_ProfileImage
+                self.LOCALCONTENTSSTRUCT.chatUserListLocalImageRegist(UID: USERINFODATA.lcl_UID!, profileImage: data.lcl_ProfileImage!, updataDate: data.lcl_UpdataDate!)
             }
-        }, UID: USERINFODATA.UID, UpdateTime: IMAGELOCALDATASTRUCT.upDateDate)
+        }, UID: UID!, UpdateTime: IMAGELOCALDATASTRUCT.lcl_UpdataDate!)
+        
          
         ///もしもセルの再利用によってベルアイコンが存在してしまっていたら初期化
         if cell.nortificationImage.image != nil {
             cell.nortificationImage.image = nil
         }
         ///listendがTrue且つ送信者IDが自分でない場合はベルアイコンを表示()
-        if USERINFODATA.listend && USERINFODATA.sendUID != UID {
+        if USERINFODATA.lcl_Listend && USERINFODATA.lcl_SendUID != UID {
             cell.nortificationImageSetting()
         }
         ///バックボタンで戻ってきた際のUIDがCellのUIDと合致していたらベルアイコンは非表示
         if let backButtonUID = backButtonUID {
-            if backButtonUID == USERINFODATA.UID {
+            if backButtonUID == USERINFODATA.lcl_UID {
                 cell.nortificationImage.image = nil
             }
         }
@@ -160,7 +170,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         ///セル情報を取得
         let cell = tableView.cellForRow(at: indexPath) as! ChatUserListTableViewCell
         ///選んだセルの相手のUIDを取得
-        let YouUID = self.talkListUsersMock[indexPath.row].UID
+        let YouUID = self.talkListUsersMock[indexPath.row].lcl_UID
         
         guard let CELLUID = cell.cellUID  else {
             let alert = actionSheets(dicidedOrOkOnlyTitle: "ユーザーに異常が発生しました", message: "このユーザーとトークすることはできません。", buttonMessage:  "OK")
@@ -174,36 +184,40 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         }
         
         ///ローカルDBの処理で行っていないのは相手のトーク情報をタップした時点で取得したいため
-        USERDATAMANAGE.talkListTargetUserDataGet(callback: { targetUserInfo in
+        TALKHOSTING.talkListTargetUserDataGet(callback: { ListUsersInfo, err in
+            let TARGETPROFILEINFOLOCAL:profileInfoLocal = profileInfoLocal()
+            TARGETPROFILEINFOLOCAL.lcl_NickName = ListUsersInfo.lcl_UserNickName
             ///遷移先のチャット画面のViewcontrollerをインスタンス化
-            let CHATVIEWCONTROLLER = ChatViewController(Youinfo: targetUserInfo)
+            let CHATVIEWCONTROLLER = ChatViewController(Youinfo: TARGETPROFILEINFOLOCAL)
             ///UIDから生成したルームIDを値渡しする
-            let CHATDATAMANAGE = ChatDataManagedData()
-            let roomID = CHATDATAMANAGE.ChatRoomID(UID1: Auth.auth().currentUser!.uid, UID2: YouUID)
+            let TOOLS = chatTools()
+            let roomID = TOOLS.roomIDCreate(UID1: Auth.auth().currentUser!.uid, UID2: YouUID!)
             CHATVIEWCONTROLLER.roomID = roomID
             ///それぞれのユーザー情報を渡す
-            CHATVIEWCONTROLLER.MeInfo = self.meInfoData
+            CHATVIEWCONTROLLER.MeInfo = self.meInfoData!
             CHATVIEWCONTROLLER.MeUID = self.UID
-            CHATVIEWCONTROLLER.YouUID = YouUID
+            CHATVIEWCONTROLLER.YouUID = YouUID!
             CHATVIEWCONTROLLER.meProfileImage = self.selfProfileImageView.image
             CHATVIEWCONTROLLER.youProfileImage = cell.talkListUserProfileImageView.image
             ///新着ベルアイコンを非表示にする＆該当ユーザーのlisntendをFalseに設定
             cell.nortificationImageRemove()
-            self.talkListUsersMock[indexPath.row].listend = false
-            ///ローカルDBにニックネームの最新情報のみ更新
-            chatUserListInfoLocalExstraRegist(UID: YouUID, usernickname: targetUserInfo.userNickName, newMessage: targetUserInfo.NewMessage, updateDate: targetUserInfo.upDateDate, listend: targetUserInfo.listend, SendUID: targetUserInfo.sendUID, blockedFLAG: targetUserInfo.blocked)
+            self.talkListUsersMock[indexPath.row].lcl_Listend = false
+            ///ローカルDB更新/新規
+            self.LOCALLISTUSERS.chatUserListInfoLocalDataRegist(USERLISTLOCALOBJECT: ListUsersInfo)
+            
            ///ブロックされている場合
-            if targetUserInfo.blocked {
+            if ListUsersInfo.lcl_BlockedFLAG {
                 CHATVIEWCONTROLLER.blocked = true
             }
             ///ブロックしている場合
-            if targetUserInfo.blocker {
+            if ListUsersInfo.lcl_BlockerFLAG {
                 CHATVIEWCONTROLLER.blocker = true
             }
 
             ///UINavigationControllerとして遷移
             self.navigationController?.pushViewController(CHATVIEWCONTROLLER, animated: true)
-        }, UID1: UID!, UID2: CELLUID, selfViewController: self)
+        }, UID1: UID!, UID2: CELLUID)
+        
     }
     
     ///横にスワイプした際の処理
@@ -245,57 +259,77 @@ extension ChatUserListViewController {
     ///- limitCount: 取得する件数
     /// - Returns:
     /// -UserUIDUserListMock:取得したユーザーリスト情報
-    func talkListUsersDataGet(limitCount:Int,argLastetTime:Date) {
-        USERDATAMANAGE.talkListUsersDataGet(callback: { UserUIDUserListMock in
-            ///もしも現在のトークユーザーリストのカウントとDBから取得してきたトークユーザーリストのカウントが等しければロードストップのフラグにTrue
-            if UserUIDUserListMock.count == self.talkListUsersMock.count {
-                self.loadDataStopFlg = true
-            }
-            ///トークリスト配列を一個ずつ回す
-            for data in UserUIDUserListMock {
-
-                ///サーバーから取得したユーザーのUIDがあったらそのIndexNoを取得
-                let indexNo = self.talkListUsersMock.firstIndex(where: { $0.UID == data.UID })
-                ///配列にある古いデータを削除
-                if let indexNo = indexNo{
-                    self.talkListUsersMock.remove(at: indexNo)
-                }
-                ///サーバーから取得したデータを配列に入れ直す
-                self.talkListUsersMock.append(TalkListUserStruct(UID: data.UID, userNickName: data.userNickName, profileImage: nil,UpdateDate:data.upDateDate, NewMessage: data.NewMessage, listend: false, sendUID: data.sendUID))
-            }
-            ///ロードフラグをTrue
-            self.loadDataLockFlg = true
-            ///テーブルビューリロード処理
-            self.CHATUSERLISTTABLEVIEW.reloadData()
-        }, UID: UID, argLatestTime: argLastetTime,limitCount: limitCount)
-    }
+//    func talkListUsersDataGet(limitCount:Int,argLastetTime:Date) {
+//
+//        USERDATAMANAGE.talkListUsersDataGet(callback: { UserUIDUserListMock in
+//            ///もしも現在のトークユーザーリストのカウントとDBから取得してきたトークユーザーリストのカウントが等しければロードストップのフラグにTrue
+//            if UserUIDUserListMock.count == self.talkListUsersMock.count {
+//                self.loadDataStopFlg = true
+//            }
+//            ///トークリスト配列を一個ずつ回す
+//            for data in UserUIDUserListMock {
+//
+//                ///サーバーから取得したユーザーのUIDがあったらそのIndexNoを取得
+//                let indexNo = self.talkListUsersMock.firstIndex(where: { $0.UID == data.UID })
+//                ///配列にある古いデータを削除
+//                if let indexNo = indexNo{
+//                    self.talkListUsersMock.remove(at: indexNo)
+//                }
+//                ///サーバーから取得したデータを配列に入れ直す
+//                self.talkListUsersMock.append(TalkListUserStruct(UID: data.UID, userNickName: data.userNickName, profileImage: nil,UpdateDate:data.upDateDate, NewMessage: data.NewMessage, listend: false, sendUID: data.sendUID))
+//            }
+//            ///ロードフラグをTrue
+//            self.loadDataLockFlg = true
+//            ///テーブルビューリロード処理
+//            self.CHATUSERLISTTABLEVIEW.reloadData()
+//        }, UID: UID, argLatestTime: argLastetTime,limitCount: limitCount)
+//    }
     ///自身の情報を取得
-    func userInfoDataGet() {
-        userProfileDatalocalGet(callback: { document in
+    func userInfoDataGet(){
+        var dataReflect_CellSelecter = {(document:profileInfoLocal) in
             ////ドキュメントにデータが入るまではセルを選択できないようにする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = false
             ///データ投入
             self.meInfoData = document
             ///セル選択を可能にする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = true
-        }, UID:UID!, hostiong: .hosting, ViewController: self)
+        }
+        
+        LOCALDATA.userProfileDatalocalGet(callback: { document,err  in
+            if err != nil {
+                hostingUserInfoGetter()
+                return
+            }
+            dataReflect_CellSelecter(document)
+        })
+        
+        func hostingUserInfoGetter() {
+            let hosting = profileHosting()
+            hosting.FireStoreProfileDataGetter(callback: { localdata, err in
+                if err != nil {
+                    let action = actionSheets(dicidedOrOkOnlyTitle: "データが破損しております。", message: "デフォルトの値を適用します", buttonMessage: "OK")
+                    action.dicidedAction(callback: { nill in
+                        self.meInfoData = localdata
+                    }, SelfViewController: self)
+                    return
+                }
+                dataReflect_CellSelecter(localdata)
+            }, UID: UID!)
+        }
     }
     ///自分の画像を取得してくる()
     func contentOfFIRStorageGet() {
+        let TOOL = TIME()
+        
         ///サーバーに対して画像取得要求
-        USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
+        CONTENTSHOSTING.ImageDataGetter(callback: { Img, ERR in
             ///ドキュメントにデータが入るまではセルを選択できないようにする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = false
-            ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-            if imageStruct.image != nil {
-                self.selfProfileImageView.image = imageStruct.image
-            ///コールバック関数でNilが返ってきたら初期画像を設定
-            } else {
-                self.selfProfileImageView.image = UIImage(named: "InitIMage")
-            }
+            ///画像セット
+            self.selfProfileImageView.image = Img.lcl_ProfileImage
             ///セル選択を可能にする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = true
-        }, UID: UID, UpdateTime: ChatDataManagedData.pastTimeGet())
+        }, UID: UID!, UpdateTime: TOOL.pastTimeGet())
     }
     
     ///トークリストのリアルタイムリスナー
@@ -305,21 +339,13 @@ extension ChatUserListViewController {
         
         for data in localDBGetData {
             if let UID = data.lcl_UID,let userNickname = data.lcl_UserNickName,let sendUID = data.lcl_SendUID{
-                self.talkListUsersMock.append(TalkListUserStruct(
-                    UID: UID,
-                    userNickName: userNickname,
-                    profileImage: nil,UpdateDate:data.lcl_UpdateDate ?? Date(),
-                    NewMessage: data.lcl_NewMessage ?? "",
-                    listend: false,
-                    sendUID: sendUID
-                ))
+                self.talkListUsersMock.append(data)
             }
         }
         ///トークリスト配列内で並び替え
-        self.talkListUsersMock = self.talkListUsersMock.sorted(by: {$0.upDateDate > $1.upDateDate})
-//        chatUserListInfoLocalLastestTimeGet(Realm: realm)
-        ///ユーザートークリスト一覧取得(いずれここは必要なくなるかも)
-//        self.talkListUsersDataGet(limitCount: 25, argLastetTime: ChatDataManagedData.pastTimeGet())
+        let pastTime = TIME()
+
+        self.talkListUsersMock = self.talkListUsersMock.sorted(by: {$0.lcl_UpdateDate ?? pastTime.pastTimeGet() > $1.lcl_UpdateDate ?? pastTime.pastTimeGet()})
         var triggerFlgCount:Int = 0
     
         ///リスナー用FireStore変数
@@ -329,6 +355,7 @@ extension ChatUserListViewController {
         }
         ///リスナー処理開始
         db.collection("users").document(uid).collection("TalkUsersList").order(by: "UpdateAt",descending: true).limit(to: 1).addSnapshotListener { (document,err) in
+            let TALKLISTUSERS:ListUsersInfoLocal = ListUsersInfoLocal()
             ///初回起動時でない場合のみ既読バッジオン
             var listend:Bool = true
             if triggerFlgCount == 0 {
@@ -342,14 +369,13 @@ extension ChatUserListViewController {
             }
             ///ドキュメント内の処理
             for documentData in documentSnapShot.documents {
-                print(documentData["youNickname"] as? String)
                 ///更新日時のタイムスタンプをTimeStamp⇨Date型として受け取る
                 guard let timeStamp = documentData["UpdateAt"] as? Timestamp else {
                     return
                 }
                 let UpdateDate = timeStamp.dateValue()
                 ///ユーザー配列の名からリスナーで取得されたIDと一致している配列番号を取得
-                let indexNo = self.talkListUsersMock.firstIndex(where: {$0.UID == documentData.documentID})
+                let indexNo = self.talkListUsersMock.firstIndex(where: {$0.lcl_UID == documentData.documentID})
 
                 ///最新メッセージ
                 guard let NewMessage = documentData["FirstMessage"] as? String else {
@@ -371,54 +397,39 @@ extension ChatUserListViewController {
                 ///トークリスト配列に存在している
                 if let indexNo = indexNo {
                     let UpdateAt = documentData["UpdateAt"] as? Timestamp
-                    print("UpdateAt:\(UpdateAt?.dateValue()),self.talkListUsersMock[indexNo].upDateDate:\(self.talkListUsersMock[indexNo].upDateDate)")
+
                     ///更新時間が変更されていない（ブロックは更新時間を更新しない）
-                    if self.talkListUsersMock[indexNo].upDateDate == UpdateAt?.dateValue(){
+                    if self.talkListUsersMock[indexNo].lcl_UpdateDate == UpdateAt?.dateValue(){
                         ///ブロック変換
                         if let blocked = documentData["blocked"] as? Bool {
                                 ///存在していたら並び替えは変えずに基の情報にブロック情報を追加
-                                self.talkListUsersMock[indexNo].blocked = blocked
+                            self.talkListUsersMock[indexNo].lcl_BlockedFLAG = blocked
                                 self.CHATUSERLISTTABLEVIEW.reloadData()
                                 return
                         }
                     }
                 }
-                
-
-//                ///ブロック情報格納
-//                if let blocked = documentData["blocked"] as? Bool {
-//                    if blocked {
-//                        ///ブロックされていて自身のトークリスト配列に存在していない場合は何もしない
-//                        if let indexNo = indexNo {
-//                            ///存在していたら並び替えは変えずに基の情報にブロック情報を追加
-//                            self.talkListUsersMock[indexNo].blocked = blocked
-//                            self.CHATUSERLISTTABLEVIEW.reloadData()
-//                            return
-//                        }
-//                    } else {
-//                        ///ブロック解除されて自身のトークリスト配列に存在していない場合は何もしない
-//                        if let indexNo = indexNo {
-//                            ///存在していたら並び替えは変えずに基の情報にブロック情報を追加
-//                            self.talkListUsersMock[indexNo].blocked = blocked
-//                        }
-//                    }
-//                }
+                TALKLISTUSERS.lcl_UID = documentData.documentID
+                TALKLISTUSERS.lcl_UserNickName = youNickname
+                TALKLISTUSERS.lcl_UpdateDate = UpdateDate
+                TALKLISTUSERS.lcl_NewMessage = NewMessage
+                TALKLISTUSERS.lcl_Listend = listend
+                TALKLISTUSERS.lcl_SendUID = sendUID
                     
                 ///リスナーで取得された情報がトークリスト配列になかった場合は
                 ///新規で配列に投入
                 guard let indexNo = indexNo else {
-                    self.talkListUsersMock.insert(TalkListUserStruct.init(UID: documentData.documentID, userNickName: youNickname, profileImage: nil, UpdateDate: UpdateDate, NewMessage: NewMessage, listend: listend, sendUID: sendUID), at: 0)
+                    self.talkListUsersMock.insert(TALKLISTUSERS, at: 0)
                     self.CHATUSERLISTTABLEVIEW.reloadData()
                     triggerFlgCount = 1
                     return
                 }
                 ///更新データなので一旦リムーブして最新データを配列に投入
                 self.talkListUsersMock.remove(at: indexNo)
-                self.talkListUsersMock.insert(TalkListUserStruct.init(UID: documentData.documentID, userNickName: youNickname, profileImage: nil, UpdateDate: UpdateDate, NewMessage: NewMessage, listend: listend, sendUID: sendUID), at: 0)
+                self.talkListUsersMock.insert(TALKLISTUSERS, at: 0)
                 self.CHATUSERLISTTABLEVIEW.reloadData()
                 triggerFlgCount = 1
             }
-
         }
     }
 }

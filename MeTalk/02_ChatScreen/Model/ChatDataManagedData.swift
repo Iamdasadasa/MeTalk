@@ -178,13 +178,7 @@ struct ChatDataManagedData{
         return MeUID
     }
     
-    ///ChatのルームIDを生成する
-    func ChatRoomID(UID1:String,UID2:String) -> String{
-        let array = [UID1,UID2]
-        let sortArray = array.sorted()
-        let roomID:String = sortArray[0] + "_" + sortArray[1]
-        return roomID
-    }
+
     
 
 
@@ -192,17 +186,6 @@ struct ChatDataManagedData{
 
 ///時間管理
 extension ChatDataManagedData {
-    
-    ///過去時間を持ってくる関数(インスタンス化なしで呼び出し可能)
-    static func pastTimeGet() -> Date{
-        
-        let calendar = Calendar(identifier: .gregorian)
-        let date = Date()
-        let modifiedDate = calendar.date(byAdding: .day, value: -10000, to: date)!
-        
-        return modifiedDate
-        
-    }
 
     // MARK: - Methods
 
