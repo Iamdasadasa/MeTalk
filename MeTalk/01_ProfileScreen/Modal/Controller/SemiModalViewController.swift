@@ -19,7 +19,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
     var VIEW:ModalBaseView?
     
     ///インスタンス化(Model)
-    let userDataManageData = UserDataManage()
+    let PROFILEHOSTING = profileHosting()
     let modalImageData = ModalImageData()
     let uid = Auth.auth().currentUser?.uid
     var ProfileData = profileInfoLocal()
@@ -58,7 +58,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
         VIEW.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
         
         ///ローカルデータ取得
-        var LOCALDATA = profileDataStruct(UID: uid!)
+        var LOCALDATA = localProfileDataStruct(UID: uid!)
         LOCALDATA.userProfileDatalocalGet { profileInfoLocal, result in
             if result == .localNoting {
                 let action = actionSheets(dicidedOrOkOnlyTitle: "端末にデータが見つかりませんでした", message: "デフォルトの値が反映されます", buttonMessage: "OK")
@@ -212,7 +212,7 @@ extension SemiModalViewController{
 ///ボタンを押下した時のデリゲート関数
 extension SemiModalViewController:ModalViewDelegateProtcol{
     ///決定ボタン押下　view: NickNameTextFieldModalView
-    func dicisionButtonTappedAction(button: UIButton, objects: ModalItems) {
+    func dicisionButtonTappedAction(button: UIButton, objects: updateKind) {
         ///画面共通処理
         guard let VIEW = VIEW else {
             return
@@ -222,30 +222,31 @@ extension SemiModalViewController:ModalViewDelegateProtcol{
         }
         ///データ代入
         let data = VIEW.itemTextField.text
-        var localData:profileDataStruct
+        var updateData:profileInfoLocal = profileInfoLocal()
+        updateData.lcl_UID = uid
         ///入力したユーザーデータをサーバへアップデート
-        userDataManageData.userInfoDataUpload(userData: data, dataFlg: objects, UID: uid, ViewController: self)
-
         ///ローカルデータ登録
         switch objects {
         case .nickName:
-            localData = profileDataStruct(UID: uid,nickName: data)
-        case .Age:
+            updateData.lcl_NickName = data
+        case .age:
             guard let data = data else {
                 return
             }
             guard let age = Int(data) else {
                 return
             }
-            localData = profileDataStruct(UID: uid,age: age)
+            updateData.lcl_Age = age
         case .aboutMe:
-            localData = profileDataStruct(UID: uid,aboutMessage: data)
-        case .Area:
-            localData = profileDataStruct(UID: uid,area:data)
+            updateData.lcl_AboutMeMassage = data
+        case .area:
+            updateData.lcl_Area = data
         }
-        
-        let results = localData.userProfileLocalDataExtraRegist()
-        if results == .localNoting {
+        ///サーバデータ登録
+        PROFILEHOSTING.userDataUpdateManager(KIND: objects, Data: updateData)
+        ///ローカルデータ登録
+        let LOCAL = localProfileDataStruct(updateObject: updateData, UID: updateData.lcl_UID!)
+        if LOCAL.userProfileLocalDataExtraRegist() == .localNoting {
             let action = actionSheets(dicidedOrOkOnlyTitle: "データが見つかりませんでした", message: "データが見つからないため入力されたデータ以外はデフォルトの値が保存されます", buttonMessage: "OK")
             action.okOnlyAction(callback: { resukt in
                 return

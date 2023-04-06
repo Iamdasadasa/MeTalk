@@ -188,7 +188,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             let TARGETPROFILEINFOLOCAL:profileInfoLocal = profileInfoLocal()
             TARGETPROFILEINFOLOCAL.lcl_NickName = ListUsersInfo.lcl_UserNickName
             ///遷移先のチャット画面のViewcontrollerをインスタンス化
-            let CHATVIEWCONTROLLER = ChatViewController(Youinfo: TARGETPROFILEINFOLOCAL)
+            let CHATVIEWCONTROLLER = ChatViewController(Youinfo: TARGETPROFILEINFOLOCAL, Meinfo: self.meInfoData!)
             ///UIDから生成したルームIDを値渡しする
             let TOOLS = chatTools()
             let roomID = TOOLS.roomIDCreate(UID1: Auth.auth().currentUser!.uid, UID2: YouUID!)

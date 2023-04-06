@@ -152,3 +152,81 @@ struct chatTools {
         return roomID
     }
 }
+
+struct TimeTools {
+    private let formatter = DateFormatter()
+    public func string(from date: Date) -> String {
+        configureDateFormatter(for: date)
+        formatter.locale = Locale(identifier: "ja_JP")
+        return formatter.string(from: date)
+    }
+
+    public func attributedString(from date: Date, with attributes: [NSAttributedString.Key: Any]) -> NSAttributedString {
+        let dateString = string(from: date)
+        return NSAttributedString(string: dateString, attributes: attributes)
+    }
+
+    public func configureDateFormatter(for date: Date) {
+        switch true {
+        case Calendar.current.isDateInToday(date) || Calendar.current.isDateInYesterday(date):
+            formatter.doesRelativeDateFormatting = true
+            formatter.dateStyle = .short
+            formatter.timeStyle = .none
+        default:
+//            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.dateFormat = "yyyy/MM/dd"
+        }
+    }
+    
+    enum DateFormatt {
+        case HM
+        case YMDHMS
+    }
+    ///Date⇨String
+    func dateToStringFormatt(date:Date?,formatFlg:DateFormatt) -> String{
+        guard let date = date else {
+            print("日付変換に失敗しました。")
+            return "0000/00/00"
+        }
+        let dateFormatter = DateFormatter()
+
+        // フォーマット設定
+        switch formatFlg{
+        case .HM:
+            dateFormatter.dateFormat = "HH:mm"
+        case .YMDHMS:
+            dateFormatter.dateFormat = "yyyy/MM/dd/HH:mm:ss"
+        }
+        //dateFormatter.dateFormat = "yyyyMMddHHmmssSSS" // ミリ秒込み
+
+        // ロケール設定（端末の暦設定に引きづられないようにする）
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+
+        // タイムゾーン設定（端末設定によらず固定にしたい場合）
+        dateFormatter.timeZone = TimeZone(identifier: "Asia/Tokyo")
+        // 変換
+        let strDate = dateFormatter.string(from: date)
+        
+        return strDate
+    }
+    ///String⇨Date
+    func stringToDateFormatte(date:String) -> Date{
+        // Date ⇔ Stringの相互変換をしてくれるすごい人
+        let dateFormatter = DateFormatter()
+        // フォーマット設定
+        dateFormatter.dateFormat = "yyyy/MM/dd/HH:mm:ss"
+        //dateFormatter.dateFormat = "yyyyMMddHHmmssSSS" // ミリ秒込み
+
+        // ロケール設定（端末の暦設定に引きづられないようにする）
+        dateFormatter.locale = Locale(identifier: "en_US_POSIX")
+
+        // タイムゾーン設定（端末設定によらず、どこの地域の時間帯なのかを指定する）
+        dateFormatter.timeZone = TimeZone(identifier: "Asia/Tokyo")
+        //dateFormatter.timeZone = TimeZone(identifier: "Etc/GMT") // 世界標準時
+
+        // 変換
+        let date = dateFormatter.date(from: date)
+
+        return date!
+    }
+}

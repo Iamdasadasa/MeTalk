@@ -8,7 +8,7 @@
 import UIKit
 
 protocol ModalViewDelegateProtcol:AnyObject {
-    func dicisionButtonTappedAction(button:UIButton,objects: ModalItems)
+    func dicisionButtonTappedAction(button:UIButton,objects: updateKind)
     func closeModalButttonClickedButtonTappedAction(button:UIButton,view:ModalBaseView)
 }
 
@@ -160,13 +160,13 @@ class ModalBaseView:UIView{
         
         switch MODALITEMS {
         case .aboutMe:
-            delegate.dicisionButtonTappedAction(button: sender, objects: MODALITEMS)
+            delegate.dicisionButtonTappedAction(button: sender, objects: .aboutMe)
         case .nickName:
-            delegate.dicisionButtonTappedAction(button: sender, objects: MODALITEMS)
+            delegate.dicisionButtonTappedAction(button: sender, objects: .nickName)
         case .Age:
-            delegate.dicisionButtonTappedAction(button: sender, objects: MODALITEMS)
+            delegate.dicisionButtonTappedAction(button: sender, objects: .age)
         case .Area:
-            delegate.dicisionButtonTappedAction(button: sender, objects: MODALITEMS)
+            delegate.dicisionButtonTappedAction(button: sender, objects: .area)
         }
     }
     

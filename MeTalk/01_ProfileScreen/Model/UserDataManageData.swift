@@ -427,7 +427,7 @@ struct UserDataManage{
                         print("更新日時が取得できませんでした。（ニックネーム）")
                         return
                     }
-                    
+
                     
                     
                     ///ここでトークリストのユーザーID一覧を格納

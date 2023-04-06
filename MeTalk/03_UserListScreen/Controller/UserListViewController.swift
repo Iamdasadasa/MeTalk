@@ -19,9 +19,10 @@ class UserListViewController:UIViewController,UINavigationControllerDelegate{
     ///RealMからデータを受け取るようの変数
     var itemList: Results<ListUsersInfoLocal>!
     ///インスタンス化(Model)
-    let USERDATAMANAGE = UserDataManage()
     let UID = Auth.auth().currentUser?.uid
-    let LOCALDATA:localProfileDataStruct
+    let LOCALPROFILE:localProfileDataStruct
+    let TALKDATAHOSTING:TalkDataHostingManager = TalkDataHostingManager()
+    let CONTENTSHOSTING:ContentsDatahosting = ContentsDatahosting()
     ///インスタンス化(Controller)
     let SHOWIMAGEVIEWCONTROLLER = ShowImageViewController()
     ///RealMオブジェクトをインスタンス化
@@ -39,10 +40,10 @@ class UserListViewController:UIViewController,UINavigationControllerDelegate{
     ///バックボタンで戻ってきた時に格納してあるUID
     var backButtonUID:String?
     ///トークリストユーザー情報格納配列
-    var UserListMock:[UserListStruct] = []
+    var UserListMock:[profileInfoLocal] = []
     
     init () {
-        self.LOCALDATA = localProfileDataStruct(UID:UID!)
+        self.LOCALPROFILE = localProfileDataStruct(UID:UID!)
         super.init()
 
     }
@@ -73,7 +74,7 @@ class UserListViewController:UIViewController,UINavigationControllerDelegate{
         navigationItem.title = "ユーザーリスト"
         ///自身の情報をローカルから取得
 
-        LOCALDATA.userProfileDatalocalGet { localData, err in
+        LOCALPROFILE.userProfileDatalocalGet { localData, err in
             guard let err = err else  {
                 return
             }
@@ -133,9 +134,9 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
         cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
 
         ///ユーザーネーム設定処理
-        if let nickname = USERINFODATA.userNickName {
+        if let nickname = USERINFODATA.lcl_NickName {
             ///セルのUIDと一致したらセット
-            if cell.celluserStruct!.UID == USERINFODATA.UID {
+            if cell.celluserStruct!.lcl_UID == USERINFODATA.lcl_UID {
                 cell.nickNameSetCell(Item: nickname)
             }
         } else {
@@ -144,16 +145,16 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
         }
         
         //最新メッセージをセルに反映する処理
-        let ABOUTMESSAGE = USERINFODATA.aboutMessage
-        cell.aboutMessageSetCell(Item: ABOUTMESSAGE)
+        let ABOUTMESSAGE = USERINFODATA.lcl_AboutMeMassage
+        cell.aboutMessageSetCell(Item: ABOUTMESSAGE!)
         ///自身の相手に押したライクボタン押下時間を取得して表示する処理（ローカルDB）
-        LOCALDATA.userProfileDatalocalGet { localData, err in
+        LOCALPROFILE.userProfileDatalocalGet { localData, err in
             guard let err = err else {
                 print("この機能を使用する前に自身のデータを再設定してください。")
                 return
             }
             if let PUSHEDDATE = localData.lcl_LikeButtonPushedDate{
-                cell.celluserStruct?.LikeButtonPushedFLAG = true
+                cell.celluserStruct?.lcl_LikeButtonPushedFLAG = true
                 let DIFFTIME = self.pushTimeDiffDate(pushTime: PUSHEDDATE)
                 ///差分が60分未満（IMAGE変更）
                 if DIFFTIME < 60.0 {
@@ -162,18 +163,18 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
             }
         }
 
-
         let TOOL = TIME()
         ///サーバーに対して画像取得要求
-        USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
-            ///取得してきた画像がNilでない且つセルに設定してあるUIDとサーバー取得UIDが合致した場合
-            ///イメージ画像をオブジェクトにセット
-
-            if imageStruct.image != nil,cell.celluserStruct!.UID == USERINFODATA.UID{
-                cell.talkListUserProfileImageView.image = imageStruct.image ?? UIImage(named: "InitIMage")
+        CONTENTSHOSTING.ImageDataGetter(callback: { Image, err in
+            if Image.lcl_ProfileImage != nil,cell.celluserStruct!.lcl_UID == USERINFODATA.lcl_UID!{
+                guard let err = err else {
+                    cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
+                    return
+                }
+                cell.talkListUserProfileImageView.image = Image.lcl_ProfileImage 
             }
-        }, UID: USERINFODATA.UID, UpdateTime: TOOL.pastTimeGet())
-         
+        }, UID: USERINFODATA.lcl_UID!, UpdateTime: TOOL.pastTimeGet())
+
         ///セルのデリゲート処理
         cell.delegate = self
         
@@ -186,7 +187,7 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
         ///セル情報を取得
         let cell = tableView.cellForRow(at: indexPath) as! UserListTableViewCell
         ///選んだセルの相手のUIDを取得
-        let YouUID = self.UserListMock[indexPath.row].UID
+        let YouUID = self.UserListMock[indexPath.row].lcl_UID
     }
     
     ///横にスワイプした際の処理
@@ -200,7 +201,7 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
             ///ローカルDBから対象のユーザーデータを取得
             let realm = try! Realm()
             let localDBGetData = realm.objects(ListUsersInfoLocal.self)
-            guard let cellUID = cell.celluserStruct?.UID else {
+            guard let cellUID = cell.celluserStruct?.lcl_UID else {
                 print("セルのUID情報を取得できませんでした")
                 return
             }
@@ -209,17 +210,12 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
             let userStruct = localDBGetData.filter(PREDICATE).first
 
             if let userStruct = userStruct{
-                if userStruct.lcl_BlockerFLAG{
-                    self.blockPushed(UID1: self.UID!, UID2: cellUID, nickname: userStruct["userNickName"] as! String, blockerFLAG: true)
+                    self.blockPushed(profileData: userStruct, targetUID: cellUID)
                     // 実行結果に関わらず記述
                     completionHandler(true)
                     return
-                }
-                self.blockPushed(UID1: self.UID!, UID2: cellUID, nickname: userStruct["userNickName"] as! String, blockerFLAG: false)
-                // 実行結果に関わらず記述
-                completionHandler(true)
             } else {
-                self.blockPushed(UID1: self.UID!, UID2: cellUID, nickname: cell.celluserStruct?.userNickName ?? "不明なユーザー", blockerFLAG: false)
+               preconditionFailure("ローカルに保存されていないデータの処理を行なっています。")
                 // 実行結果に関わらず記述
                 completionHandler(true)
             }
@@ -253,30 +249,60 @@ extension UserListViewController {
     /// - Returns:
     /// -UserUIDUserListMock:取得したユーザーリスト情報
     func talkListUsersDataGet(limitCount:Int) {
-        
-        USERDATAMANAGE.userListInfoDataGet(callback: { USERSLISTMOCK in
+        TALKDATAHOSTING.newTalkUserListGetter(callback: { UserList, err in
+            if err != nil {
+                let action = actionSheets(dicidedOrOkOnlyTitle: "ユーザー取得時に問題が発生いたしました。", message: "もう一度試してください", buttonMessage: "OK")
+                action.okOnlyAction(callback: { result in
+                    return
+                }, SelfViewController: self)
+                return
+            }
+            
             ///もしも現在のトークユーザーリストのカウントとDBから取得してきたトークユーザーリストのカウントが等しければロードストップのフラグにTrue
-            if USERSLISTMOCK.count == self.UserListMock.count {
+            if UserList.count == self.UserListMock.count {
                 self.loadDataStopFlg = true
             }
             ///トークリスト配列を一個ずつ回す
-            for data in USERSLISTMOCK {
+            for data in UserList {
                 ///サーバーから取得したユーザーのUIDがあったらそのIndexNoを取得
-                let indexNo = self.UserListMock.firstIndex(where: { $0.UID == data.UID })
+                let indexNo = self.UserListMock.firstIndex(where: { $0.lcl_UID == data.lcl_UID })
                 ///配列にある古いデータを削除
                 if let indexNo = indexNo{
                     self.UserListMock.remove(at: indexNo)
                 }
                 ///サーバーから取得したデータを配列に入れ直す
-                self.UserListMock.append(UserListStruct(UID: data.UID, userNickName: data.userNickName, aboutMessage: data.aboutMessage, Age: data.Age, From: data.From!, Sex: data.Sex,createdAt: data.createdAt,updatedAt: data.updatedAt))
+                self.UserListMock.append(data)
             }
             ///ロードフラグをTrue
             self.loadDataLockFlg = true
             ///テーブルビューリロード処理
             self.CHATUSERLISTTABLEVIEW.reloadData()
-            
-            
-        }, CountLimit: limitCount)
+        }, getterCount: limitCount)
+//
+//
+//        USERDATAMANAGE.userListInfoDataGet(callback: { USERSLISTMOCK in
+//            ///もしも現在のトークユーザーリストのカウントとDBから取得してきたトークユーザーリストのカウントが等しければロードストップのフラグにTrue
+//            if USERSLISTMOCK.count == self.UserListMock.count {
+//                self.loadDataStopFlg = true
+//            }
+//            ///トークリスト配列を一個ずつ回す
+//            for data in USERSLISTMOCK {
+//                ///サーバーから取得したユーザーのUIDがあったらそのIndexNoを取得
+//                let indexNo = self.UserListMock.firstIndex(where: { $0.UID == data.UID })
+//                ///配列にある古いデータを削除
+//                if let indexNo = indexNo{
+//                    self.UserListMock.remove(at: indexNo)
+//                }
+//                ///サーバーから取得したデータを配列に入れ直す
+//                self.UserListMock.append(UserListStruct(UID: data.UID, userNickName: data.userNickName, aboutMessage: data.aboutMessage, Age: data.Age, From: data.From!, Sex: data.Sex,createdAt: data.createdAt,updatedAt: data.updatedAt))
+//            }
+//            ///ロードフラグをTrue
+//            self.loadDataLockFlg = true
+//            ///テーブルビューリロード処理
+//            self.CHATUSERLISTTABLEVIEW.reloadData()
+//
+//
+//        }, CountLimit: limitCount)
     }
 }
 ///ライクボタン処理
@@ -287,22 +313,22 @@ extension UserListViewController:UserListTableViewCellDelegate{
     /// - Parameters:
     ///- CELL: CELL全体が引数
     ///- CELLUSERSTRUCT:サーバーから取得した個人データ（ReloadViewしてセル更新されるまで最新にはならない）
-    func likebuttonPushed(CELL: UserListTableViewCell, CELLUSERSTRUCT: UserListStruct) {
+    func likebuttonPushed(CELL: UserListTableViewCell, CELLUSERSTRUCT: profileInfoLocal) {
                 
-        if CELLUSERSTRUCT.UID  == "unknown" {
+        if CELLUSERSTRUCT.lcl_UID  == "unknown" {
             print("ここにきたらエラーアラート")
         }
         
-        if !CELL.celluserStruct!.LikeButtonPushedFLAG {
+        if !CELL.celluserStruct!.lcl_LikeButtonPushedFLAG {
             ///画像タップ時のイメージ保存
             CELL.ImageView.image = UIImage(named: "LIKEBUTTON_IMAGE_Pushed")
             ///ローカルとサーバーそれぞれにライクボタンデータ送信
             self.LikeButtonPushedInfoUpdate(CELLUSERSTRUCT: CELLUSERSTRUCT)
             ///ReloadView前の連続押下防止
-            CELL.celluserStruct?.LikeButtonPushedFLAG = true
+            CELL.celluserStruct?.lcl_LikeButtonPushedFLAG = true
         } else {
             ///ローカルデータから情報取得
-            LOCALDATA.userProfileDatalocalGet { localdata, err in
+            LOCALPROFILE.userProfileDatalocalGet { localdata, err in
                 guard let err = err else {
                     print("この機能を使用する前に自身のデータを更新してください。")
                     return
@@ -361,29 +387,42 @@ extension UserListViewController:UserListTableViewCellDelegate{
         return minute
     }
     
-    func LikeButtonPushedInfoUpdate(CELLUSERSTRUCT:UserListStruct) {
-        let TALKHOST = TalkDataHostingManager()
+    func LikeButtonPushedInfoUpdate(CELLUSERSTRUCT:profileInfoLocal) {
         let ROOMID = chatTools()
+        ///ライクボタン情報をトークDBに送信
+        let roomID = ROOMID.roomIDCreate(UID1: UID!, UID2: CELLUSERSTRUCT.lcl_UID!)
         ///自身の情報からニックネームを取得
         let nickname = self.meInfoData!.lcl_NickName
+        let likeMessage = messageLocal()
+        likeMessage.lcl_RoomID = roomID
+        likeMessage.lcl_MessageID = UUID().uuidString
+        likeMessage.lcl_Listend = true
+        likeMessage.lcl_Date = Date()
+        likeMessage.lcl_Sender = UID!
+        likeMessage.lcl_LikeButtonFLAG = true
+        likeMessage.lcl_Message = "💓"
+        let LOCALTALK:localTalkDataStruct = localTalkDataStruct(roomID: likeMessage.lcl_RoomID,updateobject: likeMessage)
 
         ///ライクデータのインクリメントを相手のデータに加算
-        USERDATAMANAGE.LikeDataPushIncrement(YouUID: CELLUSERSTRUCT.UID, MEUID: UID!)
+        TALKDATAHOSTING.LikeDataPushIncrement(TargetUID: CELLUSERSTRUCT.lcl_UID!)
         ///それぞれのトーク情報にライクボタン情報を送信
-        let chatManageData = ChatDataManagedData()
-        chatManageData.talkListUserAuthUIDCreate(UID1: UID!, UID2: CELLUSERSTRUCT.UID, NewMessage: "💓", meNickName: nickname ?? "Unknown", youNickname: CELLUSERSTRUCT.userNickName!, LikeButtonFLAG: true, blockedFlag: nil)
+        TALKDATAHOSTING.talkListUserAuthUIDCreate(UID1: UID!, UID2: CELLUSERSTRUCT.lcl_UID!, message: "💓", sender: UID!, nickName1: nickname ?? "Unknown", nickName2: CELLUSERSTRUCT.lcl_NickName!, like: true, blocked: false)
+//        ///それぞれのトーク情報にライクボタン情報を送信
+//        let chatManageData = ChatDataManagedData()
+//        chatManageData.talkListUserAuthUIDCreate(UID1: UID!, UID2: CELLUSERSTRUCT.UID, NewMessage: "💓", meNickName: nickname ?? "Unknown", youNickname: CELLUSERSTRUCT.userNickName!, LikeButtonFLAG: true, blockedFlag: nil)
         
-        ///ライクボタン情報をトークDBに送信
-        let roomID = ROOMID.roomIDCreate(UID1: UID!, UID2: CELLUSERSTRUCT.UID)
-        TALKHOST.likePushing(message: "💓", messageId: UUID().uuidString, sender: UID!, Date: Date(), roomID: roomID)
+
+        TALKDATAHOSTING.likePushing(message: "💓", messageId: UUID().uuidString, sender: UID!, Date: Date(), roomID: roomID)
         ///ローカルデータにライクボタン情報を保存
-        LikeUserDataRegist_Update(UID: CELLUSERSTRUCT.UID, nickname: CELLUSERSTRUCT.userNickName, sex: CELLUSERSTRUCT.Sex, aboutMassage: CELLUSERSTRUCT.aboutMessage, age: CELLUSERSTRUCT.Age, area: CELLUSERSTRUCT.From, createdAt: CELLUSERSTRUCT.createdAt,updatedAt: CELLUSERSTRUCT.updatedAt, LikeButtonPushedFLAG:1, LikeButtonPushedDate: Date(),ViewController: self)
+        LOCALTALK.localMessageDataRegist()
+        
+//        LikeUserDataRegist_Update(UID: CELLUSERSTRUCT.UID, nickname: CELLUSERSTRUCT.userNickName, sex: CELLUSERSTRUCT.Sex, aboutMassage: CELLUSERSTRUCT.aboutMessage, age: CELLUSERSTRUCT.Age, area: CELLUSERSTRUCT.From, createdAt: CELLUSERSTRUCT.createdAt,updatedAt: CELLUSERSTRUCT.updatedAt, LikeButtonPushedFLAG:1, LikeButtonPushedDate: Date(),ViewController: self)
     }
 }
 
 extension UserListViewController {
     ///_プロフィール画像タップ時アクションシート_
-    func profileImageButtonPushed(CELL: UserListTableViewCell, CELLUSERSTRUCT: UserListStruct) {
+    func profileImageButtonPushed(CELL: UserListTableViewCell, CELLUSERSTRUCT: profileInfoLocal) {
         ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
         let action = actionSheets(twoAtcionTitle1: "画像を表示", twoAtcionTitle2: "プロフィールを表示")
         
@@ -413,8 +452,21 @@ extension UserListViewController {
             switch result {
                 ///画像を表示
             case .one:
+                ///プロファイル用データ構造体作成
+                let targetProfileObject = profileInfoLocal()
+                targetProfileObject.lcl_NickName = CELLUSERSTRUCT.userNickName
+                targetProfileObject.lcl_AboutMeMassage = CELLUSERSTRUCT.aboutMessage
+                targetProfileObject.lcl_Sex = CELLUSERSTRUCT.Sex
+                targetProfileObject.lcl_Age = CELLUSERSTRUCT.Age
+                targetProfileObject.lcl_Area = CELLUSERSTRUCT.From
+                targetProfileObject.lcl_DateCreatedAt = CELLUSERSTRUCT.createdAt
+                targetProfileObject.lcl_DateUpdatedAt = CELLUSERSTRUCT.updatedAt
+                targetProfileObject.lcl_UID = CELLUSERSTRUCT.UID
+                targetProfileObject.lcl_LikeButtonPushedDate = CELLUSERSTRUCT.LikeButtonPushedDate
+                targetProfileObject.lcl_LikeButtonPushedFLAG = CELLUSERSTRUCT.LikeButtonPushedFLAG
+
                 ///プロフィール画面遷移
-                let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController(profileData: CELLUSERSTRUCT, profileImage: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
+                let TARGETPROFILEVIEWCONTROLLER = TargetProfileViewController(profileData: targetProfileObject, profileImage: CELL.talkListUserProfileImageView.image ?? UIImage(named: "InitIMage")!)
                 ///遷移先のControllerに対してプロフィール画像データを渡す
                 TARGETPROFILEVIEWCONTROLLER.profileData
                 self.navigationController?.pushViewController(TARGETPROFILEVIEWCONTROLLER, animated: true)
@@ -427,15 +479,17 @@ extension UserListViewController {
     
     ///_スライドボタンアクションシート_
     ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
-    func blockPushed(UID1:String,UID2:String,nickname:String,blockerFLAG:Bool) {
+    func blockPushed(profileData:ListUsersInfoLocal,targetUID:String) {
+        let LOCALDATAMANAGER = localListUsersDataStruct()
         ///すでにブロックしている場合
-        if blockerFLAG {
+        if profileData.lcl_BlockerFLAG {
             let alert = actionSheets(dicidedOrOkOnlyTitle: "このユーザーは既にブロックされています。ブロックを解除しますか？", message: "解除した場合、相手はメッセージの送信が行えるようになります。", buttonMessage: "確定")
             
             alert.okOnlyAction(callback: { result in
                 switch result {
                 case .one:
-                    blockUserRegist(UID1: UID1, UID2: UID2, blockerFLAG: false, nickname: nickname)
+                    self.TALKDATAHOSTING.blockHosting(meUID: profileData.lcl_UID!, targetUID: targetUID, blocker: false)
+                    LOCALDATAMANAGER.chatUserListInfoLocalDataRegist(USERLISTLOCALOBJECT: profileData)
                 }
             }, SelfViewController: self)
             
@@ -446,7 +500,8 @@ extension UserListViewController {
             alert.okOnlyAction(callback: { result in
                 switch result {
                 case .one:
-                    blockUserRegist(UID1: UID1, UID2: UID2, blockerFLAG: true, nickname: nickname)
+                    self.TALKDATAHOSTING.blockHosting(meUID: profileData.lcl_UID!, targetUID: targetUID, blocker: true)
+                    LOCALDATAMANAGER.chatUserListInfoLocalDataRegist(USERLISTLOCALOBJECT: profileData)
                 }
             }, SelfViewController: self)
         }

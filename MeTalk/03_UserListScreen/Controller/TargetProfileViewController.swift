@@ -19,10 +19,10 @@ class TargetProfileViewController:UIViewController{
     ///インスタンス化（View）
     let PROFILEVIEW = TargetProfileView()
     ///プロフィール情報を保存する辞書型変数
-    var profileData:UserListStruct
+    var profileData:profileInfoLocal
     var profileImage:UIImage
     
-    init(profileData:UserListStruct,profileImage:UIImage) {
+    init(profileData:profileInfoLocal,profileImage:UIImage) {
         self.profileData = profileData
         self.profileImage = profileImage
         super.init(nibName: nil, bundle: nil)
@@ -51,19 +51,44 @@ extension TargetProfileViewController{
     /// - Parameters:
     /// - userInfoData:画面表示の際に取得してきているユーザーデータ
     /// - Returns:
-    func targetUserInfoDataSetup(userInfoData:UserListStruct) {
+    func targetUserInfoDataSetup(userInfoData:profileInfoLocal) {
+        ///nil判断&格納
+        let action = actionSheets(dicidedOrOkOnlyTitle: "データが取得できませんでした。", message: "やり直してください", buttonMessage: "OK")
+        let date:Date
+        let aboutMeMessage:String
+        let nickName:String
+        let age:Int
+        let area:String
+        let dateResult = userInfoData.dateBinding(dateVaule: userInfoData.lcl_DateCreatedAt)
+        let aboutMeMessageResult = userInfoData.strBinding(strVaule: userInfoData.lcl_AboutMeMassage)
+        let nickNameResult = userInfoData.strBinding(strVaule: userInfoData.lcl_NickName)
+        let ageResult = userInfoData.intBinding(intVaule: userInfoData.lcl_Age)
+        let areaResult = userInfoData.strBinding(strVaule: userInfoData.lcl_Area)
+        
+        if dateResult.1 == .err,aboutMeMessageResult.1 == .err,nickNameResult.1 == .err,ageResult.1 == .err,areaResult.1 == .err{
+            action.okOnlyAction(callback: { result in
+                ///nilエラー
+                return
+            }, SelfViewController: self)
+        }
+        ///値格納
+        date = dateResult.0
+        aboutMeMessage = aboutMeMessageResult.0
+        nickName = nickNameResult.0
+        age = ageResult.0
+        area = areaResult.0
 
         ///開始日をもってくる際の日付フォーマットの設定
         let dateFormatter = DateFormatter()
         dateFormatter.locale = .init(identifier: "en_US_POSIX")
         dateFormatter.dateFormat = "yyyy/MM/dd HH:mm"
         dateFormatter.locale = Locale(identifier: "ja_JP")
-        let date = userInfoData.createdAt
+
         ///日付型をStringに変更してラベルにセット
         let userCreatedAtdate:String = dateFormatter.string(from: date)
         self.PROFILEVIEW.startDateInfoLabel.text = userCreatedAtdate
         ///性別を取得。Firebaseでは数値で入っているために数字を判断して性別表示
-        switch userInfoData.Sex {
+        switch userInfoData.lcl_Sex {
         case 0:
             self.PROFILEVIEW.sexInfoLabel.text = "設定なし"
         case 1:
@@ -72,24 +97,23 @@ extension TargetProfileViewController{
             self.PROFILEVIEW.sexInfoLabel.text = "女性"
         default:break
         }
-        ///文字列に改行処理を入れる
-        let aboutMeMassageValue = userInfoData.aboutMessage
+
         let resultValue:String!
 
-        if aboutMeMassageValue.count >= 15 {
-            resultValue = aboutMeMassageValue.prefix(15) + "\n" + aboutMeMassageValue.suffix(aboutMeMassageValue.count - 15)
+        if aboutMeMessage.count >= 15 {
+            resultValue = aboutMeMessage.prefix(15) + "\n" + aboutMeMessage.suffix(aboutMeMessage.count - 15)
         } else {
-            resultValue = aboutMeMassageValue
+            resultValue = aboutMeMessage
         }
-        guard let resultValue = resultValue else {return}
+
         ///ニックネームのラベルとニックネームの項目にデータセット
         
-        self.PROFILEVIEW.nickNameItemView.valueLabel.text = userInfoData.userNickName
-        self.PROFILEVIEW.personalInformationLabel.text = userInfoData.userNickName
+        self.PROFILEVIEW.nickNameItemView.valueLabel.text = nickName
+        self.PROFILEVIEW.personalInformationLabel.text = nickName
         ///ひとことにデータセット
         self.PROFILEVIEW.AboutMeItemView.valueLabel.text = resultValue
         //年齢にデータセット
-        let ageTypeInt:Int = userInfoData.Age
+        let ageTypeInt:Int = age
         
         if String(ageTypeInt)  == "0" {
             self.PROFILEVIEW.ageItemView.valueLabel.text = "未設定"
@@ -98,7 +122,7 @@ extension TargetProfileViewController{
         }
         
         //出身地にデータセット
-        self.PROFILEVIEW.areaItemView.valueLabel.text = userInfoData.From
+        self.PROFILEVIEW.areaItemView.valueLabel.text = area
         
         ///画像データセット
         self.PROFILEVIEW.profileImageButton.setImage(profileImage, for: .normal)

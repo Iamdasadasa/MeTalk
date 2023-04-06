@@ -8,13 +8,13 @@
 import UIKit
 
 protocol UserListTableViewCellDelegate:AnyObject{
-    func likebuttonPushed(CELL:UserListTableViewCell,CELLUSERSTRUCT:UserListStruct)
-    func profileImageButtonPushed(CELL:UserListTableViewCell,CELLUSERSTRUCT:UserListStruct)
+    func likebuttonPushed(CELL:UserListTableViewCell,CELLUSERSTRUCT:profileInfoLocal)
+    func profileImageButtonPushed(CELL:UserListTableViewCell,CELLUSERSTRUCT:profileInfoLocal)
 }
 
 class UserListTableViewCell: UITableViewCell {
   ///セル自体が持つUID定数（画面には表示させない nillを初期値にしているがControllerから値は代入される）
-    var celluserStruct:UserListStruct?
+    var celluserStruct:profileInfoLocal?
     weak var delegate:UserListTableViewCellDelegate?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {

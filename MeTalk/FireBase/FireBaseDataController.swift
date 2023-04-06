@@ -78,6 +78,27 @@ struct profileInitHosting:firebaseHostingProtocol{
     }
 }
 
+///アップデート種別列挙
+enum updateKind{
+    case nickName
+    case age
+    case aboutMe
+    case area
+    
+    var dataObjectName: String {
+        switch self {
+        case .nickName:
+            return "nickname"
+        case .aboutMe:
+            return "aboutMeMassage"
+        case .age:
+            return "age"
+        case .area:
+            return "area"
+        }
+    }
+}
+
 struct profileHosting {
     ///ユーザー情報取得
     func FireStoreProfileDataGetter(callback: @escaping  (profileInfoLocal,Error?) -> Void,UID:String) {
@@ -150,6 +171,38 @@ struct profileHosting {
             }
         }
     }
+    
+    enum ERROR:Error {
+        case err
+    }
+    
+    func userDataUpdateManager(KIND:updateKind,Data:profileInfoLocal) -> Error? {
+        let collectionPath = "users"
+        let updateObjectName = "updatedAt"
+        switch KIND {
+        case .nickName:
+            guard let nickName = Data.lcl_NickName else {
+                return ERROR.err
+            }
+            Firestore.firestore().collection(collectionPath).document(Data.lcl_UID!).updateData([KIND.dataObjectName:nickName])
+        case .aboutMe:
+            guard let aboutMessage = Data.lcl_AboutMeMassage else {
+                return ERROR.err
+            }
+            Firestore.firestore().collection(collectionPath).document(Data.lcl_UID!).updateData([KIND.dataObjectName:aboutMessage])
+        case .age:
+            Firestore.firestore().collection(collectionPath).document(Data.lcl_UID!).updateData([KIND.dataObjectName:Data.lcl_Age])
+        case .area:
+            guard let area = Data.lcl_Area else {
+                return ERROR.err
+            }
+            Firestore.firestore().collection(collectionPath).document(Data.lcl_UID!).updateData([KIND.dataObjectName:area])
+        }
+        
+        Firestore.firestore().collection(collectionPath).document(Data.lcl_UID!).updateData([updateObjectName:FieldValue.serverTimestamp()])
+        return nil
+    }
+    
 }
 struct ContentsDatahosting {
 
@@ -237,14 +290,87 @@ struct TalkDataHostingManager {
         })
     }
     
+    func newTalkUserListGetter(callback: @escaping ([profileInfoLocal],Error?) -> Void, getterCount:Int){
+        cloudDB.collection("users").limit(to: getterCount).order(by: "updatedAt", descending: true).getDocuments(){ (querySnapshot, err) in
+            var USERLIST:[profileInfoLocal] = []
+            if let err = err {
+                callback([profileInfoLocal()],err)
+                return
+            }
+            for USER in querySnapshot!.documents {
+                var USERINFO:profileInfoLocal = profileInfoLocal()
+                let UID = USER.documentID.trimmingCharacters(in: .whitespaces)
+                guard let SEX = USER["Sex"] as? Int,
+                      let ABOUTMESSAGE = USER["aboutMeMassage"] as? String,
+                      let AGE = USER["age"] as? Int,
+                      let AREA = USER["area"] as? String,
+                      let UPDATEDATE = USER["updatedAt"] as? Timestamp,
+                      let CREATEDAT = USER["createdAt"] as? Timestamp,
+                      let NICKNAME = USER["nickname"] as? String else {
+                        callback([profileInfoLocal()],err)
+                        return
+                }
+                let UPDATEDATEVALUE = UPDATEDATE.dateValue()
+                let CREATEDATDATEVALUE = CREATEDAT.dateValue()
+                USERINFO.lcl_UID = UID
+                USERINFO.lcl_Sex = SEX
+                USERINFO.lcl_AboutMeMassage = ABOUTMESSAGE
+                USERINFO.lcl_Area = AREA
+                USERINFO.lcl_NickName = NICKNAME
+                USERINFO.lcl_Age = AGE
+                USERINFO.lcl_DateUpdatedAt = UPDATEDATEVALUE
+                USERINFO.lcl_DateCreatedAt = CREATEDATDATEVALUE
+                
+                USERLIST.append(USERINFO)
+            }
+            callback(USERLIST, nil)
+        }
+    }
+    
+    func LikeDataPushIncrement(TargetUID:String) {
+        ///ライクボタンを押下した相手のプロフィール情報のライク数をインクリメント
+        Firestore.firestore().collection("users").document(TargetUID).setData(["likeIncrement":FieldValue.increment(1.0)],merge: true)
+    }
+    
     func likePushing(message:String,messageId:String,sender:String,Date:Date,roomID:String){
-        let date = ChatDataManagedData.dateToStringFormatt(date: Date, formatFlg: 0)
+        let TIMETOOLS = TimeTools()
+        let date = TIMETOOLS.dateToStringFormatt(date: Date, formatFlg: .YMDHMS)
         let messageStructData:[String : Any] = ["message":message,"messageID":messageId,"sender":sender,"Date":date,"listend":false,"LikeButtonFLAG":true]
             databaseRef.child("Chat").child(roomID).childByAutoId().setValue(messageStructData)
     }
+    
+    func blockHosting(meUID:String,targetUID:String,blocker:Bool) {
+        ///ブロック登録(相手に自分がブロックしている情報を)
+        Firestore.firestore().collection("users").document(targetUID).collection("TalkUsersList").document(meUID).setData(["blocked":blocker], merge: true)
+        ///ブロック登録(自分に相手のブロック情報を)
+        Firestore.firestore().collection("users").document(meUID).collection("TalkUsersList").document(targetUID).setData(["blocker":blocker], merge: true)
+    }
+    
+    func writeMessageData(mockMessage:MockMessage?,text:String?,roomID:String) -> ERROR? {
+        let date = {(DateTime:Date) in
+            let TOOLS = TimeTools()
+            return TOOLS.dateToStringFormatt(date: DateTime, formatFlg: .YMDHMS)
+        }
+        
+        guard let message = text,
+              let messageId = mockMessage?.messageId,
+              let sender = mockMessage?.sender.senderId,
+              let dateValue = mockMessage?.sentDate else {
+                return .err
+              }
+        let messageData:[String:Any] = [
+            "message":message,
+            "messageID":messageId,
+            "sender":sender,
+            "Date":date(dateValue),
+            "listend":false
+        ]
+        databaseRef.child("Chat").child(roomID).childByAutoId().setValue(messageData)
+        return nil
+    }
 
     
-    func talkListUserAuthUIDCreate(UID1:String,UID2:String,frtDocumentPath:String,scdDocumentPath:String,
+    func talkListUserAuthUIDCreate(UID1:String,UID2:String,
                  message:String,sender:String,nickName1:String,nickName2:String,like:Bool,blocked:Bool){
         var TargetListUID:String
         var TargetDocuUID:String

@@ -32,7 +32,8 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     ///インスタンス化（Model）
     let USERDATAMANAGE = UserDataManage()
     let UID = Auth.auth().currentUser?.uid
-    let localData = profileDataStruct(UID: Auth.auth().currentUser!.uid)
+    let localData = localProfileDataStruct(UID: Auth.auth().currentUser!.uid)
+    let IMAGELOCALDATASTRUCT = localProfileContentsDataStruct()
     ///RealMオブジェクトをインスタンス化
     let REALM = try! Realm()
     ///プロフィール情報を保存する辞書型変数
@@ -90,25 +91,26 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
-        ///ローカルDBインスンス化
-        let IMAGELOCALDATASTRUCT = chatUserListLocalImageInfoGet(UID: UID!)
-        ///プロフィール画像オブジェクトに画像セット（ローカル）
-        self.PROFILEVIEW.profileImageButton.setImage(IMAGELOCALDATASTRUCT.image, for: .normal)
-        self.profileImage = IMAGELOCALDATASTRUCT.image
 
-        ///サーバーに対して画像取得要求（ローカルとの差分更新）
-        USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
-            ///取得してきた画像がNilの場合初期画像セット
-            guard let image = imageStruct.image else {
-                self.PROFILEVIEW.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
-                return
-            }
-            ///イメージ画像をオブジェクトにセット（サーバー）
-            self.PROFILEVIEW.profileImageButton.setImage(image, for: .normal)
-            ///ローカルDBに取得したデータを上書き保存
-            chatUserListLocalImageRegist(UID: self.UID!, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
-            
-        }, UID: UID, UpdateTime: IMAGELOCALDATASTRUCT.upDateDate)
+        ///イメージをローカルから取得
+        let IMAGE = IMAGELOCALDATASTRUCT.chatUserListLocalImageInfoGet(UID: UID!)
+        ///プロフィール画像オブジェクトに画像セット（ローカル）
+        self.PROFILEVIEW.profileImageButton.setImage(IMAGE.lcl_ProfileImage, for: .normal)
+        self.profileImage = IMAGE.lcl_ProfileImage
+
+//        ///サーバーに対して画像取得要求（ローカルとの差分更新）
+//        USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
+//            ///取得してきた画像がNilの場合初期画像セット
+//            guard let image = imageStruct.image else {
+//                self.PROFILEVIEW.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
+//                return
+//            }
+//            ///イメージ画像をオブジェクトにセット（サーバー）
+//            self.PROFILEVIEW.profileImageButton.setImage(image, for: .normal)
+//            ///ローカルDBに取得したデータを上書き保存
+//            chatUserListLocalImageRegist(UID: self.UID!, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
+//
+//        }, UID: UID, UpdateTime: IMAGELOCALDATASTRUCT.upDateDate)
         
     }
     
@@ -182,11 +184,12 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
         ///UIimageViewをModelインスタンス先で圧縮するためにImageviewをインスタンス化
         let UIimageView = UIImageView()
         UIimageView.image = image
+        ///ローカルDBに取得したデータを上書き保存
+        IMAGELOCALDATASTRUCT.chatUserListLocalImageRegist(UID: self.UID!, profileImage: image, updataDate: Date())
         ///プロフィールイメージ投稿Model
         USERDATAMANAGE.contentOfFIRStorageUpload(callback: { pressureImage in
             self.PROFILEVIEW.profileImageButton.setImage(pressureImage, for: .normal)
-            ///ローカルDBに取得したデータを上書き保存
-            chatUserListLocalImageRegist(UID: self.UID!, profileImage: pressureImage!, updataDate: Date())
+            
         }, UIimagedata: UIimageView, UID: UID)
         
         ///cropViewControllerを閉じる
