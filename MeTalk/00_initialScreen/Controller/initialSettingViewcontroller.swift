@@ -18,7 +18,7 @@ class initialSettingViewcontroller:UIViewController{
     let loadingView = LoadingView()
     ///インスタンス化（Model）
     let initialSettingData = InitialSettingData()
-    let userDataManagedData = UserDataManage()
+
     ///ボタン押下中フラグ
     var buttonPushingFlg:Int? = nil
     ///性別タグNo格納
@@ -144,8 +144,6 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
             }, SelfViewController: self)
             return
         }
-        ///ユーザー情報用構造体
-        let USERDATAS = ProfileUserData(nickName: nickName, sex: SexNo)
         ///ユーザーの基本的な通信処理をまとめた構造体（DIが行えるようにProtcol型とする
         ///let USERHOSTING = profileInitHosting()
 
@@ -153,6 +151,21 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
         var USERUID:String? {
             ///USERUIDに値が入ってから実行
             didSet {
+                ///データ登録用Local構造体及び初期値
+                var DefaultIntValue = {(I:USERINFODEFAULTVALUE) in
+                    return I.NumObjec
+                }
+                var DefaultStrValue = {(S:USERINFODEFAULTVALUE) in
+                    return S.StrObjec
+                }
+                let LOCALPROFILEDATA = profileInfoLocal()
+                LOCALPROFILEDATA.lcl_NickName = nickName
+                LOCALPROFILEDATA.lcl_Sex = SexNo
+                LOCALPROFILEDATA.lcl_AboutMeMassage = DefaultStrValue(.AboutMeMassage)
+                LOCALPROFILEDATA.lcl_Age = DefaultIntValue(.Age)
+                LOCALPROFILEDATA.lcl_Area = DefaultStrValue(.area)
+                LOCALPROFILEDATA.lcl_DateCreatedAt = Date()
+                LOCALPROFILEDATA.lcl_DateUpdatedAt = Date()
                 ///ユーザー情報登録
                 USERHOSTING.FireStoreUserInfoRegister(callback: { FireBaseResult in
                     ///情報登録成功
@@ -164,8 +177,9 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
                         //.partialCurlにするとバグるのでflipHorizontalに変更
                         mainTabBarController.modalTransitionStyle = .flipHorizontal
                         mainTabBarController.modalPresentationStyle = .fullScreen
-                        
-                        userProfileLocalDataRegist(UID: Auth.auth().currentUser!.uid, nickname: USERDATAS.nickName, sex: USERDATAS.sex, aboutMassage: USERDATAS.aboutMessage, age: USERDATAS.age, area: USERDATAS.area, createdAt: Date(), updatedAt: Date())
+
+                        let LOCAL = localProfileDataStruct(updateObject: LOCALPROFILEDATA, UID: Auth.auth().currentUser!.uid)
+                        LOCAL.userProfileLocalDataExtraRegist()
                         
                         self.present(mainTabBarController, animated: true, completion: nil)
                     }
@@ -182,7 +196,7 @@ extension initialSettingViewcontroller:InitialSettingViewDelegateProtcol{
                             }
                         }, SelfViewController: self)
                     }
-                }, USER: USERDATAS, uid: USERUID!)
+                }, USER: LOCALPROFILEDATA, uid: USERUID!)
             }
         }
         

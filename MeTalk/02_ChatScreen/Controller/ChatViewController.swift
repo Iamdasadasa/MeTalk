@@ -159,7 +159,7 @@ class ChatViewController: MessagesViewController {
 extension ChatViewController: MessagesDataSource {
     
     func currentSender() -> SenderType {
-        return userType.me(UID: self.MeUID, displayName: self.MeInfo["nickname"] as! String).data
+        return userType.me(UID: self.MeUID, displayName: self.MeInfo.lcl_NickName!).data
     }
 
     func otherSender() -> SenderType {
@@ -388,18 +388,17 @@ extension ChatViewController {
                             ///読み込んだメッセージのlistendは全てtrueに更新（送信者が自分以外）
                             databaseRef.child("Chat").child(roomID).child(snapChild.key).updateChildValues(["listend":true])
                         }
-                        ///ライクボタン有無（ライクボタン以外がきたらfalse）
-                        var likeButtonFLAG:Bool
-                        
+                                            
                         ///ローカルデータベースに保存
                         let messageLocal = messageLocal()
                         messageLocal.lcl_Listend = true
                         messageLocal.lcl_Message = postDict["message"] as? String
                         messageLocal.lcl_Sender = postDict["sender"] as? String
-                        messageLocal.lcl_MessageID = postDict["sender"] as? String
+                        messageLocal.lcl_MessageID = postDict["messageID"] as? String
                         messageLocal.lcl_Date = TIMETOOLS.stringToDateFormatte(date: postDict["Date"] as! String)
                         messageLocal.lcl_MessageID = postDict["messageID"] as? String
                         messageLocal.lcl_LikeButtonFLAG = postDict["LikeButtonFLAG"] as? Bool ?? false
+                        messageLocal.lcl_RoomID = roomID
                         let LOCALDATASTRUCT = localTalkDataStruct(roomID: roomID,updateobject: messageLocal)
                         ///保存呼び出し
                         LOCALDATASTRUCT.localMessageDataRegist()
@@ -419,7 +418,7 @@ extension ChatViewController {
         ///ローカルデータからデータ抽出
         for localmessage in LOCALMESSAGEDATA {
             ///Date型をStringに変換
-            let messageSentDataString = TIMETOOLS.dateToStringFormatt(date: localmessage.lcl_Date, formatFlg: .HM)
+            let messageSentDataString = TIMETOOLS.dateToStringFormatt(date: localmessage.lcl_Date, formatFlg: .YMDHMS)
             ///日付を年月までで切り取り
             let YEARMONTHDATE = (messageSentDataString as NSString).substring(to: 10)
 
@@ -441,7 +440,6 @@ extension ChatViewController {
             
             ///日付格納配列に格納
             DateGrouping.append(YEARMONTHDATE)
-            
             ///メッセージ配列に適用
             func messageAppend(FLAG:Bool) {
                 let likeTrue = localmessage.lcl_LikeButtonFLAG
@@ -467,7 +465,7 @@ extension ChatViewController {
     ///自身かどうか判断
     func userTypeJudge(senderID:String) -> userType{
         if senderID == Auth.auth().currentUser?.uid{
-            return userType.me(UID: MeUID, displayName: self.MeInfo["nickname"] as! String)
+            return userType.me(UID: MeUID, displayName: self.MeInfo.lcl_NickName as! String)
         } else {
             return userType.you(UID: YouUID, displayName:YouInfo.lcl_NickName!)
         }

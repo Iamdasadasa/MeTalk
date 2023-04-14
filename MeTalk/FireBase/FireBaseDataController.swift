@@ -12,7 +12,7 @@ import FirebaseStorage
 ///DIプロトコル
 protocol firebaseHostingProtocol {
     func FireStoreSignUpAuthRegister(callback: @escaping (FireBaseResult) -> Void)
-    func FireStoreUserInfoRegister(callback: @escaping (FireBaseResult) -> Void,USER:ProfileUserData,uid:String)
+    func FireStoreUserInfoRegister(callback: @escaping (FireBaseResult) -> Void,USER:profileInfoLocal,uid:String)
 }
 ///Firebase通信結果列挙型
 enum FireBaseResult {
@@ -58,14 +58,14 @@ struct profileInitHosting:firebaseHostingProtocol{
         }
     }
     ///FireStoreにユーザー情報登録
-    func FireStoreUserInfoRegister(callback: @escaping (FireBaseResult) -> Void,USER:ProfileUserData,uid:String){
+    func FireStoreUserInfoRegister(callback: @escaping (FireBaseResult) -> Void,USER:profileInfoLocal,uid:String){
         Firestore.firestore().collection("users").document(uid).setData([
-            "nickname": USER.nickName,
-            "Sex": USER.sex,
-            "aboutMeMassage":USER.aboutMessage,
-            "area":USER.area,
-            "age":USER.age,
-            "signUpFlg":USER.signUpFlg,
+            "nickname": USER.lcl_NickName,
+            "Sex": USER.lcl_Sex,
+            "aboutMeMassage":USER.lcl_AboutMeMassage,
+            "area":USER.lcl_Area,
+            "age":USER.lcl_Age,
+            "signUpFlg":"SignUp",
             "createdAt": FieldValue.serverTimestamp(),
             "updatedAt": FieldValue.serverTimestamp()
         ],completion: { error in
@@ -167,6 +167,10 @@ struct profileHosting {
                 PROFILEINFOLOCAL.lcl_DateCreatedAt = createdAt.dateValue()
                 PROFILEINFOLOCAL.lcl_DateUpdatedAt = updatedAt.dateValue()
                 
+                ///ここに来たら最新データを取得してきていることになるのでローカル保存を行う。
+                let LOCALDATAREGISTER = localProfileDataStruct(updateObject: PROFILEINFOLOCAL,UID: UID)
+                LOCALDATAREGISTER.userProfileLocalDataExtraRegist()
+                
                 callback(PROFILEINFOLOCAL,nil)
             }
         }
@@ -210,38 +214,42 @@ struct ContentsDatahosting {
     let host = "gs://metalk-f132e.appspot.com"
     
     func ImageDataGetter(callback: @escaping (ListUsersImageLocal,Error?) -> Void,UID:String,UpdateTime:Date) {
-        let ImageObject = ListUsersImageLocal()
-        ImageObject.lcl_ProfileImage = UIImage(named: "InitIMage")!
-        ImageObject.lcl_UID = UID
-        let TOOLS = TIME()
-        ImageObject.lcl_UpdataDate = TOOLS.pastTimeGet()
+        let TIMETOOL = TIME()
+        let CONTENTSLOCAL = ListUsersImageLocal()
+        CONTENTSLOCAL.lcl_UID = UID
+        CONTENTSLOCAL.lcl_UpdataDate = TIMETOOL.pastTimeGet()
+        
+
         
         STORAGE.reference(forURL: host).child("profileImage").child("\(UID).jpeg").getMetadata {metadata, error in
-            
+
             if error != nil {
                 print("StorageのProfile画像取得の際にMetadataが取得できませんでした:\(error?.localizedDescription)")
-                callback(ImageObject,error)
+                callback(CONTENTSLOCAL,error)
+                return
             }
             
             guard let metadata = metadata else {
-                callback(ImageObject, nil)
+                callback(CONTENTSLOCAL, nil)
                 return
             }
+            
             
             if metadata.updated! > UpdateTime {
                 STORAGE.reference(forURL: host).child("profileImage").child("\(UID).jpeg")
                     .getData(maxSize: 1024 * 1024 * 10) { (data: Data?, error: Error?) in
                     ///ユーザーIDのプロフィール画像が取得できなかったらnilを返す
                     if error != nil {
-                        callback(ImageObject, error)
+                        callback(CONTENTSLOCAL, error)
+                        return
                     }
                     ///ユーザーIDのプロフィール画像を設定していたらその画像を取得してリターン
                     if let imageData = data {
                         let image = UIImage(data: imageData)
-                        ImageObject.lcl_UID = UID
-                        ImageObject.lcl_ProfileImage = image!
-                        ImageObject.lcl_UpdataDate = metadata.updated!
-                        callback(ImageObject,nil)
+                        CONTENTSLOCAL.profileImage = image!
+
+                        callback(CONTENTSLOCAL,nil)
+                        return
                     }
                 }
             }
@@ -372,10 +380,8 @@ struct TalkDataHostingManager {
     
     func talkListUserAuthUIDCreate(UID1:String,UID2:String,
                  message:String,sender:String,nickName1:String,nickName2:String,like:Bool,blocked:Bool){
-        var TargetListUID:String
-        var TargetDocuUID:String
-        var frtCollectionPath:String = "users"
-        var scdCollectionPath:String = "TalkUsersList"
+        let frtCollectionPath:String = "users"
+        let scdCollectionPath:String = "TalkUsersList"
         var data:[String:Any] = [ "UpdateAt":FieldValue.serverTimestamp(),
                               "FirstMessage":message,
                               "SendID":sender,
@@ -385,10 +391,14 @@ struct TalkDataHostingManager {
         var kindDeceid = {(KIND:MessageKind,TLU:String,TDU:String) in
             switch KIND {
             case .block,.MyExtra:
+                data.updateValue(nickName1, forKey: "meNickname")
+                data.updateValue(nickName2, forKey: "youNickname")
                 if like {
                  data.updateValue(like, forKey: "likeButtonFLAG")
                 }
             case .MyNew:
+                data.updateValue(nickName1, forKey: "meNickname")
+                data.updateValue(nickName2, forKey: "youNickname")
                 if !like {
                  data.updateValue(FieldValue.serverTimestamp(), forKey: "createdAt")
                 } else {
@@ -414,30 +424,25 @@ struct TalkDataHostingManager {
             Firestore.firestore().collection(frtCollectionPath).document(TLU).collection(scdCollectionPath).document(TDU).setData(data,merge: true)
         }
         
-        TargetListUID = UID1
-        TargetDocuUID = UID2
-        
         if blocked {
-            kindDeceid(.block,TargetListUID,TargetDocuUID)
+            kindDeceid(.block,UID1,UID2)
             return
         }
         
-        cloudDB.collection(frtCollectionPath).document(TargetListUID).collection(scdCollectionPath).document(TargetDocuUID).getDocument(completion: { (document,err) in
+        cloudDB.collection(frtCollectionPath).document(UID1).collection(scdCollectionPath).document(UID2).getDocument(completion: { (document,err) in
             if let document = document,document.exists {
-                kindDeceid(.MyExtra,TargetListUID,TargetDocuUID)
+                kindDeceid(.MyExtra,UID1,UID2)
             } else {
-                kindDeceid(.MyNew,TargetListUID,TargetDocuUID)
+                kindDeceid(.MyNew,UID1,UID2)
             }
         })
+    
         
-        TargetListUID = UID2
-        TargetDocuUID = UID1
-        
-        cloudDB.collection(frtCollectionPath).document(TargetListUID).collection(scdCollectionPath).document(TargetDocuUID).getDocument(completion: { (document,err) in
+        cloudDB.collection(frtCollectionPath).document(UID2).collection(scdCollectionPath).document(UID1).getDocument(completion: { (document,err) in
             if let document = document,document.exists {
-                kindDeceid(.YouExtra,TargetListUID,TargetDocuUID)
+                kindDeceid(.YouExtra,UID2,UID1)
             } else {
-                kindDeceid(.YouNew,TargetListUID,TargetDocuUID)
+                kindDeceid(.YouNew,UID2,UID1)
             }
         })
      }

@@ -57,8 +57,6 @@ class SexButton:UIButton,sexImageChangeable {
         }
     }
 }
-
-
 protocol InitialSettingViewDelegateProtcol:AnyObject {
     func SexButtonTappedAction(button:SexButton,view:InitialSettingView)
     func dicisionButtonTappedAction(button:UIButton,view:InitialSettingView)
@@ -191,14 +189,6 @@ class  InitialSettingView:UIView{
             delegate.SexButtonTappedAction(button: sender, view: self)
         }
     }
-    ///各性別ボタンが別のボタンをセットする処理（親から呼び出される想定）
-//    func setButtons(buttons: [UIButton]) {
-//        malebutton.setButtons(buttons: buttons)
-//        femalebutton.setButtons(buttons: buttons)
-//        unknownSexbutton.setButtons(buttons: buttons)
-//    }
-    
-    
     ///性別ラベル
     let maleLabel:UILabel = {
         let returnLabel = UILabel()
@@ -242,9 +232,6 @@ class  InitialSettingView:UIView{
         addSubview(unknownSexLabel)
         addSubview(dicisionButton)
         addSubview(SexCautionLabel)
-        //addSubview(dateOfBirthTextField)
-        //addSubview(placeTextField)
-
 
         ///UIオートレイアウトと競合させない処理
         titleLabel1.translatesAutoresizingMaskIntoConstraints = false
@@ -320,7 +307,6 @@ class  InitialSettingView:UIView{
         dicisionButton.heightAnchor.constraint(equalTo: self.malebutton.heightAnchor, multiplier: 0.5).isActive = true
         dicisionButton.topAnchor.constraint(equalTo: self.maleLabel.bottomAnchor, constant: 50).isActive = true
         dicisionButton.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        
     }
 }
 

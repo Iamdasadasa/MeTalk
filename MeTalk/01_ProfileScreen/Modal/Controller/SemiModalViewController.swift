@@ -57,20 +57,11 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
         ///クローズ画像データをセット
         VIEW.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
         
-        ///ローカルデータ取得
+        ///プロフィールデータ取得
         var LOCALDATA = localProfileDataStruct(UID: uid!)
         LOCALDATA.userProfileDatalocalGet { profileInfoLocal, result in
             if result == .localNoting {
-                let action = actionSheets(dicidedOrOkOnlyTitle: "端末にデータが見つかりませんでした", message: "デフォルトの値が反映されます", buttonMessage: "OK")
-                action.okOnlyAction(callback: { result in
-                    profileInfoLocal.lcl_NickName = self.STR(.NickName)
-                    profileInfoLocal.lcl_Age = self.INT(.Age)
-                    profileInfoLocal.lcl_Area = self.STR(.area)
-                    profileInfoLocal.lcl_AboutMeMassage = self.STR(.AboutMeMassage)
-                    profileInfoLocal.lcl_Sex = self.INT(.Sex)
-                    profileInfoLocal.lcl_DateUpdatedAt = Date()
-                    profileInfoLocal.lcl_DateCreatedAt = Date()
-                }, SelfViewController: self)
+                hostingProfileDataGetter()
             }
             self.ProfileData = profileInfoLocal
         }
@@ -224,7 +215,6 @@ extension SemiModalViewController:ModalViewDelegateProtcol{
         let data = VIEW.itemTextField.text
         var updateData:profileInfoLocal = profileInfoLocal()
         updateData.lcl_UID = uid
-        ///入力したユーザーデータをサーバへアップデート
         ///ローカルデータ登録
         switch objects {
         case .nickName:

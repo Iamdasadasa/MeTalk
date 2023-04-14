@@ -111,7 +111,6 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         ///セルUID変数に対してUIDを代入
         cell.cellUID = USERINFODATA.lcl_UID
 
-        
         ///ローカル保存処理
         LOCALLISTUSERS.chatUserListInfoLocalDataRegist(USERLISTLOCALOBJECT: USERINFODATA)
 
@@ -127,22 +126,26 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         let newMessage = USERINFODATA.lcl_NewMessage
         cell.newMessageSetCell(Item: newMessage!)
         ///ローカルDBインスタンス化
-        let IMAGELOCALDATASTRUCT = LOCALCONTENTSSTRUCT.chatUserListLocalImageInfoGet(UID: USERINFODATA.lcl_UID!)
+        let targetImage = LOCALCONTENTSSTRUCT.chatUserListLocalImageInfoGet(UID: USERINFODATA.lcl_UID!)
         ///プロファイルイメージをセルに反映(ローカルDB)
-        cell.talkListUserProfileImageView.image = IMAGELOCALDATASTRUCT.lcl_ProfileImage
+        cell.talkListUserProfileImageView.image = targetImage.profileImage
+
         ///サーバーに対して画像取得要求
         CONTENTSHOSTING.ImageDataGetter(callback: { data, err in
+            if data.lcl_UID! == "Yd7MNepBxzSc0p7bpp3LjcwSl1h2" {
+                print("画像は存在しているはずです。")
+            }
             if cell.cellUID == USERINFODATA.lcl_UID {
                 ///エラー時ローカルデータ更新
                 if err != nil {
-                    cell.talkListUserProfileImageView.image = IMAGELOCALDATASTRUCT.lcl_ProfileImage
-                    self.LOCALCONTENTSSTRUCT.chatUserListLocalImageRegist(UID: USERINFODATA.lcl_UID!, profileImage: IMAGELOCALDATASTRUCT.lcl_ProfileImage!, updataDate: IMAGELOCALDATASTRUCT.lcl_UpdataDate!)
+                    cell.talkListUserProfileImageView.image = targetImage.profileImage
+                    self.LOCALCONTENTSSTRUCT.chatUserListLocalImageRegist(UID: USERINFODATA.lcl_UID!, profileImage: targetImage.profileImage, updataDate: targetImage.lcl_UpdataDate!)
                 }
                 
-                cell.talkListUserProfileImageView.image = data.lcl_ProfileImage
-                self.LOCALCONTENTSSTRUCT.chatUserListLocalImageRegist(UID: USERINFODATA.lcl_UID!, profileImage: data.lcl_ProfileImage!, updataDate: data.lcl_UpdataDate!)
+                cell.talkListUserProfileImageView.image = data.profileImage
+                self.LOCALCONTENTSSTRUCT.chatUserListLocalImageRegist(UID: USERINFODATA.lcl_UID!, profileImage: data.profileImage, updataDate: data.lcl_UpdataDate!)
             }
-        }, UID: UID!, UpdateTime: IMAGELOCALDATASTRUCT.lcl_UpdataDate!)
+        }, UID: USERINFODATA.lcl_UID!, UpdateTime: targetImage.lcl_UpdataDate!)
         
          
         ///もしもセルの再利用によってベルアイコンが存在してしまっていたら初期化
@@ -201,7 +204,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             CHATVIEWCONTROLLER.youProfileImage = cell.talkListUserProfileImageView.image
             ///新着ベルアイコンを非表示にする＆該当ユーザーのlisntendをFalseに設定
             cell.nortificationImageRemove()
-            self.talkListUsersMock[indexPath.row].lcl_Listend = false
+            ListUsersInfo.lcl_Listend = false
             ///ローカルDB更新/新規
             self.LOCALLISTUSERS.chatUserListInfoLocalDataRegist(USERLISTLOCALOBJECT: ListUsersInfo)
             
@@ -213,7 +216,6 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             if ListUsersInfo.lcl_BlockerFLAG {
                 CHATVIEWCONTROLLER.blocker = true
             }
-
             ///UINavigationControllerとして遷移
             self.navigationController?.pushViewController(CHATVIEWCONTROLLER, animated: true)
         }, UID1: UID!, UID2: CELLUID)
@@ -326,7 +328,7 @@ extension ChatUserListViewController {
             ///ドキュメントにデータが入るまではセルを選択できないようにする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = false
             ///画像セット
-            self.selfProfileImageView.image = Img.lcl_ProfileImage
+            self.selfProfileImageView.image = Img.profileImage
             ///セル選択を可能にする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = true
         }, UID: UID!, UpdateTime: TOOL.pastTimeGet())
@@ -396,17 +398,13 @@ extension ChatUserListViewController {
                 
                 ///トークリスト配列に存在している
                 if let indexNo = indexNo {
-                    let UpdateAt = documentData["UpdateAt"] as? Timestamp
 
-                    ///更新時間が変更されていない（ブロックは更新時間を更新しない）
-                    if self.talkListUsersMock[indexNo].lcl_UpdateDate == UpdateAt?.dateValue(){
-                        ///ブロック変換
-                        if let blocked = documentData["blocked"] as? Bool {
-                                ///存在していたら並び替えは変えずに基の情報にブロック情報を追加
-                            self.talkListUsersMock[indexNo].lcl_BlockedFLAG = blocked
-                                self.CHATUSERLISTTABLEVIEW.reloadData()
-                                return
-                        }
+                    ///ブロック変換
+                    if let blocked = documentData["blocked"] as? Bool {
+                            ///存在していたら並び替えは変えずに基の情報にブロック情報を追加
+                        self.talkListUsersMock[indexNo].lcl_BlockedFLAG = blocked
+                            self.CHATUSERLISTTABLEVIEW.reloadData()
+                            return
                     }
                 }
                 TALKLISTUSERS.lcl_UID = documentData.documentID

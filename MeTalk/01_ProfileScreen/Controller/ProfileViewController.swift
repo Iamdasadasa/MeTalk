@@ -95,8 +95,8 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         ///イメージをローカルから取得
         let IMAGE = IMAGELOCALDATASTRUCT.chatUserListLocalImageInfoGet(UID: UID!)
         ///プロフィール画像オブジェクトに画像セット（ローカル）
-        self.PROFILEVIEW.profileImageButton.setImage(IMAGE.lcl_ProfileImage, for: .normal)
-        self.profileImage = IMAGE.lcl_ProfileImage
+        self.PROFILEVIEW.profileImageButton.setImage(IMAGE.profileImage, for: .normal)
+        self.profileImage = IMAGE.profileImage
 
 //        ///サーバーに対して画像取得要求（ローカルとの差分更新）
 //        USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
@@ -253,13 +253,13 @@ extension ProfileViewController{
         dateFormatter.locale = .init(identifier: "en_US_POSIX")
         dateFormatter.dateFormat = "yyyy/MM/dd HH:mm"
         dateFormatter.locale = Locale(identifier: "ja_JP")
-        let dateUnix = userInfoData["createdAt"] as? Timestamp
-        let date = dateUnix?.dateValue() ?? Date()
+        
+        let date = userInfoData.lcl_DateCreatedAt
         ///日付型をStringに変更してラベルにセット
-        let userCreatedAtdate:String = dateFormatter.string(from: date as Date)
+        let userCreatedAtdate:String = dateFormatter.string(from: date!)
         self.PROFILEVIEW.startDateInfoLabel.text = userCreatedAtdate
         ///性別を取得。Firebaseでは数値で入っているために数字を判断して性別表示
-        switch userInfoData["Sex"] as? Int {
+        switch userInfoData.lcl_Sex {
         case 0:
             self.PROFILEVIEW.sexInfoLabel.text = "設定なし"
         case 1:
@@ -269,37 +269,33 @@ extension ProfileViewController{
         default:break
         }
         ///文字列に改行処理を入れる
-        let aboutMeMassageValue = userInfoData["aboutMeMassage"] as? String
+        let aboutMeMassageValue = userInfoData.lcl_AboutMeMassage
         let resultValue:String!
         guard let aboutMeMassageValue = aboutMeMassageValue else {
             return
         }
         if aboutMeMassageValue.count >= 15 {
             resultValue = aboutMeMassageValue.prefix(15) + "\n" + aboutMeMassageValue.suffix(aboutMeMassageValue.count - 15)
-            print(resultValue)
         } else {
             resultValue = aboutMeMassageValue
         }
         guard let resultValue = resultValue else {return}
         ///ニックネームのラベルとニックネームの項目にデータセット
         
-        self.PROFILEVIEW.nickNameItemView.valueLabel.text = userInfoData["nickname"] as? String
-        self.PROFILEVIEW.personalInformationLabel.text = userInfoData["nickname"] as? String
+        self.PROFILEVIEW.nickNameItemView.valueLabel.text = userInfoData.lcl_NickName
+        self.PROFILEVIEW.personalInformationLabel.text = userInfoData.lcl_NickName
         ///ひとことにデータセット
         self.PROFILEVIEW.AboutMeItemView.valueLabel.text = resultValue
         //年齢にデータセット
-        guard let ageTypeInt:Int = userInfoData["age"] as? Int else {
-            print("年齢を取得できませんでした。")
-            return
-        }
-        if String(ageTypeInt)  == "0" {
+
+        if String(userInfoData.lcl_Age)  == "0" {
             self.PROFILEVIEW.ageItemView.valueLabel.text = "未設定"
         } else {
-            self.PROFILEVIEW.ageItemView.valueLabel.text = String(ageTypeInt)
+            self.PROFILEVIEW.ageItemView.valueLabel.text = String(userInfoData.lcl_Age)
         }
         
         //出身地にデータセット
-        self.PROFILEVIEW.areaItemView.valueLabel.text = userInfoData["area"] as? String
+        self.PROFILEVIEW.areaItemView.valueLabel.text = userInfoData.lcl_Area
     }
     
 }

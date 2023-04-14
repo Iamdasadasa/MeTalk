@@ -19,6 +19,7 @@ class BlockListViewController:UIViewController{
     ///インスタンス化（Model）
     let userDataManagedData = UserDataManage()
     let uid = Auth.auth().currentUser?.uid
+    let TIMES = TIME()
     ///ブロックリストユーザーID格納配列
     var blockUsersID:[String]? = []
     
@@ -84,7 +85,7 @@ extension BlockListViewController:UITableViewDelegate,UITableViewDataSource{
             } else {
                 cell.blockUserProfileImageView.image = UIImage(named: "InitIMage")
             }
-        }, UID: blockUserID, UpdateTime: ChatDataManagedData.pastTimeGet())
+        }, UID: blockUserID, UpdateTime: TIMES.pastTimeGet())
         return cell
     }
     

@@ -27,7 +27,7 @@ struct MockTestHosting:firebaseHostingProtocol{
         callback(.Success("テスト的に発生させています"))
     }
     
-    func FireStoreUserInfoRegister(callback: @escaping (FireBaseResult) -> Void, USER: ProfileUserData, uid: String) {
+    func FireStoreUserInfoRegister(callback: @escaping (FireBaseResult) -> Void, USER: profileInfoLocal, uid: String) {
         let error = result.error
         callback(.failure(error))
     }
