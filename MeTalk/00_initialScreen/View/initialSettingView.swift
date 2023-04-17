@@ -180,7 +180,7 @@ class  InitialSettingView:UIView{
         returnButton.setImage(UIImage(named: "Unknown_Sex_Black"), for: .normal)
         returnButton.tag = 0
         returnButton.backgroundColor = .white
-        returnButton.addTarget(self, action: #selector(butttonClicked(_:)), for: UIControl.Event.touchUpInside)
+        returnButton.addTarget(InitialSettingView.self, action: #selector(butttonClicked(_:)), for: UIControl.Event.touchUpInside)
         return returnButton
     }()
     ///性別ボタンが押下された際の挙動

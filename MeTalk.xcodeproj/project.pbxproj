@@ -60,6 +60,8 @@
 		D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37F27AA92F100290B18 /* ProfileViewController.swift */; };
 		D69EC38227AA952000290B18 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC38127AA952000290B18 /* ProfileView.swift */; };
 		D6A8C0D8286345AD0017171A /* UserListLocalModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */; };
+		D6C5ACDE29E91D3900CED90C /* initialSettingWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C5ACDD29E91D3900CED90C /* initialSettingWelcomeView.swift */; };
+		D6C5ACE029E92A7700CED90C /* initialSettingWelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C5ACDF29E92A7700CED90C /* initialSettingWelcomeViewController.swift */; };
 		D6DE5C1F28085CB4006C6236 /* TalkUsersListMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */; };
 		D6E1F779292B419C0005212C /* userListFunctionStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6E1F778292B419C0005212C /* userListFunctionStruct.swift */; };
 		D6EA09F12976ACA0003801F7 /* ModalBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6EA09F02976ACA0003801F7 /* ModalBaseView.swift */; };
@@ -144,6 +146,8 @@
 		D69EC37F27AA92F100290B18 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		D69EC38127AA952000290B18 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListLocalModel.swift; sourceTree = "<group>"; };
+		D6C5ACDD29E91D3900CED90C /* initialSettingWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingWelcomeView.swift; sourceTree = "<group>"; };
+		D6C5ACDF29E92A7700CED90C /* initialSettingWelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingWelcomeViewController.swift; sourceTree = "<group>"; };
 		D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkUsersListMock.swift; sourceTree = "<group>"; };
 		D6E1F778292B419C0005212C /* userListFunctionStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = userListFunctionStruct.swift; sourceTree = "<group>"; };
 		D6EA09F02976ACA0003801F7 /* ModalBaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalBaseView.swift; sourceTree = "<group>"; };
@@ -352,6 +356,7 @@
 			isa = PBXGroup;
 			children = (
 				D631EC2227A5831400800693 /* initialSettingView.swift */,
+				D6C5ACDD29E91D3900CED90C /* initialSettingWelcomeView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -360,6 +365,7 @@
 			isa = PBXGroup;
 			children = (
 				D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */,
+				D6C5ACDF29E92A7700CED90C /* initialSettingWelcomeViewController.swift */,
 				D69EC37927AA681100290B18 /* MainTabBarController.swift */,
 			);
 			path = Controller;
@@ -804,6 +810,8 @@
 				D68FB3A227D7410800E57F5A /* NotificationViewController.swift in Sources */,
 				D6543DCB27BA7AC200444454 /* UserDataManageData.swift in Sources */,
 				D655504D27E4260C00C86E34 /* ChatDataManagedData.swift in Sources */,
+				D6C5ACDE29E91D3900CED90C /* initialSettingWelcomeView.swift in Sources */,
+				D6C5ACE029E92A7700CED90C /* initialSettingWelcomeViewController.swift in Sources */,
 				D655504F27EADB7600C86E34 /* ChatUserListViewController.swift in Sources */,
 				D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */,
 				D696850827D24100006D85DC /* ShowImageView.swift in Sources */,

@@ -29,7 +29,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             if let uid = Auth.auth().currentUser?.uid {
                 rootViewController = MainTabBarController()
             } else {
-                rootViewController = initialSettingViewcontroller()
+                rootViewController = intialSettingWelcomeViewController()
+//                rootViewController = initialSettingViewcontroller()
             }
             
             window.rootViewController = rootViewController
