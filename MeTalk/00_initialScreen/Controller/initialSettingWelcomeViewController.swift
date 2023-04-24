@@ -8,36 +8,41 @@
 import Foundation
 import UIKit
 
-class intialSettingWelcomeViewController:UIViewController,welcomeViewDelegateProtocol,welcomeViewObjectDelegateProtocol {
+class intialSettingWelcomeViewController:UIViewController,welcomeViewObjectDelegateProtocol {
+
+    let welcomeView = initialSettingWelcomeView()
+    
     override func viewDidLoad() {
-        // 初期設定のウェルカム画面を表示し、デリゲートを自分自身に設定
-        let initialSettingWelcomeView = initialSettingWelcomeView()
-        initialSettingWelcomeView.delegateFadeIn = self
-        initialSettingWelcomeView.delegateUIViewAnimate = self
-        self.view = initialSettingWelcomeView
+        welcomeView.delegateanimationLabel = self
+        self.view = welcomeView
     }
-    
-    /**
-     "ようこそ"のラベルをフェードインするアニメーションを実行します。
-     
-     - Parameters:
-         - duration: アニメーションの時間（秒）。デフォルト値は0.5秒です。
-     */
-    func fadeInLabel(fadeInLabel: UILabel) {
-        UIView.animate(withDuration: 2.0) {
+    /// ビューのアニメーションを実行
+    /// - Parameters:
+    ///   - fadeInLabel: フェードインするUILabel
+    ///   - typingLabel: タイピングアニメーション対象UILabel
+    func animationLabel(fadeInLabel: UILabel, typingLabel: CLTypingLabel) {
+        UIView.animate(withDuration: 3.0, animations: {
             fadeInLabel.alpha = 1.0
+        }) {_ in
+            fadeInLabel.alpha = 0.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+                ///テキスト挿入時にアニメーション開始
+                typingLabel.text = "Welcome To Penguin"
+                typingLabel.onTypingAnimationFinished = {
+                    self.goToNextScreen()
+                }
+            }
         }
     }
-    
-    func UIViewAnimateStart(UIview: UIView) {
-        UIView.animate(withDuration: 0.0) {
-            let transition = CATransition()
-            transition.duration = 1.0
-            transition.type = .reveal
-            transition.subtype = .fromBottom
-            transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            UIview.layer.add(transition, forKey: nil)
-        }
+    /**
+     次の画面へ遷移
+     スライドアウトアニメーションを実行してビューを上部に遷移する
+     */
+    func goToNextScreen() {
+        let nextVC = initialSettingGenderSelectionViewController()
+        self.slideOutToTop()
+        nextVC.modalPresentationStyle = .fullScreen
+        self.present(nextVC, animated: false)
     }
 }
 

@@ -344,6 +344,7 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.7):
     - BoringSSL-GRPC/Interface (= 0.0.7)
   - BoringSSL-GRPC/Interface (0.0.7)
+  - CLTypingLabel (0.4.0)
   - Firebase/Auth (8.13.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 8.13.0)
@@ -507,6 +508,7 @@ PODS:
   - SideMenu (6.5.0)
 
 DEPENDENCIES:
+  - CLTypingLabel
   - Firebase/Auth
   - Firebase/Core
   - Firebase/Database
@@ -522,6 +524,7 @@ SPEC REPOS:
   trunk:
     - abseil
     - BoringSSL-GRPC
+    - CLTypingLabel
     - Firebase
     - FirebaseAnalytics
     - FirebaseAuth
@@ -551,6 +554,7 @@ SPEC REPOS:
 SPEC CHECKSUMS:
   abseil: 6c8eb7892aefa08d929b39f9bb108e5367e3228f
   BoringSSL-GRPC: 8edf627ee524575e2f8d19d56f068b448eea3879
+  CLTypingLabel: 95a7d1faf7e3d1d952cd11cb0491d17d80c50934
   Firebase: ee9b1d9b1801371e29f5591eda89eb5a314ab599
   FirebaseAnalytics: 2be3cc52ac310759f28861aec9d459c851370cdb
   FirebaseAuth: ee43cf9474641c673a3a215ac92ab99e5630620c
@@ -577,6 +581,6 @@ SPEC CHECKSUMS:
   RealmSwift: 0e0e4786685c4442bf56d3831dfefb5fa05d6fd6
   SideMenu: f583187d21c5b1dd04c72002be544b555a2627a2
 
-PODFILE CHECKSUM: 67202f9464560dfecff393be5bb83b2a4ad4ce16
+PODFILE CHECKSUM: 906a0bc97ae0a1c66cb733888a1eea6ac9b7b3ac
 
 COCOAPODS: 1.11.2

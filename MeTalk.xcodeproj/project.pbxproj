@@ -36,6 +36,9 @@
 		D65BD34828EFE2BC00DDAFA4 /* UserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */; };
 		D65BD34A28EFE2D100DDAFA4 /* UserListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BD34928EFE2D100DDAFA4 /* UserListTableViewCell.swift */; };
 		D663007F2950471D00C59657 /* FireBaseDataController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D663007E2950471D00C59657 /* FireBaseDataController.swift */; };
+		D673C2A029EDB6FD00DCB995 /* typingUILabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D673C29F29EDB6FD00DCB995 /* typingUILabel.swift */; };
+		D673C2A229EE67C300DCB995 /* initialSettingGenderSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D673C2A129EE67C300DCB995 /* initialSettingGenderSelectViewController.swift */; };
+		D673C2A429EE934500DCB995 /* initialSettingGenderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D673C2A329EE934500DCB995 /* initialSettingGenderSelectionView.swift */; };
 		D67C27D028F88B2F00C25BA3 /* UserListStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */; };
 		D67C27D428F88CDA00C25BA3 /* UserListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27D328F88CDA00C25BA3 /* UserListManager.swift */; };
 		D67C27D628FE959100C25BA3 /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27D528FE959100C25BA3 /* Extension.swift */; };
@@ -124,6 +127,9 @@
 		D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListViewController.swift; sourceTree = "<group>"; };
 		D65BD34928EFE2D100DDAFA4 /* UserListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListTableViewCell.swift; sourceTree = "<group>"; };
 		D663007E2950471D00C59657 /* FireBaseDataController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FireBaseDataController.swift; sourceTree = "<group>"; };
+		D673C29F29EDB6FD00DCB995 /* typingUILabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = typingUILabel.swift; sourceTree = "<group>"; };
+		D673C2A129EE67C300DCB995 /* initialSettingGenderSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingGenderSelectViewController.swift; sourceTree = "<group>"; };
+		D673C2A329EE934500DCB995 /* initialSettingGenderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingGenderSelectionView.swift; sourceTree = "<group>"; };
 		D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListStruct.swift; sourceTree = "<group>"; };
 		D67C27D328F88CDA00C25BA3 /* UserListManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListManager.swift; sourceTree = "<group>"; };
 		D67C27D528FE959100C25BA3 /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
@@ -229,6 +235,7 @@
 				D68FB3A727D87ECE00E57F5A /* TableViewTemplete */,
 				D655503E27E20F5300C86E34 /* Default */,
 				D655503F27E20FBF00C86E34 /* 00_initialScreen */,
+				D673C29E29EDB6A300DCB995 /* Module */,
 				D655504327E2107100C86E34 /* 01_ProfileScreen */,
 				D655504427E35FC800C86E34 /* 02_ChatScreen */,
 				D65BD34628EFE15F00DDAFA4 /* 03_UserListScreen */,
@@ -357,6 +364,7 @@
 			children = (
 				D631EC2227A5831400800693 /* initialSettingView.swift */,
 				D6C5ACDD29E91D3900CED90C /* initialSettingWelcomeView.swift */,
+				D673C2A329EE934500DCB995 /* initialSettingGenderSelectionView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -366,6 +374,7 @@
 			children = (
 				D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */,
 				D6C5ACDF29E92A7700CED90C /* initialSettingWelcomeViewController.swift */,
+				D673C2A129EE67C300DCB995 /* initialSettingGenderSelectViewController.swift */,
 				D69EC37927AA681100290B18 /* MainTabBarController.swift */,
 			);
 			path = Controller;
@@ -455,6 +464,15 @@
 				D663007E2950471D00C59657 /* FireBaseDataController.swift */,
 			);
 			path = FireBase;
+			sourceTree = "<group>";
+		};
+		D673C29E29EDB6A300DCB995 /* Module */ = {
+			isa = PBXGroup;
+			children = (
+				D673C29F29EDB6FD00DCB995 /* typingUILabel.swift */,
+			);
+			name = Module;
+			path = 00_initialScreen/Controller/Module;
 			sourceTree = "<group>";
 		};
 		D67C27D228F88B9E00C25BA3 /* Model */ = {
@@ -792,11 +810,13 @@
 				D631EC2127A582A200800693 /* initialSettingViewcontroller.swift in Sources */,
 				D67C27D428F88CDA00C25BA3 /* UserListManager.swift in Sources */,
 				D68FB3AD27D9D65400E57F5A /* BlockListViewController.swift in Sources */,
+				D673C2A029EDB6FD00DCB995 /* typingUILabel.swift in Sources */,
 				D68FB39427D5C6CC00E57F5A /* GeneralTableView.swift in Sources */,
 				D67C27D028F88B2F00C25BA3 /* UserListStruct.swift in Sources */,
 				D663007F2950471D00C59657 /* FireBaseDataController.swift in Sources */,
 				D67C27DC2908FAAF00C25BA3 /* TargetProfileViewController.swift in Sources */,
 				D67C27D628FE959100C25BA3 /* Extension.swift in Sources */,
+				D673C2A429EE934500DCB995 /* initialSettingGenderSelectionView.swift in Sources */,
 				D6543DC127B7B61500444454 /* SemiModalViewController.swift in Sources */,
 				D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */,
 				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,
@@ -830,6 +850,7 @@
 				D63E275928CA4BF40013BE1E /* kaihatsu.swift in Sources */,
 				D698A0CB27E0BA66002C64DE /* WebViewTempleteController.swift in Sources */,
 				D6543DD027C4822300444454 /* ModalImageData.swift in Sources */,
+				D673C2A229EE67C300DCB995 /* initialSettingGenderSelectViewController.swift in Sources */,
 				D6A8C0D8286345AD0017171A /* UserListLocalModel.swift in Sources */,
 				D68FB3A927D884F700E57F5A /* NotificationTableViewCell.swift in Sources */,
 			);
