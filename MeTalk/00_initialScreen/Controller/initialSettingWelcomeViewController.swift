@@ -42,6 +42,7 @@ class intialSettingWelcomeViewController:UIViewController,welcomeViewObjectDeleg
         let nextVC = initialSettingGenderSelectionViewController()
         self.slideOutToTop()
         nextVC.modalPresentationStyle = .fullScreen
+//        self.navigationController?.pushViewController(navigationController, animated: true)
         self.present(nextVC, animated: false)
     }
 }

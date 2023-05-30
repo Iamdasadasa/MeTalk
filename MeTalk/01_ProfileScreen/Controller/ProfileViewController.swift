@@ -40,7 +40,7 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     var profileData:profileInfoLocal?
     var profileImage:UIImage?
     
-    ///ライブラリのハンモーダルインスタンス
+    ///ライブラリの半モーダルインスタンス
     let FPC = FloatingPanelController()
     ///後ろにいるビューコントローラー（このビューコントローラー）をタップできないようにするためのView
     let SEMIMODALTRANSLUCENTVIEW = SemiModalTranslucentView()
@@ -97,20 +97,6 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         ///プロフィール画像オブジェクトに画像セット（ローカル）
         self.PROFILEVIEW.profileImageButton.setImage(IMAGE.profileImage, for: .normal)
         self.profileImage = IMAGE.profileImage
-
-//        ///サーバーに対して画像取得要求（ローカルとの差分更新）
-//        USERDATAMANAGE.contentOfFIRStorageGet(callback: { imageStruct in
-//            ///取得してきた画像がNilの場合初期画像セット
-//            guard let image = imageStruct.image else {
-//                self.PROFILEVIEW.profileImageButton.setImage(UIImage(named: "InitIMage"), for: .normal)
-//                return
-//            }
-//            ///イメージ画像をオブジェクトにセット（サーバー）
-//            self.PROFILEVIEW.profileImageButton.setImage(image, for: .normal)
-//            ///ローカルDBに取得したデータを上書き保存
-//            chatUserListLocalImageRegist(UID: self.UID!, profileImage: imageStruct.image!, updataDate: imageStruct.upDateDate)
-//
-//        }, UID: UID, UpdateTime: IMAGELOCALDATASTRUCT.upDateDate)
         
     }
     

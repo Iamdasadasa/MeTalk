@@ -63,6 +63,10 @@
 		D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37F27AA92F100290B18 /* ProfileViewController.swift */; };
 		D69EC38227AA952000290B18 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC38127AA952000290B18 /* ProfileView.swift */; };
 		D6A8C0D8286345AD0017171A /* UserListLocalModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */; };
+		D6BC3C082A1CD05600E00A2A /* initialSettingAgeSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BC3C072A1CD05600E00A2A /* initialSettingAgeSelectViewController.swift */; };
+		D6BC3C0A2A1DACCE00E00A2A /* initialSettingAgeSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BC3C092A1DACCE00E00A2A /* initialSettingAgeSelectView.swift */; };
+		D6BC3C0C2A259AB200E00A2A /* initialSettingNicknameSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BC3C0B2A259AB200E00A2A /* initialSettingNicknameSelectViewController.swift */; };
+		D6BC3C0E2A25A13600E00A2A /* initialSettingNickNameSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BC3C0D2A25A13600E00A2A /* initialSettingNickNameSelectView.swift */; };
 		D6C5ACDE29E91D3900CED90C /* initialSettingWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C5ACDD29E91D3900CED90C /* initialSettingWelcomeView.swift */; };
 		D6C5ACE029E92A7700CED90C /* initialSettingWelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C5ACDF29E92A7700CED90C /* initialSettingWelcomeViewController.swift */; };
 		D6DE5C1F28085CB4006C6236 /* TalkUsersListMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */; };
@@ -152,6 +156,10 @@
 		D69EC37F27AA92F100290B18 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		D69EC38127AA952000290B18 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListLocalModel.swift; sourceTree = "<group>"; };
+		D6BC3C072A1CD05600E00A2A /* initialSettingAgeSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingAgeSelectViewController.swift; sourceTree = "<group>"; };
+		D6BC3C092A1DACCE00E00A2A /* initialSettingAgeSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingAgeSelectView.swift; sourceTree = "<group>"; };
+		D6BC3C0B2A259AB200E00A2A /* initialSettingNicknameSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingNicknameSelectViewController.swift; sourceTree = "<group>"; };
+		D6BC3C0D2A25A13600E00A2A /* initialSettingNickNameSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingNickNameSelectView.swift; sourceTree = "<group>"; };
 		D6C5ACDD29E91D3900CED90C /* initialSettingWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingWelcomeView.swift; sourceTree = "<group>"; };
 		D6C5ACDF29E92A7700CED90C /* initialSettingWelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingWelcomeViewController.swift; sourceTree = "<group>"; };
 		D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkUsersListMock.swift; sourceTree = "<group>"; };
@@ -365,6 +373,8 @@
 				D631EC2227A5831400800693 /* initialSettingView.swift */,
 				D6C5ACDD29E91D3900CED90C /* initialSettingWelcomeView.swift */,
 				D673C2A329EE934500DCB995 /* initialSettingGenderSelectionView.swift */,
+				D6BC3C092A1DACCE00E00A2A /* initialSettingAgeSelectView.swift */,
+				D6BC3C0D2A25A13600E00A2A /* initialSettingNickNameSelectView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -375,6 +385,8 @@
 				D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */,
 				D6C5ACDF29E92A7700CED90C /* initialSettingWelcomeViewController.swift */,
 				D673C2A129EE67C300DCB995 /* initialSettingGenderSelectViewController.swift */,
+				D6BC3C072A1CD05600E00A2A /* initialSettingAgeSelectViewController.swift */,
+				D6BC3C0B2A259AB200E00A2A /* initialSettingNicknameSelectViewController.swift */,
 				D69EC37927AA681100290B18 /* MainTabBarController.swift */,
 			);
 			path = Controller;
@@ -809,9 +821,11 @@
 				D68FB39227D5AC5300E57F5A /* sideMenuViewController.swift in Sources */,
 				D631EC2127A582A200800693 /* initialSettingViewcontroller.swift in Sources */,
 				D67C27D428F88CDA00C25BA3 /* UserListManager.swift in Sources */,
+				D6BC3C082A1CD05600E00A2A /* initialSettingAgeSelectViewController.swift in Sources */,
 				D68FB3AD27D9D65400E57F5A /* BlockListViewController.swift in Sources */,
 				D673C2A029EDB6FD00DCB995 /* typingUILabel.swift in Sources */,
 				D68FB39427D5C6CC00E57F5A /* GeneralTableView.swift in Sources */,
+				D6BC3C0C2A259AB200E00A2A /* initialSettingNicknameSelectViewController.swift in Sources */,
 				D67C27D028F88B2F00C25BA3 /* UserListStruct.swift in Sources */,
 				D663007F2950471D00C59657 /* FireBaseDataController.swift in Sources */,
 				D67C27DC2908FAAF00C25BA3 /* TargetProfileViewController.swift in Sources */,
@@ -831,9 +845,11 @@
 				D6543DCB27BA7AC200444454 /* UserDataManageData.swift in Sources */,
 				D655504D27E4260C00C86E34 /* ChatDataManagedData.swift in Sources */,
 				D6C5ACDE29E91D3900CED90C /* initialSettingWelcomeView.swift in Sources */,
+				D6BC3C0E2A25A13600E00A2A /* initialSettingNickNameSelectView.swift in Sources */,
 				D6C5ACE029E92A7700CED90C /* initialSettingWelcomeViewController.swift in Sources */,
 				D655504F27EADB7600C86E34 /* ChatUserListViewController.swift in Sources */,
 				D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */,
+				D6BC3C0A2A1DACCE00E00A2A /* initialSettingAgeSelectView.swift in Sources */,
 				D696850827D24100006D85DC /* ShowImageView.swift in Sources */,
 				D65BD34A28EFE2D100DDAFA4 /* UserListTableViewCell.swift in Sources */,
 				D65BD34828EFE2BC00DDAFA4 /* UserListViewController.swift in Sources */,

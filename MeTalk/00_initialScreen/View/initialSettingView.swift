@@ -171,7 +171,7 @@ class  InitialSettingView:UIView{
         returnButton.setImage(UIImage(named: "Female_Black"), for: .normal)
         returnButton.tag = 2
         returnButton.backgroundColor = .white
-        returnButton.addTarget(self, action: #selector(butttonClicked(_:)), for: UIControl.Event.touchUpInside)
+        returnButton.addTarget(InitialSettingView.self, action: #selector(butttonClicked(_:)), for: UIControl.Event.touchUpInside)
         return returnButton
     }()
     ///性別ボタン（不明）サブクラス

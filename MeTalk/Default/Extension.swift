@@ -18,6 +18,22 @@ extension UIView {
         childView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 0).isActive = true
         childView.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: 0).isActive = true
     }
+    ///背景画像を画面一杯に指定する
+    /// レイアウト全般処理
+    func backGroundViewImageSetUp(imageName:String) {
+        ///背景画像設定
+        // スクリーンサイズの取得
+        let width = UIScreen.main.bounds.size.width
+        let height = UIScreen.main.bounds.size.height
+        
+        // スクリーンサイズにあわせてimageViewの配置
+        let imageViewBackground = UIImageView(frame: CGRect(x: 0, y: 0, width: width, height: height))
+        let backgroundImage = UIImage(named: imageName)
+        imageViewBackground.image = backgroundImage
+        imageViewBackground.contentMode = .scaleAspectFill
+        self.addSubview(imageViewBackground)
+        self.sendSubviewToBack(imageViewBackground)
+    }
 }
 
 extension UIViewController {
@@ -36,6 +52,24 @@ extension UIViewController {
         transition.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
         transition.type = CATransitionType.push
         transition.subtype = CATransitionSubtype.fromTop
+        self.view.window!.layer.add(transition, forKey: kCATransition)
+    }
+    
+    func slideOutToLeft() {
+        let transition = CATransition()
+        transition.duration = 0.3
+        transition.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+        transition.type = CATransitionType.push
+        transition.subtype = CATransitionSubtype.fromLeft
+        self.view.window!.layer.add(transition, forKey: kCATransition)
+    }
+    
+    func slideInFromRight() {
+        let transition = CATransition()
+        transition.duration = 0.3
+        transition.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.easeInEaseOut)
+        transition.type = CATransitionType.push
+        transition.subtype = CATransitionSubtype.fromRight
         self.view.window!.layer.add(transition, forKey: kCATransition)
     }
 }

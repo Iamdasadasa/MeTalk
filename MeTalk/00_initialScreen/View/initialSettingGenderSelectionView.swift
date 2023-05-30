@@ -7,75 +7,529 @@
 
 import Foundation
 import UIKit
-class initialSettingGenderSelectionView:UIView {
-    
-    // アイコンの半径
-    let iconRadius: CGFloat = 30
-
-    // アイコンの間隔
-    let iconSpacing: CGFloat = 20
-
-    let maleIcon:UIImageView = {
-        let maleIcon = UIImageView()
-        maleIcon.backgroundColor = .systemPink
-        return maleIcon
-    }()
-
-    let femaleIcon:UIImageView = {
-        let femaleIcon = UIImageView()
-        femaleIcon.backgroundColor = .brown
-        return femaleIcon
-    }()
-    
-    let noneIcon:UIImageView = {
-        let noneIcon = UIImageView()
-        noneIcon.backgroundColor = .black
-        return noneIcon
-    }()
-
-    // ビューの初期化
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupView()
-    }
-
-    // コードから生成されるビューに対応する初期化メソッド
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        setupView()
-    }
-
-    // ビューを初期化するメソッド
-    func setupView() {
-
-        let angle = CGFloat.pi / 3 // 60度
+///画面ハイライト用オーバーレイビュークラス
+class OverlayView: UIView {
+    func show() {
+        self.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        self.alpha = 0
         
-        maleIcon.translatesAutoresizingMaskIntoConstraints = false
-        femaleIcon.translatesAutoresizingMaskIntoConstraints = false
-        noneIcon.translatesAutoresizingMaskIntoConstraints = false
-
-        // アイコンを円形にする
-        maleIcon.layer.cornerRadius = iconRadius
-        femaleIcon.layer.cornerRadius = iconRadius
-        noneIcon.layer.cornerRadius = iconRadius
-
-        maleIcon.frame.size = CGSize(width: iconRadius, height: iconRadius)
-        femaleIcon.frame.size = CGSize(width: iconRadius, height: iconRadius)
-        noneIcon.frame.size = CGSize(width: iconRadius, height: iconRadius)
-
-        maleIcon.center = CGPoint(x: bounds.midX + (iconRadius + iconSpacing) * cos(angle), y: bounds.midY - (iconRadius + iconSpacing) * sin(angle))
-        femaleIcon.center = CGPoint(x: bounds.midX - (iconRadius + iconSpacing) * cos(angle), y: bounds.midY - (iconRadius + iconSpacing) * sin(angle))
-        noneIcon.center = CGPoint(x: bounds.midX, y: bounds.midY + (iconRadius + iconSpacing))
-
-        addSubview(maleIcon)
-        addSubview(femaleIcon)
-        addSubview(noneIcon)
-
-        // ビューの背景色を設定する
+        UIView.animate(withDuration: 0.3) {
+            self.alpha = 1
+        }
+    }
+    
+    func hide() {
+        UIView.animate(withDuration: 0.3) {
+            self.alpha = 0
+        }
+    }
+}
+///性別画像Viewカスタムクラス
+class genderImageView:UIImageView {
+    var gender:GENDER
+    var selected:Bool = false
+    var centerValue:CGPoint?
+    init(gender: GENDER) {
+        self.gender = gender
+        super.init(image: nil) // 親クラスの指定イニシャライザを呼び出す
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setting() {
+        self.contentMode = .scaleAspectFit
+        self.clipsToBounds = true
+        self.layer.borderWidth = 1
+        self.layer.borderColor = UIColor.gray.cgColor
+        
+        switch gender {
+        case .male:
+            self.image = UIImage(named: "Male")
+        case .female:
+            self.image = UIImage(named: "Female")
+        case .none:
+            self.image = UIImage(named: "Unknown")
+        }
+    }
+}
+///性別ボタンカスタムクラス
+class genderButton:UIButton {
+    var gender:GENDER
+    init(gender: GENDER) {
+        self.gender = gender
+        super.init(frame: .zero)// 親クラスの指定イニシャライザを呼び出す
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setting() {
         self.backgroundColor = .clear
         
-        print(maleIcon.center)
-        
+        switch gender {
+        case .male:
+            self.tag = 0
+        case .female:
+            self.tag = 1
+        case .none:
+            self.tag = 2
+        }
+    }
+}
 
+///性別テキストラベルカスタムクラス
+class genderTextLabel:UILabel {
+    var gender: GENDER
+    
+    init(gender: GENDER) {
+        self.gender = gender
+        super.init(frame: .zero) // 親クラスの指定イニシャライザを呼び出す
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setting() {
+        switch gender {
+        case .male:
+            self.text = "男性"
+        case .female:
+            self.text = "女性"
+        case .none:
+            self.text = "選択しない"
+        }
+        self.textColor = UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 1.0)
+        self.backgroundColor = .clear
+        self.font = UIFont.systemFont(ofSize: 25)
+        self.textAlignment = NSTextAlignment.center
+    }
+    
+}
+///決定ボタンカスタムクラス
+class decisionCustomButton:UIButton {
+    var selectedGender:GENDER?
+    init() {
+        super.init(frame: .zero)// 親クラスの指定イニシャライザを呼び出す
+        self.backgroundColor = .clear
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}
+
+///イメージ名称列挙型配列
+enum GENDER:CaseIterable {
+    case male
+    case female
+    case none
+}
+///メインクラスプロトコル
+protocol initialSettingGenderSelectionViewDelegate:AnyObject {
+    func decisionButtonTappedAction(gender:GENDER)
+}
+///メインクラス
+class initialSettingGenderSelectionView:UIView{
+    ///共通画像インスタンス
+    var femaleImage:genderImageView!
+    var maleImage:genderImageView!
+    var noneGenderImage:genderImageView!
+    
+    ///共通ボタンインスタンス
+    var femaleButton:genderButton!
+    var maleButton:genderButton!
+    var noneGenderButton:genderButton!
+    
+    ///共通テキストラベル
+    var femaleTxtLabel:genderTextLabel!
+    var maleTxtLabel:genderTextLabel!
+    var noneTxtLabel:genderTextLabel!
+    
+    ///決定ボタン_決定ラベル
+    var decisionButton:decisionCustomButton = decisionCustomButton()
+    var decitionTextLabel:UILabel = {
+        let label = UILabel()
+        label.text = "決定"
+        label.textColor = UIColor(red: 1, green: 0.2, blue: 0.2, alpha: 1.0)
+        label.backgroundColor = .white
+        label.font = UIFont.systemFont(ofSize: 25)
+        label.textAlignment = NSTextAlignment.center
+        label.layer.cornerRadius = 10
+        label.layer.masksToBounds = true
+        return label
+    }()
+    ///キャンセルボタン_キャンセルラベル
+    var cancelButton:UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .clear
+        return button
+    }()
+    var cancelTextLabel:UILabel = {
+        let label = UILabel()
+        label.text = "キャンセル"
+        label.textColor = UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 1.0)
+        label.backgroundColor = .white
+        label.font = UIFont.systemFont(ofSize: 25)
+        label.textAlignment = NSTextAlignment.center
+        label.layer.cornerRadius = 10
+        label.layer.masksToBounds = true
+        return label
+    }()
+    
+    ///ハイライト用View
+    var overlayView:OverlayView = OverlayView()
+    
+    ///イメージサイズ
+    var imageSize:CGFloat!
+    
+    ///delegate
+    weak var delegate:initialSettingGenderSelectionViewDelegate?
+    
+    ///画像選択ロックフラグ
+    var selectGenderLocking:Bool = false
+    
+    ///性別選択案内ラベル
+    let selectGenderInfoLabel:UILabel = {
+        let returnLabel = UILabel()
+        returnLabel.text = "性別を教えてください"
+        returnLabel.textColor = UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 1.0)
+        returnLabel.backgroundColor = .clear
+        returnLabel.font = UIFont.systemFont(ofSize: 50)
+        returnLabel.textAlignment = NSTextAlignment.center
+        returnLabel.adjustsFontSizeToFitWidth = true
+        return returnLabel
+    }()
+
+    ///ビューの初期化
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        viewSetUp()
+        viewLayoutSetUp()
+    }
+    ///コードから生成されるビューに対応する初期化メソッド
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        viewSetUp()
+        viewLayoutSetUp()
+    }
+    ///各レイアウト描写ごとに対応するメソッド
+    override func layoutSubviews() {
+        super.layoutSubviews()
+    }
+    
+    /// 性別ボタンが押下された際の挙動
+    /// - Parameter sender: クリックされた性別ボタン（カスタムクラス)
+    @objc func genderButtonClicked(_ sender: genderButton) {
+        ///性別複数押下無効対応
+        if selectGenderLocking {
+            return
+        }
+        ///性別性別ロック
+        self.selectGenderLocking = true
+        ///性別画像拡大アニメーション
+        let FlipAnimation = {(targetImageView:genderImageView) in
+            UIView.transition(with: targetImageView, duration: 0.8, options: .transitionFlipFromLeft, animations: {
+                targetImageView.transform = CGAffineTransform(scaleX: 2, y: 2)
+                targetImageView.center = self.center
+            },completion: {_ in
+                self.bringSubviewToFront(targetImageView)
+                self.decision_CancelIsEnable(isEnable: true)
+            })
+        }
+        ///画面内のすべてのオブジェクト処理
+        self.subviews.forEach{ subView in
+            ///性別ボタンに対しての処理
+            if let Button = subView as? genderButton {
+                Button.isEnabled = false
+            }
+            ///性別画像に対しての処理
+            if let ImageView = subView as? genderImageView {
+                if ImageView.gender == sender.gender {
+                    self.decisionButton.selectedGender = sender.gender
+                    ImageView.selected = true
+                    ImageView.layer.borderColor = UIColor.white.cgColor
+                    ImageView.translatesAutoresizingMaskIntoConstraints = true
+                    ///対象Imageの中心座標を取得しておく
+                    ImageView.centerValue = ImageView.center
+                    FlipAnimation(ImageView)
+                }
+            }
+            ///性別テキストラベルに対しての処理
+            if let textLabel = subView as? genderTextLabel {
+                if textLabel.gender == sender.gender {
+                    textLabel.translatesAutoresizingMaskIntoConstraints = true
+                }
+            }
+        }
+        
+        self.selectGenderInfoLabel.translatesAutoresizingMaskIntoConstraints = true
+        
+        ///ハイライト用ビューの差し込み
+        overlayViewShowOrHide(isAdding: true)
+    }
+    /// 決定ボタンが押下された際の挙動
+    /// - Parameter sender: クリックされた決定ボタン
+    @objc func decitionButtonClicked(_ sender: decisionCustomButton) {
+        guard let gender = sender.selectedGender else {
+            return
+        }
+        ///キャンセルボタンを押下させて画面を初期状態に戻す
+        self.cancelButtonClicked(self.cancelButton)
+        
+        if let delegate = self.delegate {
+            ///ボタンタグをデリゲート関数の引数で渡す
+            delegate.decisionButtonTappedAction(gender:gender)
+        }
+    }
+    /// キャンセルボタンが押下された際の挙動
+    /// - Parameter sender: クリックされたキャンセルボタン
+    @objc func cancelButtonClicked(_ sender: UIButton) {
+        ///性別性別ロック解除
+        self.selectGenderLocking = false
+        ///性別画像縮小アニメーション
+        let FlipAnimation = {(targetImageView:genderImageView) in
+            self.decision_CancelIsEnable(isEnable: false)
+            UIView.transition(with: targetImageView, duration: 0.8, options: .transitionFlipFromLeft, animations: {
+                self.overlayViewShowOrHide(isAdding: false)
+                targetImageView.transform = CGAffineTransform(scaleX: 1, y: 1)
+                targetImageView.center = targetImageView.centerValue!
+            },completion: {_ in
+
+            })
+        }
+        ///画面内のすべてのオブジェクト処理
+        self.subviews.forEach{ subView in
+            ///オートレイアウト無効処理
+            if subView.translatesAutoresizingMaskIntoConstraints {
+                subView.translatesAutoresizingMaskIntoConstraints = false
+            }
+            ///性別画像に対しての処理
+            if let ImageView = subView as? genderImageView {
+                if ImageView.selected {
+                    ImageView.selected = false
+                    ImageView.layer.borderColor = UIColor.gray.cgColor
+                    FlipAnimation(ImageView)
+                    self.insertSubview(ImageView, belowSubview: self.overlayView)
+                }
+            }
+            ///性別テキストラベルに対しての処理
+            if let Button = subView as? genderButton {
+                Button.isEnabled = true
+            }
+        }
+    }
+}
+
+extension initialSettingGenderSelectionView:UIScrollViewDelegate {
+    /// レイアウト全般処理
+    func viewSetUp() {
+        ///背景画像設定
+        backGroundViewImageSetUp(imageName: "gemderSelectBack")
+        
+        ///列挙型配列からボタンおよび画像のインスタンス生成
+        let genderArray:[GENDER] = [.female,.male,.none]
+        for genderPattern in genderArray {
+            ///各インスタンス変数に割り振り
+            switch genderPattern {
+            case .none:
+                noneGenderImage = genderImageView(gender: genderPattern)
+                noneGenderImage.setting()
+                noneTxtLabel = genderTextLabel(gender: genderPattern)
+                noneTxtLabel.setting()
+                noneGenderButton = genderButton(gender: genderPattern)
+                noneGenderButton.setting()
+                noneGenderButton.addTarget(self, action: #selector(genderButtonClicked(_:)), for: UIControl.Event.touchUpInside)
+            case .male:
+                maleImage = genderImageView(gender: genderPattern)
+                maleImage.setting()
+                maleTxtLabel = genderTextLabel(gender: genderPattern)
+                maleTxtLabel.setting()
+                maleButton = genderButton(gender: genderPattern)
+                maleButton.setting()
+                maleButton.addTarget(self, action: #selector(genderButtonClicked(_:)), for: UIControl.Event.touchUpInside)
+            case .female:
+                femaleImage = genderImageView(gender: genderPattern)
+                femaleImage.setting()
+                femaleTxtLabel = genderTextLabel(gender: genderPattern)
+                femaleTxtLabel.setting()
+                femaleButton = genderButton(gender: genderPattern)
+                femaleButton.setting()
+                femaleButton.addTarget(self, action: #selector(genderButtonClicked(_:)), for: UIControl.Event.touchUpInside)
+            }
+        }
+
+        // 画像のサイズを画面の1/3に設定
+        imageSize = UIScreen.main.bounds.width / 3
+
+        /// 各UIImageViewのAuto Layout制約を設定
+        selectGenderInfoLabel.translatesAutoresizingMaskIntoConstraints = false
+        femaleButton.translatesAutoresizingMaskIntoConstraints = false
+        maleButton.translatesAutoresizingMaskIntoConstraints = false
+        noneGenderButton.translatesAutoresizingMaskIntoConstraints = false
+        femaleImage.translatesAutoresizingMaskIntoConstraints = false
+        maleImage.translatesAutoresizingMaskIntoConstraints = false
+        noneGenderImage.translatesAutoresizingMaskIntoConstraints = false
+        femaleTxtLabel.translatesAutoresizingMaskIntoConstraints = false
+        maleTxtLabel.translatesAutoresizingMaskIntoConstraints = false
+        noneTxtLabel.translatesAutoresizingMaskIntoConstraints = false
+        overlayView.translatesAutoresizingMaskIntoConstraints = false
+
+        ///画像の円形処理
+        femaleButton.layer.cornerRadius = imageSize / 2
+        maleButton.layer.cornerRadius = imageSize / 2
+        noneGenderButton.layer.cornerRadius = imageSize / 2
+        noneGenderImage.layer.cornerRadius = imageSize / 2
+        maleImage.layer.cornerRadius = imageSize / 2
+        femaleImage.layer.cornerRadius = imageSize / 2
+        ///オブジェクト 追加
+        self.addSubview(selectGenderInfoLabel)
+        self.addSubview(noneGenderImage)
+        self.addSubview(femaleImage)
+        self.addSubview(maleImage)
+        self.addSubview(overlayView)///必ず各Imageの後ろでaddSubview
+        self.addSubview(femaleButton)
+        self.addSubview(maleButton)
+        self.addSubview(noneGenderButton)
+        self.addSubview(noneTxtLabel)
+        self.addSubview(femaleTxtLabel)
+        self.addSubview(maleTxtLabel)
+    }
+    /// オートレイアウト制約処理
+    func viewLayoutSetUp() {
+        ///無性別イメージビュー
+        noneGenderImage.centerYAnchor.constraint(equalTo: self.centerYAnchor, constant: -imageSize).isActive = true
+        noneGenderImage.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        noneGenderImage.widthAnchor.constraint(equalToConstant: imageSize).isActive = true
+        noneGenderImage.heightAnchor.constraint(equalTo: noneGenderImage.widthAnchor).isActive = true
+        ///女性イメージビュー
+        femaleImage.centerYAnchor.constraint(equalTo: self.centerYAnchor, constant: imageSize).isActive = true
+        femaleImage.widthAnchor.constraint(equalToConstant: imageSize).isActive = true
+        femaleImage.heightAnchor.constraint(equalTo: femaleImage.widthAnchor).isActive = true
+        femaleImage.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+        ///男性イメージビュー
+        maleImage.centerYAnchor.constraint(equalTo: self.centerYAnchor, constant: imageSize).isActive = true
+        maleImage.widthAnchor.constraint(equalToConstant: imageSize).isActive = true
+        maleImage.heightAnchor.constraint(equalTo: maleImage.widthAnchor).isActive = true
+        maleImage.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+        ///無性別ボタン
+        noneGenderButton.centerYAnchor.constraint(equalTo: noneGenderImage.centerYAnchor).isActive = true
+        noneGenderButton.centerXAnchor.constraint(equalTo: noneGenderImage.centerXAnchor).isActive = true
+        noneGenderButton.widthAnchor.constraint(equalTo: noneGenderImage.widthAnchor).isActive = true
+        noneGenderButton.heightAnchor.constraint(equalTo: noneGenderImage.widthAnchor).isActive = true
+        ///女性ボタン
+        femaleButton.centerYAnchor.constraint(equalTo: femaleImage.centerYAnchor).isActive = true
+        femaleButton.widthAnchor.constraint(equalTo: femaleImage.widthAnchor).isActive = true
+        femaleButton.heightAnchor.constraint(equalTo: femaleImage.heightAnchor).isActive = true
+        femaleButton.leadingAnchor.constraint(equalTo: femaleImage.leadingAnchor).isActive = true
+        ///男性ボタン
+        maleButton.centerYAnchor.constraint(equalTo: maleImage.centerYAnchor).isActive = true
+        maleButton.widthAnchor.constraint(equalTo: maleImage.widthAnchor).isActive = true
+        maleButton.heightAnchor.constraint(equalTo: maleImage.heightAnchor).isActive = true
+        maleButton.trailingAnchor.constraint(equalTo: maleImage.trailingAnchor).isActive = true
+        ///無性別テキストラベル
+        noneTxtLabel.centerXAnchor.constraint(equalTo: noneGenderImage.centerXAnchor).isActive = true
+        noneTxtLabel.topAnchor.constraint(equalTo: noneGenderImage.bottomAnchor).isActive = true
+        noneTxtLabel.trailingAnchor.constraint(equalTo: noneGenderImage.trailingAnchor).isActive = true
+        noneTxtLabel.leadingAnchor.constraint(equalTo: noneGenderImage.leadingAnchor).isActive = true
+        noneTxtLabel.heightAnchor.constraint(equalTo: selectGenderInfoLabel.heightAnchor, multiplier: 0.5).isActive = true
+        ///男性テキストラベル
+        maleTxtLabel.centerXAnchor.constraint(equalTo: maleImage.centerXAnchor).isActive = true
+        maleTxtLabel.topAnchor.constraint(equalTo: maleImage.bottomAnchor).isActive = true
+        maleTxtLabel.trailingAnchor.constraint(equalTo: maleImage.trailingAnchor).isActive = true
+        maleTxtLabel.leadingAnchor.constraint(equalTo: maleImage.leadingAnchor).isActive = true
+        maleTxtLabel.heightAnchor.constraint(equalTo: selectGenderInfoLabel.heightAnchor, multiplier: 0.5).isActive = true
+        ///女性テキストラベル
+        femaleTxtLabel.centerXAnchor.constraint(equalTo: femaleImage.centerXAnchor).isActive = true
+        femaleTxtLabel.topAnchor.constraint(equalTo: femaleImage.bottomAnchor).isActive = true
+        femaleTxtLabel.trailingAnchor.constraint(equalTo: femaleImage.trailingAnchor).isActive = true
+        femaleTxtLabel.leadingAnchor.constraint(equalTo: femaleImage.leadingAnchor).isActive = true
+        femaleTxtLabel.heightAnchor.constraint(equalTo: selectGenderInfoLabel.heightAnchor, multiplier: 0.5).isActive = true
+        ///ハイライト用View
+        overlayView.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+        overlayView.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        overlayView.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+        overlayView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+        
+        ///性別選択案内ラベル（Top位置はLayout Sub Viewで設定）
+        selectGenderInfoLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        selectGenderInfoLabel.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.1).isActive = true
+        selectGenderInfoLabel.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.9).isActive = true
+        selectGenderInfoLabel.bottomAnchor.constraint(equalTo: self.noneGenderImage.topAnchor,constant: -10).isActive = true
+    }
+    
+    
+    /// オーバーレイ表示Or非表示
+    /// - Parameter isAdding: 表示するか非表示にするか選択するBool値
+    func overlayViewShowOrHide(isAdding:Bool) {
+        if isAdding {
+            self.noneGenderImage.image = UIImage(named: "UnknownSelected")
+            overlayView.show()
+        } else {
+            guard let overlayView = self.subviews.first(where: { $0 is OverlayView }) as? OverlayView else {
+                return
+            }
+            self.noneGenderImage.image = UIImage(named: "Unknown")
+            overlayView.hide()
+        }
+    }
+    
+    ///性別決定及びキャンセル設定
+    func decision_CancelSetUp() {
+        
+        ///キャンセルボタンと決定ボタンのタップアクション設定
+        cancelButton.addTarget(self, action: #selector(self.cancelButtonClicked(_:)), for: UIControl.Event.touchUpInside)
+        decisionButton.addTarget(self, action: #selector(self.decitionButtonClicked(_:)), for: UIControl.Event.touchUpInside)
+        self.addSubview(decitionTextLabel)
+        self.addSubview(decisionButton)
+        self.addSubview(cancelTextLabel)
+        self.addSubview(cancelButton)
+        
+        decisionButton.translatesAutoresizingMaskIntoConstraints = false
+        decitionTextLabel.translatesAutoresizingMaskIntoConstraints = false
+        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+        cancelTextLabel.translatesAutoresizingMaskIntoConstraints = false
+    }
+    ///性別決定及びキャンセルレイアウト設定
+    func decision_CancelLayoutSetUp() {
+        
+        decisionButton.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.3).isActive = true
+        decisionButton.heightAnchor.constraint(equalTo: self.selectGenderInfoLabel.heightAnchor).isActive = true
+        decisionButton.topAnchor.constraint(equalTo: self.centerYAnchor, constant: self.bounds.width/3).isActive = true
+        decisionButton.centerXAnchor.constraint(equalTo: self.centerXAnchor, constant: self.bounds.width/3).isActive = true
+        
+        decitionTextLabel.widthAnchor.constraint(equalTo: decisionButton.widthAnchor).isActive = true
+        decitionTextLabel.heightAnchor.constraint(equalTo: decisionButton.heightAnchor).isActive = true
+        decitionTextLabel.topAnchor.constraint(equalTo: decisionButton.topAnchor).isActive = true
+        decitionTextLabel.centerXAnchor.constraint(equalTo: decisionButton.centerXAnchor).isActive = true
+        
+        cancelButton.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.3).isActive = true
+        cancelButton.heightAnchor.constraint(equalTo: self.selectGenderInfoLabel.heightAnchor).isActive = true
+        cancelButton.topAnchor.constraint(equalTo: self.centerYAnchor, constant: self.bounds.width/3).isActive = true
+        cancelButton.centerXAnchor.constraint(equalTo: self.centerXAnchor, constant: -self.bounds.width/3).isActive = true
+        
+        cancelTextLabel.widthAnchor.constraint(equalTo: cancelButton.widthAnchor).isActive = true
+        cancelTextLabel.heightAnchor.constraint(equalTo: cancelButton.heightAnchor).isActive = true
+        cancelTextLabel.topAnchor.constraint(equalTo: cancelButton.topAnchor).isActive = true
+        cancelTextLabel.centerXAnchor.constraint(equalTo: cancelButton.centerXAnchor).isActive = true
+
+    }
+    /// 決定・キャンセルボタン有効・無効化
+    /// - Parameter isEnable: 有効か無効にするか選択するBool値
+    func decision_CancelIsEnable(isEnable:Bool) {
+            self.cancelButton.isEnabled = isEnable
+            self.decisionButton.isEnabled = isEnable
+        if isEnable {
+            decision_CancelSetUp()
+            decision_CancelLayoutSetUp()
+        } else {
+            self.cancelButton.removeFromSuperview()
+            self.decisionButton.removeFromSuperview()
+            self.cancelTextLabel.removeFromSuperview()
+            self.decitionTextLabel.removeFromSuperview()
+        }
     }
 }

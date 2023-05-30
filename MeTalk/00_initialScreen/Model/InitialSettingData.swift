@@ -33,6 +33,10 @@ struct InitialSettingData {
         var returnImage = UIImage(named: "Unknown_Sex_Orange")!
         return returnImage
     }()
-    
 }
 
+struct initialProfileInfo {
+    var nickName:String?
+    var Age:Int?
+    var gender:GENDER?
+}
