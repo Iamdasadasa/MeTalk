@@ -154,15 +154,15 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
 
         let TOOL = TIME()
         ///サーバーに対して画像取得要求
-        CONTENTSHOSTING.ImageDataGetter(callback: { Image, err in
-
-            if Image.profileImage != nil,cell.celluserStruct!.lcl_UID == USERINFODATA.lcl_UID!{
-                if err != nil  {
-                    ///エラー処理したい場合はここに書く
-                }
-                cell.talkListUserProfileImageView.image = Image.profileImage
-            }
-        }, UID: USERINFODATA.lcl_UID!, UpdateTime: TOOL.pastTimeGet())
+//        CONTENTSHOSTING.ImageDataGetter(callback: { Image, err in
+//
+//            if Image.profileImage != nil,cell.celluserStruct!.lcl_UID == USERINFODATA.lcl_UID!{
+//                if err != nil  {
+//                    ///エラー処理したい場合はここに書く
+//                }
+//                cell.talkListUserProfileImageView.image = Image.profileImage
+//            }
+//        }, UID: USERINFODATA.lcl_UID!, UpdateTime: TOOL.pastTimeGet())
 
         ///セルのデリゲート処理
         cell.delegate = self

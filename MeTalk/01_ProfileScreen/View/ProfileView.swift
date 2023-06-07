@@ -24,7 +24,7 @@ class  ProfileView:UIView{
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.backgroundColor = .black
+        self.backgroundColor = .white
         autoLayoutSetUp()
         autoLayout()
         viewSetUp()
@@ -94,41 +94,15 @@ class  ProfileView:UIView{
         delegate?.profileImageButtonTappedDelegate()
     }
     
-    ///プロフィール名ラベル
-    let profileNameTitleLabel:UILabel = {
-        let returnLabel = UILabel()
-        returnLabel.textColor = .white
-        returnLabel.backgroundColor = .clear
-        returnLabel.textAlignment = NSTextAlignment.left
-        returnLabel.adjustsFontSizeToFitWidth = true
-        return returnLabel
-    }()
-    
     ///基本情報ラベル
     let personalInformationLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.text = "10文字でユーザー名"
         returnLabel.textColor = .white
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
         returnLabel.adjustsFontSizeToFitWidth = true
         return returnLabel
     }()
-    
-    ///プロフィール名ボタン
-    let profileNameButton:UIButton = {
-        let returnUIButton = UIButton()
-        returnUIButton.layer.cornerRadius = 10
-        returnUIButton.layer.borderWidth = 1
-        returnUIButton.clipsToBounds = true
-        returnUIButton.layer.borderColor = UIColor.orange.cgColor
-        returnUIButton.addTarget(self, action: #selector(profileImageButtonTapped), for: .touchUpInside)
-        return returnUIButton
-    }()
-    
-    @objc func profileNameButtonTapped(){
-//        delegate?.profileNameButtonTappedDelegate()
-    }
     
     ///変更不可情報ラベル
     let cantBeChangedInfoTitleLabel:UILabel = {
@@ -259,15 +233,13 @@ class  ProfileView:UIView{
         personalInformationLabel.bottomAnchor.constraint(equalTo: self.profileImageButton.bottomAnchor).isActive = true
         
         nickNameItemView.topAnchor.constraint(equalTo: self.profileImageButton.bottomAnchor,constant: 50).isActive = true
-//        nickNameItemView.leadingAnchor.constraint(equalTo: self.profileImageButton.leadingAnchor).isActive = true
-//        nickNameItemView.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
-        nickNameItemView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 5).isActive = true
-        nickNameItemView.trailingAnchor.constraint(equalTo: self.centerXAnchor, constant: -2.5).isActive = true
+        nickNameItemView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 10).isActive = true
+        nickNameItemView.trailingAnchor.constraint(equalTo: self.centerXAnchor, constant: -5).isActive = true
         nickNameItemView.heightAnchor.constraint(equalTo: self.profileImageButton.heightAnchor).isActive = true
         
         AboutMeItemView.topAnchor.constraint(equalTo: self.nickNameItemView.topAnchor).isActive = true
-        AboutMeItemView.leadingAnchor.constraint(equalTo: self.centerXAnchor, constant: 2.5).isActive = true
-        AboutMeItemView.trailingAnchor.constraint(equalTo: self.trailingAnchor,constant: -5).isActive = true
+        AboutMeItemView.leadingAnchor.constraint(equalTo: self.centerXAnchor, constant: 5).isActive = true
+        AboutMeItemView.trailingAnchor.constraint(equalTo: self.trailingAnchor,constant: -10).isActive = true
         AboutMeItemView.heightAnchor.constraint(equalTo: self.nickNameItemView.heightAnchor).isActive = true
         
         ageItemView.topAnchor.constraint(equalTo: self.nickNameItemView.bottomAnchor, constant: 5).isActive = true
@@ -275,11 +247,11 @@ class  ProfileView:UIView{
         ageItemView.trailingAnchor.constraint(equalTo: self.nickNameItemView.trailingAnchor).isActive = true
         ageItemView.heightAnchor.constraint(equalTo: self.nickNameItemView.heightAnchor).isActive = true
 
-        areaItemView.topAnchor.constraint(equalTo: self.AboutMeItemView.bottomAnchor, constant: 5).isActive = true
-        areaItemView.leadingAnchor.constraint(equalTo: self.centerXAnchor, constant: 2.5).isActive = true
-        areaItemView.trailingAnchor.constraint(equalTo: self.trailingAnchor,constant: -5).isActive = true
+        areaItemView.topAnchor.constraint(equalTo: self.ageItemView.topAnchor).isActive = true
+        areaItemView.leadingAnchor.constraint(equalTo: self.AboutMeItemView.leadingAnchor).isActive = true
+        areaItemView.trailingAnchor.constraint(equalTo: self.AboutMeItemView.trailingAnchor).isActive = true
         areaItemView.heightAnchor.constraint(equalTo: self.AboutMeItemView.heightAnchor).isActive = true
-        
+            
         cantBeChangedInfoTitleLabel.topAnchor.constraint(equalTo: self.ageItemView.bottomAnchor, constant: 5).isActive = true
         cantBeChangedInfoTitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 5).isActive = true
         cantBeChangedInfoTitleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: -5).isActive = true
@@ -351,10 +323,11 @@ extension ProfileView{
 extension ProfileView{
     func viewSetUp(){
         ///タイトルセットアップ
-        self.nickNameItemView.TitleLabel.text = "ニックネーム"
-        self.AboutMeItemView.TitleLabel.text = "ひとこと"
-        self.ageItemView.TitleLabel.text = "年齢"
-        self.areaItemView.TitleLabel.text = "住まい"
+        self.nickNameItemView.TitleLabel.text = "┃ニックネーム"
+        self.AboutMeItemView.TitleLabel.text = "┃ひとこと"
+        self.ageItemView.TitleLabel.text = "┃年齢"
+        self.areaItemView.TitleLabel.text = "┃住まい"
+
         ///View判断タグセットアップ
         self.nickNameItemView.tag = 1
         self.AboutMeItemView.tag = 2

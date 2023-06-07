@@ -11,16 +11,18 @@ import UIKit
 class initialSettingAgeSelectViewController:UIViewController{
     ///プロファイル受け渡し用変数
     var PROFILEINFODATA = initialProfileInfo()
+    ///表示画面
     let AgeSelectView = initialSettingAgeSelectView()
-    let nickNameSelectViewController = initialSettingNicknameSelectViewController()
-    
+    ///遷移先画面
+    let nextVC = initialSettingNicknameSelectViewController()
+    ///戻るボタン
     var backButtonItem:UIBarButtonItem! // Backボタン
     
     override func viewDidLoad() {
         self.AgeSelectView.delegate = self
         self.view = AgeSelectView
         ///barボタン初期設定
-        backButtonItem = UIBarButtonItem(barButtonSystemItem: .reply, target: self, action: #selector(backButtonPressed(_:)))
+        backButtonItem = UIBarButtonItem(title: "＜性別選択", style: .plain, target: self, action: #selector(backButtonPressed(_:)))
         self.navigationItem.leftBarButtonItem = backButtonItem
         self.view.backgroundColor = .gray
     }
@@ -32,16 +34,20 @@ class initialSettingAgeSelectViewController:UIViewController{
 }
 
 extension initialSettingAgeSelectViewController:initialSettingAgeSelectViewDelegate{
+    
+    /// 画面の決定ボタンを押下した際の処理
+    /// - Parameter ageSelectionView: 表示画面丸ごと
     func decisionButtonTappedAction(ageSelectionView: initialSettingAgeSelectView) {
-        guard let SELECTTEDAGE = ageSelectionView.allAgeSelected() else {
+        guard let AGE = formattedBirth() else {
             return
         }
         ///年齢データ格納
-        self.PROFILEINFODATA.Age = SELECTTEDAGE
+        self.PROFILEINFODATA.Age = AGE
+        print(self.PROFILEINFODATA.Age)
         ///年齢データおよび性別データ格納
-        nickNameSelectViewController.PROFILEINFODATA = self.PROFILEINFODATA
+        nextVC.PROFILEINFODATA = self.PROFILEINFODATA
         ///画面遷移
-        nextPushViewController(nextViewController: nickNameSelectViewController)
+        nextPushViewController(nextViewController: nextVC)
                 
         return
     }
@@ -53,6 +59,24 @@ extension initialSettingAgeSelectViewController:initialSettingAgeSelectViewDeleg
         UINavigationController.modalPresentationStyle = .fullScreen
         self.present(UINavigationController, animated: false, completion: nil)
         self.slideInFromRight() // 遷移先の画面を横スライドで表示
+    }
+    
+    ///Viewから取得した生年月日をスラッシュ形式の文字列に変更
+    func formattedBirth() -> String? {
+        let allCustomTextField = AgeSelectView.allCustomTextField
+        var BirthString = ""
+        
+        for customTextField in allCustomTextField {
+            guard let selectedAge = customTextField.selectedAge else {
+                return nil
+            }
+            if customTextField.birthType == .day {
+                BirthString += String(selectedAge)
+            } else {
+                BirthString += String("\(selectedAge)/")
+            }
+        }
+        return BirthString.convertToFormattedDateString(targetAgeString: BirthString, Type: .EightDigit)
     }
     
 }

@@ -73,3 +73,53 @@ extension UIViewController {
         self.view.window!.layer.add(transition, forKey: kCATransition)
     }
 }
+
+//extension UITextField {
+//    func textFieldFontSizeAutoResize(MaxCharacterDigit:Int) {
+//        // 最大文字サイズの計算
+//        let textFieldWidth = self.bounds.width
+//        let characterWidth = textFieldWidth / CGFloat(MaxCharacterDigit)
+//        let maximumFontSize = UIFont.systemFont(ofSize: 1).pointSize * characterWidth
+//        self.font = UIFont.systemFont(ofSize: maximumFontSize)
+//    }
+//}
+
+extension String {
+    enum birthStringType{
+        case EightDigit
+        case YearsOld
+    }
+    func convertToFormattedDateString(targetAgeString:String,Type:birthStringType) -> String? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy/MM/dd"
+        
+        if let birthDate = dateFormatter.date(from: targetAgeString) {
+            let formattedString = dateFormatter.string(from: birthDate)
+            return formattedString
+        } else {
+            return nil
+        }
+    }
+    
+    enum birthIntType{
+        case EightDigit
+        case YearsOld
+    }
+    
+    func convertToFormattedDateInt(targetAgeString:String,Type:birthIntType) -> Int? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy/MM/dd"
+
+        if let date = dateFormatter.date(from: targetAgeString) {
+            let modifiedDateFormatter = DateFormatter()
+            modifiedDateFormatter.dateFormat = "yyyyMMdd"
+            let modifiedDateString = modifiedDateFormatter.string(from: date)
+
+            if let modifiedDate = Int(modifiedDateString) {
+                return modifiedDate
+            }
+        }
+        return nil
+    }
+    
+}

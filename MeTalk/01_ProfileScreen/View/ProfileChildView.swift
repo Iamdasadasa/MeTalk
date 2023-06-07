@@ -27,10 +27,22 @@ class ProfileChildView:UIView{
     //※layoutSubviews レイアウト描写が更新された後※
     override func layoutSubviews() {
         super.layoutSubviews()
+        ///それぞれのフォントサイズを決定
+        let titleFontSize = sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 20, objectWidth: TitleLabel.bounds.width)
+
+        let valueFontSize = sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 15, objectWidth: valueLabel.bounds.width)
         
-        TitleLabel.font = TitleLabel.font.withSize(TitleLabel.bounds.width * 0.13)
-        ///valueLabelの値のサイズはTitleLabelの値のサイズの半分
-        valueLabel.font = valueLabel.font.withSize(TitleLabel.font.pointSize * 0.5)
+        TitleLabel.font = UIFont.systemFont(ofSize: titleFontSize)
+        valueLabel.font = UIFont.systemFont(ofSize: valueFontSize)
+        ///自身に陰影をつける（ボタンっぽくする）
+        self.layer.masksToBounds = false
+        self.layer.shadowColor = UIColor.black.cgColor
+        self.layer.shadowOffset = CGSize(width: -2, height: 2)
+        self.layer.shadowOpacity = 0.5
+        self.layer.shadowRadius = 2
+        ///シャドウパスとして保持
+        self.layer.shadowPath = UIBezierPath(rect: self.bounds).cgPath
+
     }
     
 //※初期化処理※
@@ -47,7 +59,7 @@ class ProfileChildView:UIView{
     ///自身のViewと同じサイズのボタン
     let selfClearButton:UIButton = {
         let returnUIButton = UIButton()
-        returnUIButton.backgroundColor = .orange
+        returnUIButton.backgroundColor = .white
         returnUIButton.layer.cornerRadius = 10
         returnUIButton.addTarget(self, action: #selector(selfClearButtonTapped), for: .touchUpInside)
         return returnUIButton
@@ -60,10 +72,10 @@ class ProfileChildView:UIView{
     ///タイトルラベル
     let TitleLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.textColor = .white
+        returnLabel.textColor = .gray
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
-        returnLabel.adjustsFontSizeToFitWidth = true
+//        returnLabel.adjustsFontSizeToFitWidth = true
         return returnLabel
     }()
     
@@ -79,10 +91,10 @@ class ProfileChildView:UIView{
         let returnLabel = UILabel()
         returnLabel.text = ""
         returnLabel.font = UIFont.boldSystemFont(ofSize: 200.0)
-        returnLabel.textColor = .gray
+        returnLabel.textColor = .black
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
-        returnLabel.adjustsFontSizeToFitWidth = true
+//        returnLabel.adjustsFontSizeToFitWidth = true
         returnLabel.numberOfLines = 0
         return returnLabel
     }()

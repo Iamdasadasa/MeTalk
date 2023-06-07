@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class intialSettingWelcomeViewController:UIViewController,welcomeViewObjectDelegateProtocol {
+class initialSettingWelcomeViewController:UIViewController,welcomeViewObjectDelegateProtocol {
 
     let welcomeView = initialSettingWelcomeView()
     

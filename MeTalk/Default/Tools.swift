@@ -230,3 +230,14 @@ struct TimeTools {
         return date!
     }
 }
+
+struct sizeAdjust {
+    static func objecFontSizeAutoResize(MaxCharacterDigit:Int,objectWidth:CGFloat) -> CGFloat {
+        // 最大文字サイズの計算
+        let textFieldWidth = objectWidth
+        let characterWidth = textFieldWidth / CGFloat(MaxCharacterDigit)
+        let maximumFontSize = UIFont.systemFont(ofSize: 1).pointSize * characterWidth
+//        self.font = UIFont.systemFont(ofSize: maximumFontSize)
+        return maximumFontSize
+    }
+}

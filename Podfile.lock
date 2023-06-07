@@ -500,11 +500,11 @@ PODS:
   - nanopb/encode (2.30908.0)
   - PromisesObjC (2.0.0)
   - ReachabilitySwift (5.0.0)
-  - Realm (10.28.1):
-    - Realm/Headers (= 10.28.1)
-  - Realm/Headers (10.28.1)
-  - RealmSwift (10.28.1):
-    - Realm (= 10.28.1)
+  - Realm (10.40.0):
+    - Realm/Headers (= 10.40.0)
+  - Realm/Headers (10.40.0)
+  - RealmSwift (10.40.0):
+    - Realm (= 10.40.0)
   - SideMenu (6.5.0)
 
 DEPENDENCIES:
@@ -577,8 +577,8 @@ SPEC CHECKSUMS:
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
-  Realm: f4674e0e7ee537f67a78d79bd8319bc777d61d06
-  RealmSwift: 0e0e4786685c4442bf56d3831dfefb5fa05d6fd6
+  Realm: 67e2bc963e693a787961bd81d0594f2410615d9e
+  RealmSwift: 39622fdcd18d54e0ba49a7d31e9662404595e998
   SideMenu: f583187d21c5b1dd04c72002be544b555a2627a2
 
 PODFILE CHECKSUM: 906a0bc97ae0a1c66cb733888a1eea6ac9b7b3ac

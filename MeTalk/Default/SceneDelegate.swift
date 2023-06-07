@@ -27,14 +27,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
             // 2. 最初に表示する画面を設定
             if let uid = Auth.auth().currentUser?.uid {
+                rootViewController = MainTabBarController()
 //                rootViewController = initialSettingNicknameSelectViewController()
 //                rootViewController = initialSettingViewcontroller()
 //                rootViewController = initialSettingAgeSelectViewController()
-                rootViewController = initialSettingGenderSelectionViewController()
+//                rootViewController = initialSettingGenderSelectionViewController()
 //                rootViewController = MainTabBarController()
             } else {
+                rootViewController = initialSettingWelcomeViewController()
 //                rootViewController = initialSettingNicknameSelectViewController()
-                rootViewController = initialSettingGenderSelectionViewController()
+//                rootViewController = initialSettingGenderSelectionViewController()
 //                rootViewController = initialSettingAgeSelectViewController()
 //                rootViewController = initialSettingViewcontroller()
 //                rootViewController = initialSettingViewcontroller()

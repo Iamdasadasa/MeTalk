@@ -9,8 +9,11 @@ import Foundation
 import UIKit
 
 class initialSettingGenderSelectionViewController:UIViewController{
+    ///入力データ受け渡し用変数
     var PROFILEINFODATA = initialProfileInfo()
+    ///遷移先画面
     let nextVC = initialSettingAgeSelectViewController()
+    ///表示画面
     let GenderSelectionView = initialSettingGenderSelectionView()
     
     override func viewDidLoad() {
@@ -20,6 +23,9 @@ class initialSettingGenderSelectionViewController:UIViewController{
 }
 
 extension initialSettingGenderSelectionViewController:initialSettingGenderSelectionViewDelegate {
+    
+    /// 画面上の決定ボタン押下時アクション
+    /// - Parameter gender: 入力された性別情報
     func decisionButtonTappedAction(gender: GENDER) {
         ///性別情報を格納
         PROFILEINFODATA.gender = gender

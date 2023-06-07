@@ -49,7 +49,7 @@ class AgeCustomImageView:UIImageView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+    ///レイアウト設定
     func setting() {
         self.contentMode = .scaleAspectFit
         self.clipsToBounds = true
@@ -138,6 +138,8 @@ class initialSettingAgeSelectView:UIView {
     let birthUnder07 = UIImageView(image: UIImage(named: "Birth_Under"))
     let birthUnder08 = UIImageView(image: UIImage(named: "Birth_Under"))
     let dayTextField = AgeCustomTextField(Type: .day)
+    ///生年月日の各カスタムテキストフィールド格納配列
+    var allCustomTextField: [AgeCustomTextField] = []
     ///デリゲート用変数
     weak var delegate:initialSettingAgeSelectViewDelegate?
     ///決定ボタン
@@ -150,22 +152,20 @@ class initialSettingAgeSelectView:UIView {
     
     ///決定ボタン押下時の挙動デリゲート
     @objc func dicisionButtontapped(_ sender: UIButton){
+        print("押下されました")
         if delegate != nil {
             self.delegate?.decisionButtonTappedAction(ageSelectionView: self)
         }
     }
-    ///決定ラベル
-    let decisionLabel:UILabel = {
-        let label = UILabel()
-        label.text = "決定"
-        label.textColor = UIColor(red: 0.7, green: 0.7, blue: 0.7, alpha: 1.0)
-        label.backgroundColor = .white
-        label.font = UIFont.systemFont(ofSize: 25)
-        label.textAlignment = NSTextAlignment.center
-        label.layer.cornerRadius = 10
-        label.layer.masksToBounds = true
-        label.isHidden = true
-        return label
+    ///決定ImageView
+    let decisionImageView:UIImageView = {
+        let ImageView = UIImageView()
+        ImageView.contentMode = .scaleAspectFit
+        ImageView.backgroundColor = .clear
+        ImageView.layer.masksToBounds = true
+        ImageView.isHidden = true
+        ImageView.image = UIImage(named: "decisionImage")
+        return ImageView
     }()
     
     ///性別選択案内ラベル
@@ -186,18 +186,17 @@ class initialSettingAgeSelectView:UIView {
         viewSetUp()
         viewLayoutSetUp()
     }
-    ///コードから生成されるビューに対応する初期化メソッド
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        viewSetUp()
-        viewLayoutSetUp()
-    }
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 extension initialSettingAgeSelectView {
     /// レイアウト全般処理
     func viewSetUp() {
+        ///カスタムテキストフィールド群格納
+        allCustomTextField =  [self.yearTextField, self.monthTextField, self.dayTextField]
         ///背景画像設定
         backGroundViewImageSetUp(imageName: "gemderSelectBack")
         ///テキストフィールドデリゲート
@@ -230,7 +229,7 @@ extension initialSettingAgeSelectView {
         self.addSubview(dayTextField)
         
         self.addSubview(selectAgeInfoLabel)
-        self.addSubview(decisionLabel)
+        self.addSubview(decisionImageView)
         self.addSubview(decisionButton)
         
         ///ピッカーの全般設定
@@ -263,7 +262,7 @@ extension initialSettingAgeSelectView {
         dayTextField.translatesAutoresizingMaskIntoConstraints = false
         
         selectAgeInfoLabel.translatesAutoresizingMaskIntoConstraints = false
-        decisionLabel.translatesAutoresizingMaskIntoConstraints = false
+        decisionImageView.translatesAutoresizingMaskIntoConstraints = false
         decisionButton.translatesAutoresizingMaskIntoConstraints = false
         
     }
@@ -368,13 +367,15 @@ extension initialSettingAgeSelectView {
         birthUnder08.heightAnchor.constraint(equalTo: self.birthUnder07.heightAnchor).isActive = true
         birthUnder08.widthAnchor.constraint(equalTo: self.birthUnder07.widthAnchor).isActive = true
         
-        decisionLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
-        decisionLabel.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.4).isActive = true
-        decisionLabel.heightAnchor.constraint(equalTo: self.selectAgeInfoLabel.heightAnchor).isActive = true
-        decisionLabel.topAnchor.constraint(equalTo: self.birthUnder01.bottomAnchor,constant: 30).isActive = true
+        decisionImageView.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        decisionImageView.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.4).isActive = true
+        decisionImageView.heightAnchor.constraint(equalTo: self.selectAgeInfoLabel.heightAnchor).isActive = true
+        decisionImageView.topAnchor.constraint(equalTo: self.birthUnder01.bottomAnchor,constant: 30).isActive = true
         
-        decisionButton.centerXAnchor.constraint(equalTo: self.decisionLabel.centerXAnchor).isActive = true
-        decisionButton.centerYAnchor.constraint(equalTo: self.decisionLabel.centerYAnchor).isActive = true
+        decisionButton.centerXAnchor.constraint(equalTo: self.decisionImageView.centerXAnchor).isActive = true
+        decisionButton.centerYAnchor.constraint(equalTo: self.decisionImageView.centerYAnchor).isActive = true
+        decisionButton.widthAnchor.constraint(equalTo: decisionImageView.widthAnchor).isActive = true
+        decisionButton.heightAnchor.constraint(equalTo: decisionImageView.heightAnchor).isActive = true
         
     }
 
@@ -425,9 +426,8 @@ extension initialSettingAgeSelectView:UIPickerViewDataSource, UIPickerViewDelega
             self.dayTextField.inputAccessoryView = toolbar
         }
 
-        
-        // 5. デフォルト設定
-        targetPickerView.selectRow(1, inComponent: 0, animated: false)
+        // デフォルト設定
+        targetPickerView.selectRow(0, inComponent: 0, animated: false)
     }
     
     // 1. 決定ボタンのアクション指定
@@ -458,14 +458,12 @@ extension initialSettingAgeSelectView:UIPickerViewDataSource, UIPickerViewDelega
             self.dayTextField.endEditing(true)
         }
         ///完了後にラベル色を変更
-        if allAgeSelected() != nil {
+        if allAgeSelected() {
             self.decisionButton.isEnabled = true
-            self.decisionLabel.isHidden = false
-            self.decisionLabel.textColor = UIColor(red: 1, green: 0.2, blue: 0.2, alpha: 1.0)
+            self.decisionImageView.isHidden = false
         } else {
             self.decisionButton.isEnabled = false
-            self.decisionLabel.isHidden = true
-            self.decisionLabel.textColor = UIColor(red: 0.7, green: 0.7, blue: 0.7, alpha: 1.0)
+            self.decisionImageView.isHidden = true
         }
         
     }
@@ -545,7 +543,7 @@ extension initialSettingAgeSelectView:UIPickerViewDataSource, UIPickerViewDelega
     
     /// ユーザーが選択した生年月日から適切な画像データを返却
     /// - Parameters:
-    ///   - targetDigitNum: 取得したい桁数
+    ///   - targetDigitNum: 取得したい桁の位置
     ///   - type: 取得したい生年月日のいずれか
     /// - Returns: 生年月日画像データ
     func getTargetBirthImage(targetDigitNum:Int,type:birthType) -> UIImage {
@@ -586,9 +584,9 @@ extension initialSettingAgeSelectView:UIPickerViewDataSource, UIPickerViewDelega
                 return UIImage(named:"Birth_0")!
             }
         }
-
+        ///文字列変換
         let birthString = String(birthValue)
-        
+        ///桁数が一桁の場合の適切な画像返却
         if birthString.count == 1 {
             if targetDigitNum == 0 {
                 ///桁数が1(月または日選択中の1〜9の場合)は2桁(01月や09日)の返却にしたいため一桁目は強制的に0画像のイメージデータを返却
@@ -598,9 +596,11 @@ extension initialSettingAgeSelectView:UIPickerViewDataSource, UIPickerViewDelega
                 return ReturnImage(targetString)
             }
         }
-        
+        ///適切な画像返却
         if birthString.count >= targetDigitNum {
+            ///取得したい桁の数値を取得
             let targetString = birthString[birthString.index(birthString.startIndex, offsetBy: targetDigitNum)]
+            ///画像返却
             return ReturnImage(targetString)
         } else {
             ///適切に変換されなかった
@@ -609,24 +609,13 @@ extension initialSettingAgeSelectView:UIPickerViewDataSource, UIPickerViewDelega
     }
 
     /// すべての年齢データが決定されている場合年齢を返却
-    /// - Returns: 年齢データ　Int型で必ず8桁
-    func allAgeSelected() -> Int? {
-        let allCustomTextField: [AgeCustomTextField] = [self.yearTextField, self.monthTextField, self.dayTextField]
-        var combinedAgeString = ""
-
+    /// - Returns: 年齢が変数に入っているか否かのBool
+    func allAgeSelected() -> Bool {
         for customTextField in allCustomTextField {
-            if let selectedAge = customTextField.selectedAge {
-                combinedAgeString += String(selectedAge)
-            } else {
-                return nil
+            guard let selectedAge = customTextField.selectedAge else {
+                return false
             }
         }
-
-        if let combinedAge = Int(combinedAgeString) {
-            return combinedAge
-        } else {
-            return nil
-        }
+        return true
     }
-    
 }

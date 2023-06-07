@@ -38,6 +38,7 @@ class genderImageView:UIImageView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// レイアウト設定
     func setting() {
         self.contentMode = .scaleAspectFit
         self.clipsToBounds = true
@@ -65,7 +66,7 @@ class genderButton:UIButton {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+    ///性別に対するタグ割り当て
     func setting() {
         self.backgroundColor = .clear
         
@@ -93,6 +94,7 @@ class genderTextLabel:UILabel {
         fatalError("init(coder:) has not been implemented")
     }
     
+    /// レイアウト設定
     func setting() {
         switch gender {
         case .male:
@@ -149,35 +151,29 @@ class initialSettingGenderSelectionView:UIView{
     var maleTxtLabel:genderTextLabel!
     var noneTxtLabel:genderTextLabel!
     
-    ///決定ボタン_決定ラベル
+    ///決定ボタン_決定画像
     var decisionButton:decisionCustomButton = decisionCustomButton()
-    var decitionTextLabel:UILabel = {
-        let label = UILabel()
-        label.text = "決定"
-        label.textColor = UIColor(red: 1, green: 0.2, blue: 0.2, alpha: 1.0)
-        label.backgroundColor = .white
-        label.font = UIFont.systemFont(ofSize: 25)
-        label.textAlignment = NSTextAlignment.center
-        label.layer.cornerRadius = 10
-        label.layer.masksToBounds = true
-        return label
+    let decisionImageView:UIImageView = {
+        let ImageView = UIImageView()
+        ImageView.contentMode = .scaleAspectFit
+        ImageView.backgroundColor = .clear
+        ImageView.layer.masksToBounds = true
+        ImageView.image = UIImage(named: "decisionImage")
+        return ImageView
     }()
-    ///キャンセルボタン_キャンセルラベル
+    ///キャンセルボタン_キャンセル画像
     var cancelButton:UIButton = {
         let button = UIButton()
         button.backgroundColor = .clear
         return button
     }()
-    var cancelTextLabel:UILabel = {
-        let label = UILabel()
-        label.text = "キャンセル"
-        label.textColor = UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 1.0)
-        label.backgroundColor = .white
-        label.font = UIFont.systemFont(ofSize: 25)
-        label.textAlignment = NSTextAlignment.center
-        label.layer.cornerRadius = 10
-        label.layer.masksToBounds = true
-        return label
+    let cancelImageView:UIImageView = {
+        let ImageView = UIImageView()
+        ImageView.contentMode = .scaleAspectFit
+        ImageView.backgroundColor = .clear
+        ImageView.layer.masksToBounds = true
+        ImageView.image = UIImage(named: "BackImage")
+        return ImageView
     }()
     
     ///ハイライト用View
@@ -210,11 +206,8 @@ class initialSettingGenderSelectionView:UIView{
         viewSetUp()
         viewLayoutSetUp()
     }
-    ///コードから生成されるビューに対応する初期化メソッド
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        viewSetUp()
-        viewLayoutSetUp()
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     ///各レイアウト描写ごとに対応するメソッド
     override func layoutSubviews() {
@@ -333,7 +326,7 @@ extension initialSettingGenderSelectionView:UIScrollViewDelegate {
         ///列挙型配列からボタンおよび画像のインスタンス生成
         let genderArray:[GENDER] = [.female,.male,.none]
         for genderPattern in genderArray {
-            ///各インスタンス変数に割り振り
+            ///各インスタンス変数に割り振りおよび初期レイアウト設定
             switch genderPattern {
             case .none:
                 noneGenderImage = genderImageView(gender: genderPattern)
@@ -469,6 +462,7 @@ extension initialSettingGenderSelectionView:UIScrollViewDelegate {
             self.noneGenderImage.image = UIImage(named: "UnknownSelected")
             overlayView.show()
         } else {
+            ///最前面がオーバーレイではなかった場合Return
             guard let overlayView = self.subviews.first(where: { $0 is OverlayView }) as? OverlayView else {
                 return
             }
@@ -483,38 +477,39 @@ extension initialSettingGenderSelectionView:UIScrollViewDelegate {
         ///キャンセルボタンと決定ボタンのタップアクション設定
         cancelButton.addTarget(self, action: #selector(self.cancelButtonClicked(_:)), for: UIControl.Event.touchUpInside)
         decisionButton.addTarget(self, action: #selector(self.decitionButtonClicked(_:)), for: UIControl.Event.touchUpInside)
-        self.addSubview(decitionTextLabel)
+        
+        self.addSubview(decisionImageView)
         self.addSubview(decisionButton)
-        self.addSubview(cancelTextLabel)
+        self.addSubview(cancelImageView)
         self.addSubview(cancelButton)
         
         decisionButton.translatesAutoresizingMaskIntoConstraints = false
-        decitionTextLabel.translatesAutoresizingMaskIntoConstraints = false
+        decisionImageView.translatesAutoresizingMaskIntoConstraints = false
         cancelButton.translatesAutoresizingMaskIntoConstraints = false
-        cancelTextLabel.translatesAutoresizingMaskIntoConstraints = false
+        cancelImageView.translatesAutoresizingMaskIntoConstraints = false
     }
     ///性別決定及びキャンセルレイアウト設定
     func decision_CancelLayoutSetUp() {
-        
+        ///決定ボタン
         decisionButton.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.3).isActive = true
         decisionButton.heightAnchor.constraint(equalTo: self.selectGenderInfoLabel.heightAnchor).isActive = true
         decisionButton.topAnchor.constraint(equalTo: self.centerYAnchor, constant: self.bounds.width/3).isActive = true
         decisionButton.centerXAnchor.constraint(equalTo: self.centerXAnchor, constant: self.bounds.width/3).isActive = true
-        
-        decitionTextLabel.widthAnchor.constraint(equalTo: decisionButton.widthAnchor).isActive = true
-        decitionTextLabel.heightAnchor.constraint(equalTo: decisionButton.heightAnchor).isActive = true
-        decitionTextLabel.topAnchor.constraint(equalTo: decisionButton.topAnchor).isActive = true
-        decitionTextLabel.centerXAnchor.constraint(equalTo: decisionButton.centerXAnchor).isActive = true
-        
+        ///決定画像
+        decisionImageView.widthAnchor.constraint(equalTo: decisionButton.widthAnchor).isActive = true
+        decisionImageView.heightAnchor.constraint(equalTo: decisionButton.heightAnchor).isActive = true
+        decisionImageView.topAnchor.constraint(equalTo: decisionButton.topAnchor).isActive = true
+        decisionImageView.centerXAnchor.constraint(equalTo: decisionButton.centerXAnchor).isActive = true
+        ///キャンセルボタン
         cancelButton.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.3).isActive = true
         cancelButton.heightAnchor.constraint(equalTo: self.selectGenderInfoLabel.heightAnchor).isActive = true
         cancelButton.topAnchor.constraint(equalTo: self.centerYAnchor, constant: self.bounds.width/3).isActive = true
         cancelButton.centerXAnchor.constraint(equalTo: self.centerXAnchor, constant: -self.bounds.width/3).isActive = true
-        
-        cancelTextLabel.widthAnchor.constraint(equalTo: cancelButton.widthAnchor).isActive = true
-        cancelTextLabel.heightAnchor.constraint(equalTo: cancelButton.heightAnchor).isActive = true
-        cancelTextLabel.topAnchor.constraint(equalTo: cancelButton.topAnchor).isActive = true
-        cancelTextLabel.centerXAnchor.constraint(equalTo: cancelButton.centerXAnchor).isActive = true
+        ///キャンセル画像
+        cancelImageView.widthAnchor.constraint(equalTo: cancelButton.widthAnchor).isActive = true
+        cancelImageView.heightAnchor.constraint(equalTo: cancelButton.heightAnchor).isActive = true
+        cancelImageView.topAnchor.constraint(equalTo: cancelButton.topAnchor).isActive = true
+        cancelImageView.centerXAnchor.constraint(equalTo: cancelButton.centerXAnchor).isActive = true
 
     }
     /// 決定・キャンセルボタン有効・無効化
@@ -527,9 +522,9 @@ extension initialSettingGenderSelectionView:UIScrollViewDelegate {
             decision_CancelLayoutSetUp()
         } else {
             self.cancelButton.removeFromSuperview()
+            self.cancelImageView.removeFromSuperview()
             self.decisionButton.removeFromSuperview()
-            self.cancelTextLabel.removeFromSuperview()
-            self.decitionTextLabel.removeFromSuperview()
+            self.decisionImageView.removeFromSuperview()
         }
     }
 }

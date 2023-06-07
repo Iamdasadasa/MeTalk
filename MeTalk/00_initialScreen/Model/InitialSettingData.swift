@@ -37,6 +37,6 @@ struct InitialSettingData {
 
 struct initialProfileInfo {
     var nickName:String?
-    var Age:Int?
+    var Age:String?
     var gender:GENDER?
 }

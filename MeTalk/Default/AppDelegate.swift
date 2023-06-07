@@ -26,10 +26,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // 2. 最初に表示する画面を設定
         if let uid = Auth.auth().currentUser?.uid {
-            rootViewController = MainTabBarController()
+            rootViewController = initialSettingGenderSelectionViewController()
         } else {
             let USERHOSTING = profileInitHosting()
-            rootViewController = initialSettingViewcontroller()
+            rootViewController = initialSettingGenderSelectionViewController()
         }
         
         window?.rootViewController = rootViewController

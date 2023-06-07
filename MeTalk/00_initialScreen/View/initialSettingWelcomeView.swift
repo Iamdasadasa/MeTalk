@@ -57,7 +57,7 @@ class initialSettingWelcomeView:UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     let welcomeMessageLabel:UILabel = {
         let welcomeMassage = UILabel()
         welcomeMassage.text = "ようこそ"

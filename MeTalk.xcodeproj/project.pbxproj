@@ -67,6 +67,8 @@
 		D6BC3C0A2A1DACCE00E00A2A /* initialSettingAgeSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BC3C092A1DACCE00E00A2A /* initialSettingAgeSelectView.swift */; };
 		D6BC3C0C2A259AB200E00A2A /* initialSettingNicknameSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BC3C0B2A259AB200E00A2A /* initialSettingNicknameSelectViewController.swift */; };
 		D6BC3C0E2A25A13600E00A2A /* initialSettingNickNameSelectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BC3C0D2A25A13600E00A2A /* initialSettingNickNameSelectView.swift */; };
+		D6BC3C102A26477500E00A2A /* initialSettingFinalConfirmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BC3C0F2A26477500E00A2A /* initialSettingFinalConfirmView.swift */; };
+		D6BC3C122A26478700E00A2A /* initialSettingFinalConfirmViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BC3C112A26478700E00A2A /* initialSettingFinalConfirmViewController.swift */; };
 		D6C5ACDE29E91D3900CED90C /* initialSettingWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C5ACDD29E91D3900CED90C /* initialSettingWelcomeView.swift */; };
 		D6C5ACE029E92A7700CED90C /* initialSettingWelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6C5ACDF29E92A7700CED90C /* initialSettingWelcomeViewController.swift */; };
 		D6DE5C1F28085CB4006C6236 /* TalkUsersListMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */; };
@@ -160,6 +162,8 @@
 		D6BC3C092A1DACCE00E00A2A /* initialSettingAgeSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingAgeSelectView.swift; sourceTree = "<group>"; };
 		D6BC3C0B2A259AB200E00A2A /* initialSettingNicknameSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingNicknameSelectViewController.swift; sourceTree = "<group>"; };
 		D6BC3C0D2A25A13600E00A2A /* initialSettingNickNameSelectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingNickNameSelectView.swift; sourceTree = "<group>"; };
+		D6BC3C0F2A26477500E00A2A /* initialSettingFinalConfirmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingFinalConfirmView.swift; sourceTree = "<group>"; };
+		D6BC3C112A26478700E00A2A /* initialSettingFinalConfirmViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingFinalConfirmViewController.swift; sourceTree = "<group>"; };
 		D6C5ACDD29E91D3900CED90C /* initialSettingWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingWelcomeView.swift; sourceTree = "<group>"; };
 		D6C5ACDF29E92A7700CED90C /* initialSettingWelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingWelcomeViewController.swift; sourceTree = "<group>"; };
 		D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkUsersListMock.swift; sourceTree = "<group>"; };
@@ -238,6 +242,7 @@
 			isa = PBXGroup;
 			children = (
 				D6EEB0DE2992BD8B00EBDFA3 /* New Group */,
+				D6D8030C2A2F32F200107DBB /* Dust */,
 				D663007D295046FA00C59657 /* FireBase */,
 				D6A8C0D5286345610017171A /* RealM */,
 				D68FB3A727D87ECE00E57F5A /* TableViewTemplete */,
@@ -370,11 +375,11 @@
 		D655504127E2100200C86E34 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				D631EC2227A5831400800693 /* initialSettingView.swift */,
 				D6C5ACDD29E91D3900CED90C /* initialSettingWelcomeView.swift */,
 				D673C2A329EE934500DCB995 /* initialSettingGenderSelectionView.swift */,
 				D6BC3C092A1DACCE00E00A2A /* initialSettingAgeSelectView.swift */,
 				D6BC3C0D2A25A13600E00A2A /* initialSettingNickNameSelectView.swift */,
+				D6BC3C0F2A26477500E00A2A /* initialSettingFinalConfirmView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -382,11 +387,11 @@
 		D655504227E2100B00C86E34 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */,
 				D6C5ACDF29E92A7700CED90C /* initialSettingWelcomeViewController.swift */,
 				D673C2A129EE67C300DCB995 /* initialSettingGenderSelectViewController.swift */,
 				D6BC3C072A1CD05600E00A2A /* initialSettingAgeSelectViewController.swift */,
 				D6BC3C0B2A259AB200E00A2A /* initialSettingNicknameSelectViewController.swift */,
+				D6BC3C112A26478700E00A2A /* initialSettingFinalConfirmViewController.swift */,
 				D69EC37927AA681100290B18 /* MainTabBarController.swift */,
 			);
 			path = Controller;
@@ -548,6 +553,16 @@
 				D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */,
 			);
 			path = RealM;
+			sourceTree = "<group>";
+		};
+		D6D8030C2A2F32F200107DBB /* Dust */ = {
+			isa = PBXGroup;
+			children = (
+				D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */,
+				D631EC2227A5831400800693 /* initialSettingView.swift */,
+			);
+			name = Dust;
+			path = TableViewTemplete/Dust;
 			sourceTree = "<group>";
 		};
 		D6EEB0DE2992BD8B00EBDFA3 /* New Group */ = {
@@ -832,6 +847,7 @@
 				D67C27D628FE959100C25BA3 /* Extension.swift in Sources */,
 				D673C2A429EE934500DCB995 /* initialSettingGenderSelectionView.swift in Sources */,
 				D6543DC127B7B61500444454 /* SemiModalViewController.swift in Sources */,
+				D6BC3C102A26477500E00A2A /* initialSettingFinalConfirmView.swift in Sources */,
 				D69EC38027AA92F100290B18 /* ProfileViewController.swift in Sources */,
 				D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */,
 				D6DE5C1F28085CB4006C6236 /* TalkUsersListMock.swift in Sources */,
@@ -862,6 +878,7 @@
 				D69EC38227AA952000290B18 /* ProfileView.swift in Sources */,
 				D631EC2327A5831400800693 /* initialSettingView.swift in Sources */,
 				D631EBF027A581BE00800693 /* SceneDelegate.swift in Sources */,
+				D6BC3C122A26478700E00A2A /* initialSettingFinalConfirmViewController.swift in Sources */,
 				D6EEB0E02992BDA000EBDFA3 /* HostingMock.swift in Sources */,
 				D63E275928CA4BF40013BE1E /* kaihatsu.swift in Sources */,
 				D698A0CB27E0BA66002C64DE /* WebViewTempleteController.swift in Sources */,
