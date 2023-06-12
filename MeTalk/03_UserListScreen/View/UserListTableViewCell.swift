@@ -49,6 +49,7 @@ class UserListTableViewCell: UITableViewCell {
         returnUIImageView.layer.borderWidth = 1
         returnUIImageView.clipsToBounds = true
         returnUIImageView.layer.borderColor = UIColor.orange.cgColor
+        returnUIImageView.image = UIImage(named: "InitIMage")
         return returnUIImageView
     }()
     

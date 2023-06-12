@@ -27,7 +27,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
             // 2. 最初に表示する画面を設定
             if let uid = Auth.auth().currentUser?.uid {
-                rootViewController = MainTabBarController()
+                rootViewController = showUserListViewController()
 //                rootViewController = initialSettingNicknameSelectViewController()
 //                rootViewController = initialSettingViewcontroller()
 //                rootViewController = initialSettingAgeSelectViewController()

@@ -37,7 +37,7 @@ class NotificationViewController:UIViewController{
     ///Barボタンの設定(NavigationBar)
     var backButtonItem: UIBarButtonItem! // Backボタン
     ///インスタンス化（View）
-    let notificationTableView = GeneralTableView()
+    let notificationTableView = UITableView()
     override func viewDidLoad() {
         super.viewDidLoad()
         ///Viewの適用

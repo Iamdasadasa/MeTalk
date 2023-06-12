@@ -15,7 +15,7 @@ class BlockListViewController:UIViewController{
     ///Barボタンの設定(NavigationBar)
     var backButtonItem: UIBarButtonItem! // Backボタン
     ///インスタンス化（View）
-    let blockListTableView = GeneralTableView()
+    let blockListTableView = UITableView()
     ///インスタンス化（Model）
     let userDataManagedData = UserDataManage()
     let uid = Auth.auth().currentUser?.uid

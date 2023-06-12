@@ -15,9 +15,7 @@ import CoreAudio
 
 class UserListViewController:UIViewController,UINavigationControllerDelegate{
     ///インスタンス化(View)
-    let CHATUSERLISTTABLEVIEW = GeneralTableView()
-    ///RealMからデータを受け取るようの変数
-    var itemList: Results<ListUsersInfoLocal>!
+    let CHATUSERLISTTABLEVIEW = UITableView()
     ///インスタンス化(Model)
     let UID = Auth.auth().currentUser?.uid
     let LOCALPROFILE:localProfileDataStruct
@@ -49,10 +47,6 @@ class UserListViewController:UIViewController,UINavigationControllerDelegate{
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-    
-    ///ビューが表示されるたびに実行する処理群
-    override func viewWillAppear(_ animated: Bool) {
     }
     
     override func viewDidLoad() {
@@ -124,8 +118,6 @@ extension UserListViewController:UITableViewDelegate, UITableViewDataSource{
         let USERINFODATA = self.UserListMock[indexPath.row]
         ///セルのユーザー情報構造体にユーザー情報を投入
         cell.celluserStruct = USERINFODATA
-        ///画像に関してはCell生成の一番最初は問答無用でInitイメージを適用
-        cell.talkListUserProfileImageView.image = UIImage(named: "InitIMage")
         ///ユーザーネーム設定処理
         if let nickname = USERINFODATA.lcl_NickName {
             ///セルのUIDと一致したらセット
@@ -238,7 +230,9 @@ extension UserListViewController {
     /// - Returns:
     /// -UserUIDUserListMock:取得したユーザーリスト情報
     func talkListUsersDataGet(limitCount:Int) {
+        ///ユーザーデータ取得
         TALKDATAHOSTING.newTalkUserListGetter(callback: { UserList, err in
+            ///存在していない場合
             if err != nil {
                 let action = actionSheets(dicidedOrOkOnlyTitle: "ユーザー取得時に問題が発生いたしました。", message: "もう一度試してください", buttonMessage: "OK")
                 action.okOnlyAction(callback: { result in
@@ -266,6 +260,8 @@ extension UserListViewController {
             self.loadDataLockFlg = true
             ///テーブルビューリロード処理
             self.CHATUSERLISTTABLEVIEW.reloadData()
+            ///画像取得処理
+            
         }, getterCount: limitCount)
     }
 }
@@ -465,20 +461,5 @@ extension UserListViewController {
                 }
             }, SelfViewController: self)
         }
-    }
-    
-    func userArrayCreate(userListStruct:UserListStruct,profileImagedata:UIImage) -> [String:Any]{
-        
-        var userInfoData:[String:Any] = [:]
-        userInfoData["createdAt"] = userListStruct.createdAt
-        userInfoData["Sex"] = userListStruct.Sex
-        userInfoData["aboutMeMassage"] = userListStruct.aboutMessage
-        userInfoData["nickname"] = userListStruct.userNickName
-        userInfoData["age"] = userListStruct.Age
-        userInfoData["area"] = userListStruct.From
-        userInfoData["profileImageData"] = profileImagedata
-        
-        return userInfoData
-        
     }
 }

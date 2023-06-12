@@ -14,7 +14,7 @@ import CoreAudio
 
 class ChatUserListViewController:UIViewController, UINavigationControllerDelegate{
     ///インスタンス化(View)
-    let CHATUSERLISTTABLEVIEW = GeneralTableView()
+    let CHATUSERLISTTABLEVIEW = UITableView()
     ///インスタンス化(Model)
     let PLOFILEHOSTING = profileHosting()
     let UID = Auth.auth().currentUser?.uid

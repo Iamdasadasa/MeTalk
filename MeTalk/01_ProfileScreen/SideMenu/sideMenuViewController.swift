@@ -104,7 +104,7 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
     ///Barボタンの設定(NavigationBar)
     var backButtonItem: UIBarButtonItem! // 戻るボタン
     ///インスタンス化(View)
-    let sideMenuTableView = GeneralTableView()
+    let sideMenuTableView = UITableView()
 
     ///デリゲート変数設定
     weak var delegate:SideMenuViewControllerDelegate?

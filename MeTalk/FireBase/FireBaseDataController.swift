@@ -219,8 +219,6 @@ struct ContentsDatahosting {
         CONTENTSLOCAL.lcl_UID = UID
         CONTENTSLOCAL.lcl_UpdataDate = TIMETOOL.pastTimeGet()
         
-
-        
         STORAGE.reference(forURL: host).child("profileImage").child("\(UID).jpeg").getMetadata {metadata, error in
 
             if error != nil {
@@ -299,6 +297,8 @@ struct TalkDataHostingManager {
     }
     
     func newTalkUserListGetter(callback: @escaping ([profileInfoLocal],Error?) -> Void, getterCount:Int){
+        
+        
         cloudDB.collection("users").limit(to: getterCount).order(by: "updatedAt", descending: true).getDocuments(){ (querySnapshot, err) in
             var USERLIST:[profileInfoLocal] = []
             if let err = err {
