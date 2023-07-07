@@ -12,54 +12,15 @@ import Firebase
 
 ///ユーザー情報初期値
 enum USERINFODEFAULTVALUE {
-    case Sex
-    case AboutMeMassage
-    case NickName
-    case Age
+    case aboutMeMassage
     case area
-    case all
-    
-    var All:profileInfoLocal {
+
+    var value:String {
         switch self {
-        case .all:
-            let profileInfoLocal = profileInfoLocal()
-            profileInfoLocal.lcl_Age = 20
-            profileInfoLocal.lcl_Sex = 0
-            profileInfoLocal.lcl_Area = "未設定"
-            profileInfoLocal.lcl_NickName = "unknown"
-            profileInfoLocal.lcl_DateCreatedAt = Date()
-            profileInfoLocal.lcl_DateUpdatedAt = Date()
-            return profileInfoLocal
-        default:
-            ///使用しては行けないCaseの値が渡されています。呼び出し元のコードを確認してAboutMeMassageかNickName、areaが選択されていたら修正してください。
-            preconditionFailure("エラーCode401")
-        }
-        
-    }
-    
-    var NumObjec:Int {
-        switch self {
-        case .Age:
-            return 20
-        case .Sex:
-            return 0
-        default :
-            ///使用しては行けないCaseの値が渡されています。呼び出し元のコードを確認してAboutMeMassageかNickName、areaが選択されていたら修正してください。
-            preconditionFailure("エラーCode301")
-        }
-    }
-    
-    var StrObjec:String {
-        switch self {
-        case .AboutMeMassage:
+        case .aboutMeMassage:
             return "よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃"
-        case .NickName:
-            return "未設定"
         case .area:
             return "未設定"
-        default :
-            ///使用しては行けないCaseの値が渡されています。呼び出し元のコードを確認してAgeかSexが選択されていたら修正してください。
-            preconditionFailure("エラーCode301")
         }
     }
 }
@@ -117,7 +78,6 @@ class profileInfoLocal: Object {
         }
         return (intVaule,nil)
     }
-    
 }
 
 ///ユーザーの画像情報を保存するローカルオブジェクト
@@ -282,12 +242,6 @@ struct localProfileDataStruct{
     
     ///登録処理
     private func Register(profileObject:profileInfoLocal,updateData:profileInfoLocal,REALM:Realm,Kind:registerKind){
-        var STR = {(CS:USERINFODEFAULTVALUE) -> String in
-            return CS.StrObjec
-        }
-        var INT = {(CS:USERINFODEFAULTVALUE) -> Int in
-            return CS.NumObjec
-        }
         
         switch Kind {
         case .new:
@@ -296,11 +250,11 @@ struct localProfileDataStruct{
             ///構造体に合わせて各項目を入力
 
             profileInfoLocalObject.lcl_UID = UID
-            profileInfoLocalObject.lcl_NickName = updateData.lcl_NickName ?? STR(.NickName)
+            profileInfoLocalObject.lcl_NickName = updateData.lcl_NickName
             profileInfoLocalObject.lcl_Sex = updateData.lcl_Sex
-            profileInfoLocalObject.lcl_AboutMeMassage = updateData.lcl_AboutMeMassage ?? STR(.AboutMeMassage)
+            profileInfoLocalObject.lcl_AboutMeMassage = updateData.lcl_AboutMeMassage ?? USERINFODEFAULTVALUE.aboutMeMassage.value
             profileInfoLocalObject.lcl_Age = updateData.lcl_Age
-            profileInfoLocalObject.lcl_Area = updateData.lcl_Area ?? STR(.area)
+            profileInfoLocalObject.lcl_Area = updateData.lcl_Area ?? USERINFODEFAULTVALUE.area.value
             profileInfoLocalObject.lcl_DateCreatedAt = updateData.lcl_DateCreatedAt
             profileInfoLocalObject.lcl_DateUpdatedAt = updateData.lcl_DateUpdatedAt
             profileInfoLocalObject.lcl_LikeButtonPushedDate = updateData.lcl_LikeButtonPushedDate
@@ -345,11 +299,11 @@ struct localProfileDataStruct{
         }
     }
     
-    func userProfileDatalocalGet(callback: @escaping (profileInfoLocal,customResults?) -> Void){
+    func userProfileDatalocalGet(callback: @escaping (ProfileInfoLocalObject,customResults?) -> Void){
         let REALM = try! Realm()
-        let LOCALDBGETDATA = REALM.objects(profileInfoLocal.self)
+        let LOCALDBGETDATA = REALM.objects(ProfileInfoLocalObject.self)
         let PREDICATE = NSPredicate(format: "\(lcl_UID)  == %@", self.UID)
-        var PROFILEINFOLOCAL = profileInfoLocal()
+        var PROFILEINFOLOCAL = ProfileInfoLocalObject()
         ///ローカルに存在
         guard let LocalProfileData = LOCALDBGETDATA.filter(PREDICATE).first else {
             callback(PROFILEINFOLOCAL,.localNoting)
@@ -362,55 +316,12 @@ struct localProfileDataStruct{
         }
         var flag:errcheck = .succees
         
-        let defaultVaule:USERINFODEFAULTVALUE = .all
-        let defaultData:profileInfoLocal = defaultVaule.All
-        ///データ不備対応
-        if LocalProfileData.lcl_Age != 0 {
-            defaultData.lcl_Age = LocalProfileData.lcl_Age
-        } else {
-            flag = .err
-        }
-        if LocalProfileData.lcl_Sex != 100 {
-            defaultData.lcl_Sex = LocalProfileData.lcl_Sex
-        } else {
-            flag = .err
-        }
-        if let area = LocalProfileData.lcl_Area {
-            defaultData.lcl_Area = area
-        } else {
-            flag = .err
-        }
-        if let nickName = LocalProfileData.lcl_NickName {
-            defaultData.lcl_NickName = nickName
-        } else {
-            flag = .err
-        }
-        if let update = LocalProfileData.lcl_DateUpdatedAt {
-            defaultData.lcl_DateUpdatedAt = update
-        } else {
-            flag = .err
-        }
-        if let create = LocalProfileData.lcl_DateCreatedAt {
-            defaultData.lcl_DateCreatedAt = create
-        } else {
-            flag = .err
-        }
-        if let aboutMessage = LocalProfileData.lcl_AboutMeMassage {
-            defaultData.lcl_AboutMeMassage = aboutMessage
-        } else {
-            flag = .err
-        }
-        if let LikeButtonPushedDate = LocalProfileData.lcl_LikeButtonPushedDate {
-            defaultData.lcl_LikeButtonPushedDate = LikeButtonPushedDate
-        }
-        
         switch flag {
         case .succees:
-            callback(defaultData,nil)
+            callback(LocalProfileData,nil)
         case .err:
-            callback(defaultData,.localNoting)
+            callback(PROFILEINFOLOCAL,.localNoting)
         }
-            
     }
 }
 

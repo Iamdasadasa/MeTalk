@@ -101,22 +101,24 @@ class initialSettingFinalConfirmView:UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    /// 画面のプロフィール情報を設定
+    /// - Parameters:
+    ///   - gender: 性別カスタム列挙
+    ///   - age: 年齢
+    ///   - nickname: ニックネーム
+    func profileValueSetUp(gender:GENDER,age:String,nickname:String) {
+        ///テキストおよび画像レイアウト変更
+        finalConfirmGenderImageView.image = gender.genderImage
+        finalConfirmGenderLabel.text = gender.genderText
+        finalConfirmBirthLabel.text = age
+        finalConfirmNicknameLabel.text = nickname
+    }
 
     override func layoutSubviews() {
-        ///テキストおよび画像レイアウト変更
-        switch PROFILEINFODATA.gender! {
-        case .female:
-            finalConfirmGenderImageView.image = UIImage(named: "Female")
-            finalConfirmGenderLabel.text = "女性"
-        case .male:
-            finalConfirmGenderImageView.image = UIImage(named: "Male")
-            finalConfirmGenderLabel.text = "男性"
-        case .none:
-            finalConfirmGenderImageView.image = UIImage(named: "Unknown")
-            finalConfirmGenderLabel.text = "選択しない"
-        }
-        finalConfirmBirthLabel.text = PROFILEINFODATA.Age!
-        finalConfirmNicknameLabel.text = PROFILEINFODATA.nickName!
+        super.layoutSubviews()
+        ///フォント設定
+        self.finalConfirmViewLabelFontSizeSetting()
     }
 }
 
@@ -193,5 +195,14 @@ extension initialSettingFinalConfirmView {
         decisionButton.centerYAnchor.constraint(equalTo: decisionImageView.centerYAnchor).isActive = true
         decisionButton.widthAnchor.constraint(equalTo: decisionImageView.widthAnchor).isActive = true
         decisionButton.heightAnchor.constraint(equalTo: decisionImageView.heightAnchor).isActive = true
+    }
+    
+    func finalConfirmViewLabelFontSizeSetting() {
+        ///fontsize調整
+        print("finalConfirmGenderLabel.frame.width:\(finalConfirmGenderLabel.frame.width)")
+        let font = sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 5, objectWidth: finalConfirmGenderLabel.frame.width)
+        finalConfirmGenderLabel.font = UIFont.systemFont(ofSize: font)
+        finalConfirmBirthLabel.font = UIFont.systemFont(ofSize: font)
+        finalConfirmNicknameLabel.font = UIFont.systemFont(ofSize: font)
     }
 }

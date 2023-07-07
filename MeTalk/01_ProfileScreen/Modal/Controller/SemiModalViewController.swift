@@ -19,17 +19,11 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
     var VIEW:ModalBaseView?
     
     ///インスタンス化(Model)
-    let PROFILEHOSTING = profileHosting()
+    let PROFILESETTER = TargetProfileSetterManager()
+    let PROFILEGETTER = TargetProfileGetterManager()
     let modalImageData = ModalImageData()
-    let uid = Auth.auth().currentUser?.uid
-    var ProfileData = profileInfoLocal()
-    ///プロフィール初期値
-    let STR = {(CS:USERINFODEFAULTVALUE) -> String in
-        return CS.StrObjec
-    }
-    let INT = {(CS:USERINFODEFAULTVALUE) -> Int in
-        return CS.NumObjec
-    }
+    var ProfileData = ProfileInfoLocalObject()
+
     ///Viewフラグ判断変数
     var dicidedModal:ModalItems
     
@@ -47,6 +41,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
         ///画面共通処理
         self.VIEW = ModalBaseView(ModalItems:self.dicidedModal, frame: self.view.frame)
         guard let VIEW = VIEW else {
@@ -58,7 +53,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
         VIEW.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
         
         ///プロフィールデータ取得
-        var LOCALDATA = localProfileDataStruct(UID: uid!)
+        var LOCALDATA = localProfileDataStruct(UID: MYUID)
         LOCALDATA.userProfileDatalocalGet { profileInfoLocal, result in
             if result == .localNoting {
                 hostingProfileDataGetter()
@@ -67,14 +62,13 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
         }
         ///サーバー通信してデータ取得
         func hostingProfileDataGetter() {
-            var hosting = profileHosting()
-            hosting.FireStoreProfileDataGetter(callback: { info, err in
-                if err != nil {
-                    print("サーバにデータが存在していないのに初期以外の画面にいるのはありえない")
-                    return
-                }
-                self.ProfileData = info
-            }, UID: uid!)
+            let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
+            PROFILEGETTER.getter(callback: { info, err in
+                   if err != nil {
+                       return
+                   }
+                   self.ProfileData = info
+            }, UID: MYUID)
         }
 
         
@@ -204,17 +198,15 @@ extension SemiModalViewController{
 extension SemiModalViewController:ModalViewDelegateProtcol{
     ///決定ボタン押下　view: NickNameTextFieldModalView
     func dicisionButtonTappedAction(button: UIButton, objects: updateKind) {
+        let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
         ///画面共通処理
         guard let VIEW = VIEW else {
             return
         }
-        guard let uid = uid else {
-            return
-        }
         ///データ代入
         let data = VIEW.itemTextField.text
-        var updateData:profileInfoLocal = profileInfoLocal()
-        updateData.lcl_UID = uid
+        var updateData:ProfileInfoLocalObject = ProfileInfoLocalObject()
+        updateData.lcl_UID = MYUID
         ///ローカルデータ登録
         switch objects {
         case .nickName:
@@ -233,15 +225,10 @@ extension SemiModalViewController:ModalViewDelegateProtcol{
             updateData.lcl_Area = data
         }
         ///サーバデータ登録
-        PROFILEHOSTING.userDataUpdateManager(KIND: objects, Data: updateData)
+        PROFILESETTER.userDataSetter(KIND: objects, Data: updateData)
         ///ローカルデータ登録
-        let LOCAL = localProfileDataStruct(updateObject: updateData, UID: updateData.lcl_UID!)
-        if LOCAL.userProfileLocalDataExtraRegist() == .localNoting {
-            let action = actionSheets(dicidedOrOkOnlyTitle: "データが見つかりませんでした", message: "データが見つからないため入力されたデータ以外はデフォルトの値が保存されます", buttonMessage: "OK")
-            action.okOnlyAction(callback: { resukt in
-                return
-            }, SelfViewController: self)
-        }
+        var LOCAL = TargetProfileLocalDataSetterManager(updateProfile: updateData)
+        LOCAL.commiting = true
 
         self.delegate?.ButtonTappedActionChildDelegateAction()
     }

@@ -45,14 +45,7 @@ class genderImageView:UIImageView {
         self.layer.borderWidth = 1
         self.layer.borderColor = UIColor.gray.cgColor
         
-        switch gender {
-        case .male:
-            self.image = UIImage(named: "Male")
-        case .female:
-            self.image = UIImage(named: "Female")
-        case .none:
-            self.image = UIImage(named: "Unknown")
-        }
+        self.image = gender.genderImage
     }
 }
 ///性別ボタンカスタムクラス
@@ -96,14 +89,7 @@ class genderTextLabel:UILabel {
     
     /// レイアウト設定
     func setting() {
-        switch gender {
-        case .male:
-            self.text = "男性"
-        case .female:
-            self.text = "女性"
-        case .none:
-            self.text = "選択しない"
-        }
+        self.text = gender.genderText
         self.textColor = UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 1.0)
         self.backgroundColor = .clear
         self.font = UIFont.systemFont(ofSize: 25)
@@ -125,10 +111,32 @@ class decisionCustomButton:UIButton {
 }
 
 ///イメージ名称列挙型配列
-enum GENDER:CaseIterable {
-    case male
-    case female
-    case none
+enum GENDER:Int {
+    case male = 1
+    case female = 2
+    case none = 0
+    
+    var genderImage:UIImage {
+        switch self {
+        case .female:
+            return UIImage(named: "Female")!
+        case .male:
+            return UIImage(named: "Male")!
+        case .none:
+            return UIImage(named: "Unknown")!
+        }
+    }
+    
+    var genderText:String {
+        switch self {
+        case .female:
+            return "女性"
+        case .male:
+            return "男性"
+        case .none:
+            return "選択しない"
+        }
+    }
 }
 ///メインクラスプロトコル
 protocol initialSettingGenderSelectionViewDelegate:AnyObject {

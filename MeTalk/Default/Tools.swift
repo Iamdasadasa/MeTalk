@@ -8,6 +8,7 @@
 import Foundation
 import Reachability
 import UIKit
+import FirebaseFirestore
 ///ネットワーク状況判断
 struct Reachabiliting{
     func NetworkStatus() -> Int {
@@ -25,99 +26,160 @@ struct Reachabiliting{
     }
 }
 
-struct actionSheets{
-    ///必要なアクションシート要素変数
-    let title01:String
-    var title02:String?
-    var message:String?
-    var buttonMessage:String?
-    ///返却アクションが1アクション用のカスタム列挙　結果用
-    enum oneActionResult {
-        case one
-    }
-    ///1アクション使用時のイニシャライザ
-    init(oneAtcionTitle1:String) {
-        self.title01 = oneAtcionTitle1
-    }
-    ///返却アクションが2アクション用のカスタム列挙　結果用
-    enum twoActionResult {
-        case one
-        case two
-    }
-    ///2アクション使用時のイニシャライザ
-    init(twoAtcionTitle1:String,twoAtcionTitle2:String) {
-        self.title01 = twoAtcionTitle1
-        self.title02 = twoAtcionTitle2
-    }
-    ///OKボタンと決定ボタンアクションどちらかを使用するときのイニシャライザ
-    init(dicidedOrOkOnlyTitle:String,message:String,buttonMessage:String) {
-        self.title01 = dicidedOrOkOnlyTitle
-        self.message = message
-        self.buttonMessage = buttonMessage
-    }
-    ///タイトル・1ボタン・キャンセル　アクション
-    func showOneActionSheets(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
-        //アクションシートを作る
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        //ボタン1
-        alert.addAction(UIAlertAction(title: title01, style: .default, handler: {
-            (action: UIAlertAction!) in
-            callback(.one)
-        }))
-        //キャンセルボタン
-        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
-        //アクションシートを表示する
-        SelfViewController.present(alert, animated: true, completion: nil)
-    }
-    ///タイトル・2ボタン・キャンセル　アクション
-    func showTwoActionSheets(callback:@escaping(twoActionResult) -> Void,SelfViewController:UIViewController) {
-        //アクションシートを作る
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        //ボタン1
-        alert.addAction(UIAlertAction(title: title01, style: .default, handler: {
-            (action: UIAlertAction!) in
-            callback(.one)
-        }))
-        //ボタン２
-        alert.addAction(UIAlertAction(title: title02, style: .default, handler: {
-            (action: UIAlertAction!) in
-            callback(.two)
-        }))
-        //キャンセルボタン
-        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
-        //アクションシートを表示する
-        SelfViewController.present(alert, animated: true, completion: nil)
-    }
-    ///タイトル・メッセージ・1ボタン・キャンセル　アクション
-    func dicidedAction(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
-        let alert = UIAlertController(title: title01, message: message, preferredStyle: UIAlertController.Style.alert)
-        //ボタン1
-        alert.addAction(UIAlertAction(title: buttonMessage, style: UIAlertAction.Style.default, handler: {
-            (action: UIAlertAction!) in
-            callback(.one)
-        }))
-        //ボタン2
-        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
-        //アクションシートを表示する
-        SelfViewController.present(alert, animated: true, completion: nil)
-    }
-    ///タイトル・メッセージ・OK　アクション
-    func okOnlyAction(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
-        let alert = UIAlertController(title: title01, message: message, preferredStyle: UIAlertController.Style.alert)
-        //ボタン1
-        alert.addAction(UIAlertAction(title: buttonMessage, style: UIAlertAction.Style.default, handler: {
-            (action: UIAlertAction!) in
-            callback(.one)
-        }))
-        //アクションシートを表示する
-        SelfViewController.present(alert, animated: true, completion: nil)
-    }
-    
+enum actionSheetsType {
+    case Retry(title:String)      //リトライ
+    case Completion(title:String) //処理完了
+    case Alert(title:String,message:String,buttonMessage:String)      //警告
+    case Options([String],((Int) -> Void))     //選択
 }
+
+
+func createSheet(callback:@escaping()-> Void,for type: actionSheetsType,SelfViewController:UIViewController){
+    switch type {
+    case .Retry(let title):
+        let alert = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
+        //リトライボタン
+        alert.addAction(UIAlertAction(title: "リトライ", style: .default, handler: {
+            (action: UIAlertAction!) in
+            callback()
+        }))
+        //アクションシートを表示する
+        SelfViewController.present(alert, animated: true, completion: nil)
+    case .Completion(let title):
+        let alert = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
+        //OKボタン
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: {
+            (action: UIAlertAction!) in
+            callback()
+        }))
+        //アクションシートを表示する
+        SelfViewController.present(alert, animated: true, completion: nil)
+    case .Alert(let title,let message,let buttonMessage):
+        let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertController.Style.alert)
+        ///ボタン
+        alert.addAction(UIAlertAction(title: buttonMessage, style: .default, handler: {
+            (action: UIAlertAction!) in
+            callback()
+        }))
+        //アクションシートを表示する
+        SelfViewController.present(alert, animated: true, completion: nil)
+    case .Options(let choices,let callback):
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        // 選択アクションの処理
+        for (index, choice) in choices.enumerated() {
+            alert.addAction(UIAlertAction(title: choice, style: .default, handler: { _ in
+                callback(index)  // 選択された項目のインデックスをコールバックで返す
+            }))
+        }
+        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: { _ in
+            callback(-1)  // キャンセルをコールバックで返す（例として-1とする）
+        }))
+        //アクションシートを表示する
+        SelfViewController.present(alert, animated: true, completion: nil)
+    }
+}
+
+//struct actionSheets{
+//    ///必要なアクションシート要素変数
+//    let title01:String
+//    var title02:String?
+//    var message:String?
+//    var buttonMessage:String?
+//    ///返却アクションが1アクション用のカスタム列挙　結果用
+//    enum oneActionResult {
+//        case one
+//    }
+//    ///1アクション使用時のイニシャライザ
+//    init(oneAtcionTitle1:String) {
+//        self.title01 = oneAtcionTitle1
+//    }
+//    ///返却アクションが2アクション用のカスタム列挙　結果用
+//    enum twoActionResult {
+//        case one
+//        case two
+//    }
+//    ///2アクション使用時のイニシャライザ
+//    init(twoAtcionTitle1:String,twoAtcionTitle2:String) {
+//        self.title01 = twoAtcionTitle1
+//        self.title02 = twoAtcionTitle2
+//    }
+//    ///OKボタンと決定ボタンアクションどちらかを使用するときのイニシャライザ
+//    init(dicidedOrOkOnlyTitle:String,message:String,buttonMessage:String) {
+//        self.title01 = dicidedOrOkOnlyTitle
+//        self.message = message
+//        self.buttonMessage = buttonMessage
+//    }
+//    ///タイトル・1ボタン・キャンセル　アクション
+//    func showOneActionSheets(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
+//        //アクションシートを作る
+//        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+//        //ボタン1
+//        alert.addAction(UIAlertAction(title: title01, style: .default, handler: {
+//            (action: UIAlertAction!) in
+//            callback(.one)
+//        }))
+//        //キャンセルボタン
+//        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
+//        //アクションシートを表示する
+//        SelfViewController.present(alert, animated: true, completion: nil)
+//    }
+//    ///タイトル・2ボタン・キャンセル　アクション
+//    func showTwoActionSheets(callback:@escaping(twoActionResult) -> Void,SelfViewController:UIViewController) {
+//        //アクションシートを作る
+//        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+//        //ボタン1
+//        alert.addAction(UIAlertAction(title: title01, style: .default, handler: {
+//            (action: UIAlertAction!) in
+//            callback(.one)
+//        }))
+//        //ボタン２
+//        alert.addAction(UIAlertAction(title: title02, style: .default, handler: {
+//            (action: UIAlertAction!) in
+//            callback(.two)
+//        }))
+//        //キャンセルボタン
+//        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
+//        //アクションシートを表示する
+//        SelfViewController.present(alert, animated: true, completion: nil)
+//    }
+//    ///タイトル・メッセージ・1ボタン・キャンセル　アクション
+//    func dicidedAction(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
+//        let alert = UIAlertController(title: title01, message: message, preferredStyle: UIAlertController.Style.alert)
+//        //ボタン1
+//        alert.addAction(UIAlertAction(title: buttonMessage, style: UIAlertAction.Style.default, handler: {
+//            (action: UIAlertAction!) in
+//            callback(.one)
+//        }))
+//        //ボタン2
+//        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
+//        //アクションシートを表示する
+//        SelfViewController.present(alert, animated: true, completion: nil)
+//    }
+//    ///タイトル・メッセージ・OK　アクション
+//    func okOnlyAction(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
+//        let alert = UIAlertController(title: title01, message: message, preferredStyle: UIAlertController.Style.alert)
+//        //ボタン1
+//        alert.addAction(UIAlertAction(title: buttonMessage, style: UIAlertAction.Style.default, handler: {
+//            (action: UIAlertAction!) in
+//            callback(.one)
+//        }))
+//        //アクションシートを表示する
+//        SelfViewController.present(alert, animated: true, completion: nil)
+//    }
+//    
+//}
 
 struct LOADING {
     let loadingView:LoadingView
-    init(loadingView:LoadingView) {
+    init(loadingView:LoadingView,BackClear:Bool) {
+        if BackClear {
+            loadingView.backgroundColor = .clear
+            loadingView.activityIndicator.color = UIColor.gray
+        } else {
+            loadingView.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)
+            loadingView.activityIndicator.color = UIColor.white
+        }
+
         self.loadingView = loadingView
     }
 
@@ -229,6 +291,10 @@ struct TimeTools {
 
         return date!
     }
+    ///Date→TimeStamp
+    func convertToTimestamp(date: Date) -> Timestamp {
+        return Timestamp(date: date)
+    }
 }
 
 struct sizeAdjust {
@@ -237,7 +303,64 @@ struct sizeAdjust {
         let textFieldWidth = objectWidth
         let characterWidth = textFieldWidth / CGFloat(MaxCharacterDigit)
         let maximumFontSize = UIFont.systemFont(ofSize: 1).pointSize * characterWidth
-//        self.font = UIFont.systemFont(ofSize: maximumFontSize)
         return maximumFontSize
+    }
+}
+///西暦を年齢に変換
+struct AgeCalculator {
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyyMMdd"
+        return formatter
+    }()
+    
+    static func calculateAge(from dateString: String) -> String {
+        if let dateOfBirth = dateFormatter.date(from: dateString) {
+            let calendar = Calendar.current
+            let ageComponents = calendar.dateComponents([.year], from: dateOfBirth, to: Date())
+            if let age = ageComponents.year {
+                return "\(age)歳"
+            }
+        }
+        
+        return "未設定"
+    }
+}
+///時間を適切な文言に変換
+struct TimeCalculator {
+    private static var calendar = Calendar.current
+
+    static func calculateRemainingTime(from date: Date) -> String {
+        let now = Date()
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month, .day, .hour, .minute, .second], from: date, to: now)
+
+        if let year = components.year, year > 0 {
+            return "\(year)年"
+        } else if let month = components.month, month > 0 {
+            return "\(month)ヶ月"
+        } else if let day = components.day, day > 0 {
+            return "\(day)日"
+        } else if let hour = components.hour, hour > 0 {
+            return "\(hour)時間"
+        } else if let minute = components.minute, minute > 0 {
+            return "\(minute)分"
+        } else if let second = components.second, second >= 5 {
+            return "\(second)秒"
+        }
+        return "今"
+    }
+}
+///60秒前の時間を取得
+struct AgoDateGetter {
+    
+    static func oneMinuteAgo() -> Date {
+        let day = Date()
+        let modifiedDate = Calendar.current.date(byAdding: .minute, value: -1, to: day)
+        
+        if let modifiedDate = modifiedDate {
+            return modifiedDate
+        }
+        return Date()
     }
 }

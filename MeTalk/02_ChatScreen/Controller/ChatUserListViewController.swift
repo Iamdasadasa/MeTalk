@@ -16,11 +16,11 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
     ///インスタンス化(View)
     let CHATUSERLISTTABLEVIEW = UITableView()
     ///インスタンス化(Model)
-    let PLOFILEHOSTING = profileHosting()
-    let UID = Auth.auth().currentUser?.uid
     let TALKLOCAL = localTalkDataStruct()
-    let TALKHOSTING = TalkDataHostingManager()
-    let CONTENTSHOSTING = ContentsDatahosting()
+    let PROFILEGETTER = TargetProfileGetterManager()
+    let CHATGETTER = ChatListGetterManager()
+    let CHATSETTER = ChatListSetterManager()
+    let CONTENTSGETTER = ContentsGetterManager()
     let LOCALCONTENTSSTRUCT = localProfileContentsDataStruct()
     let LOCALLISTUSERS = localListUsersDataStruct()
     ///ローカルデータ取得
@@ -28,7 +28,7 @@ class ChatUserListViewController:UIViewController, UINavigationControllerDelegat
     ///自身の画像View
     var selfProfileImageView = UIImageView()
     ///自身のユーザー情報格納変数
-    var meInfoData:profileInfoLocal?
+    var meInfoData:ProfileInfoLocalObject?
     ///追加でロードする際のCount変数
     var loadToLimitCount:Int = 15
     ///重複してメッセージデータを取得しないためのフラグ
@@ -131,7 +131,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         cell.talkListUserProfileImageView.image = targetImage.profileImage
 
         ///サーバーに対して画像取得要求
-        CONTENTSHOSTING.ImageDataGetter(callback: { data, err in
+        CONTENTSGETTER.ImageDataGetter(callback: { data, err in
             if data.lcl_UID! == "Yd7MNepBxzSc0p7bpp3LjcwSl1h2" {
                 print("画像は存在しているはずです。")
             }
@@ -153,7 +153,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             cell.nortificationImage.image = nil
         }
         ///listendがTrue且つ送信者IDが自分でない場合はベルアイコンを表示()
-        if USERINFODATA.lcl_Listend && USERINFODATA.lcl_SendUID != UID {
+        if USERINFODATA.lcl_Listend && USERINFODATA.lcl_SendUID != USERINFODATA.lcl_UID! {
             cell.nortificationImageSetting()
         }
         ///バックボタンで戻ってきた際のUIDがCellのUIDと合致していたらベルアイコンは非表示
@@ -174,21 +174,20 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
         let cell = tableView.cellForRow(at: indexPath) as! ChatUserListTableViewCell
         ///選んだセルの相手のUIDを取得
         let YouUID = self.talkListUsersMock[indexPath.row].lcl_UID
+        ///自身のUID
+        let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
         
         guard let CELLUID = cell.cellUID  else {
-            let alert = actionSheets(dicidedOrOkOnlyTitle: "ユーザーに異常が発生しました", message: "このユーザーとトークすることはできません。", buttonMessage:  "OK")
-            alert .okOnlyAction(callback: { result in
-                switch result {
-                case .one:
-                    return
-                }
-            }, SelfViewController: self)
+            createSheet(callback: {
+                return
+            }, for: .Alert(title: "ユーザーに異常が発生しました", message: "このユーザーとトークすることはできません。", buttonMessage: "OK"), SelfViewController: self)
             return
         }
         
         ///ローカルDBの処理で行っていないのは相手のトーク情報をタップした時点で取得したいため
-        TALKHOSTING.talkListTargetUserDataGet(callback: { ListUsersInfo, err in
-            let TARGETPROFILEINFOLOCAL:profileInfoLocal = profileInfoLocal()
+        CHATGETTER.TargetUserInfoGetter(callback: { ListUsersInfo, err in
+            
+            let TARGETPROFILEINFOLOCAL:ProfileInfoLocalObject = ProfileInfoLocalObject()
             TARGETPROFILEINFOLOCAL.lcl_NickName = ListUsersInfo.lcl_UserNickName
             ///遷移先のチャット画面のViewcontrollerをインスタンス化
             let CHATVIEWCONTROLLER = ChatViewController(Youinfo: TARGETPROFILEINFOLOCAL, Meinfo: self.meInfoData!)
@@ -198,7 +197,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             CHATVIEWCONTROLLER.roomID = roomID
             ///それぞれのユーザー情報を渡す
             CHATVIEWCONTROLLER.MeInfo = self.meInfoData!
-            CHATVIEWCONTROLLER.MeUID = self.UID
+            CHATVIEWCONTROLLER.MeUID = MYUID
             CHATVIEWCONTROLLER.YouUID = YouUID!
             CHATVIEWCONTROLLER.meProfileImage = self.selfProfileImageView.image
             CHATVIEWCONTROLLER.youProfileImage = cell.talkListUserProfileImageView.image
@@ -218,7 +217,7 @@ extension ChatUserListViewController:UITableViewDelegate, UITableViewDataSource{
             }
             ///UINavigationControllerとして遷移
             self.navigationController?.pushViewController(CHATVIEWCONTROLLER, animated: true)
-        }, UID1: UID!, UID2: CELLUID)
+        }, MYUID: MYUID, UID2: CELLUID)
         
     }
     
@@ -288,7 +287,8 @@ extension ChatUserListViewController {
 //    }
     ///自身の情報を取得
     func userInfoDataGet(){
-        var dataReflect_CellSelecter = {(document:profileInfoLocal) in
+        let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
+        var dataReflect_CellSelecter = {(document:ProfileInfoLocalObject) in
             ////ドキュメントにデータが入るまではセルを選択できないようにする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = false
             ///データ投入
@@ -306,36 +306,33 @@ extension ChatUserListViewController {
         })
         
         func hostingUserInfoGetter() {
-            let hosting = profileHosting()
-            hosting.FireStoreProfileDataGetter(callback: { localdata, err in
+            PROFILEGETTER.getter(callback: { data, err in
                 if err != nil {
-                    let action = actionSheets(dicidedOrOkOnlyTitle: "データが破損しております。", message: "デフォルトの値を適用します", buttonMessage: "OK")
-                    action.dicidedAction(callback: { nill in
-                        self.meInfoData = localdata
-                    }, SelfViewController: self)
+
                     return
                 }
-                dataReflect_CellSelecter(localdata)
-            }, UID: UID!)
+                dataReflect_CellSelecter(data)
+            }, UID: MYUID)
+
         }
     }
     ///自分の画像を取得してくる()
     func contentOfFIRStorageGet() {
         let TOOL = TIME()
-        
-        ///サーバーに対して画像取得要求
-        CONTENTSHOSTING.ImageDataGetter(callback: { Img, ERR in
+        let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
+        CONTENTSGETTER.ImageDataGetter(callback: { Img, ERR in
             ///ドキュメントにデータが入るまではセルを選択できないようにする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = false
             ///画像セット
             self.selfProfileImageView.image = Img.profileImage
             ///セル選択を可能にする
             self.CHATUSERLISTTABLEVIEW.allowsSelection = true
-        }, UID: UID!, UpdateTime: TOOL.pastTimeGet())
+        }, UID: MYUID, UpdateTime: TOOL.pastTimeGet())
     }
     
     ///トークリストのリアルタイムリスナー
     func talkListListner() {
+        let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
         ///ローカルDBにデータが入っている場合はデータをユーザー配列に投入する
         let localDBGetData = TALKLOCAL.localTalkListDataGet()
         
@@ -352,11 +349,8 @@ extension ChatUserListViewController {
     
         ///リスナー用FireStore変数
         let db = Firestore.firestore()
-        guard let uid = UID else {
-            return
-        }
         ///リスナー処理開始
-        db.collection("users").document(uid).collection("TalkUsersList").order(by: "UpdateAt",descending: true).limit(to: 1).addSnapshotListener { (document,err) in
+        db.collection("users").document(MYUID).collection("TalkUsersList").order(by: "UpdateAt",descending: true).limit(to: 1).addSnapshotListener { (document,err) in
             let TALKLISTUSERS:ListUsersInfoLocal = ListUsersInfoLocal()
             ///初回起動時でない場合のみ既読バッジオン
             var listend:Bool = true

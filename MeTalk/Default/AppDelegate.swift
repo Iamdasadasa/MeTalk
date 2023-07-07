@@ -28,7 +28,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if let uid = Auth.auth().currentUser?.uid {
             rootViewController = initialSettingGenderSelectionViewController()
         } else {
-            let USERHOSTING = profileInitHosting()
+//            let USERHOSTING = profileInitHosting()
             rootViewController = initialSettingGenderSelectionViewController()
         }
         

@@ -53,7 +53,6 @@ extension TargetProfileViewController{
     /// - Returns:
     func targetUserInfoDataSetup(userInfoData:profileInfoLocal) {
         ///nil判断&格納
-        let action = actionSheets(dicidedOrOkOnlyTitle: "データが取得できませんでした。", message: "やり直してください", buttonMessage: "OK")
         let date:Date
         let aboutMeMessage:String
         let nickName:String
@@ -66,10 +65,9 @@ extension TargetProfileViewController{
         let areaResult = userInfoData.strBinding(strVaule: userInfoData.lcl_Area)
         
         if dateResult.1 == .err,aboutMeMessageResult.1 == .err,nickNameResult.1 == .err,ageResult.1 == .err,areaResult.1 == .err{
-            action.okOnlyAction(callback: { result in
-                ///nilエラー
+            createSheet(callback: {
                 return
-            }, SelfViewController: self)
+            }, for: .Alert(title: "データが取得できませんでした", message: "やり直してください", buttonMessage: "OK"), SelfViewController: self)
         }
         ///値格納
         date = dateResult.0

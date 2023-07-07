@@ -17,7 +17,10 @@ class BlockListViewController:UIViewController{
     ///インスタンス化（View）
     let blockListTableView = UITableView()
     ///インスタンス化（Model）
-    let userDataManagedData = UserDataManage()
+    let CONTENTSGETTER = ContentsGetterManager()
+    let CONTENTSSETTER = ContentsSetterManager()
+    let PRLOFILEGETTER = TargetProfileGetterManager()
+    let BLOCKLISTGETTER  = BlockListGetterManager()
     let uid = Auth.auth().currentUser?.uid
     let TIMES = TIME()
     ///ブロックリストユーザーID格納配列
@@ -27,7 +30,7 @@ class BlockListViewController:UIViewController{
     override func viewDidLoad() {
         super.viewDidLoad()
         ///自身のブロックユーザーの一覧を取得
-        userDataManagedData.blockUserDataGet(callback: {document in
+        BLOCKLISTGETTER.blockUserDataGet(callback: {document in
             self.blockUsersID = document
             self.blockListTableView.reloadData()
         }, UID: uid)
@@ -68,18 +71,14 @@ extension BlockListViewController:UITableViewDelegate,UITableViewDataSource{
         ///ブロックユーザーIDの配列から取得
         guard let blockUserID = blockUsersID?[indexPath.row] else {return cell}
         ///取得したIDでユーザー情報の取得を開始(ユーザーニックネーム)
-        userDataManagedData.userInfoDataGet(callback: {blockUserInfoDoc in
-            guard let blockUserInfoDoc = blockUserInfoDoc else {
-                print("ブロックリストのユーザー情報が取得できませんでした")
-                return
-            }
+        PRLOFILEGETTER.getter(callback: {blockUserInfoDoc,err  in
             cell.setCell(Item: blockUserInfoDoc["nickname"] as? String ?? "退会したユーザー")
         }, UID: blockUserID)
-        ///取得したIDでユーザー情報の取得を開始(プロフィール画像)
-        self.userDataManagedData.contentOfFIRStorageGet(callback: { imageStruct in
+        ///取得したIDでユーザー情報の取得を開始(プロフィール画像
+        CONTENTSGETTER.ImageDataGetter(callback: { imageStruct,err in
             ///Nilでない場合はコールバック関数で返ってきたイメージ画像をオブジェクトにセット
-            if imageStruct.image != nil {
-                cell.blockUserProfileImageView.image = imageStruct.image
+            if imageStruct.profileImage != nil {
+                cell.blockUserProfileImageView.image = imageStruct.profileImage
                 
             ///コールバック関数でNilが返ってきたら初期画像を設定
             } else {

@@ -35,7 +35,7 @@ enum Section:Int,CaseIterable {
             let SectionItem = SectionItem(sectionTitle: "アプリケーション", numberOfRowsInSection: 2)
             return SectionItem
         case .user:
-            let SectionItem = SectionItem(sectionTitle: "ユーザー関連", numberOfRowsInSection: 1)
+            let SectionItem = SectionItem(sectionTitle: "ユーザー関連", numberOfRowsInSection: 2)
             return SectionItem
         }
     }
@@ -58,6 +58,8 @@ enum CellItem:Int,CaseIterable {
             return.aboutApp
         case[2,0]:
             return.cancelTheMembership
+        case[2,1]:
+            return.developperTestViewController
         default:
             preconditionFailure("Sectionの数が多すぎているか、セルの数が多すぎているためにenum Sectionを要確認")
         }
@@ -69,6 +71,7 @@ enum CellItem:Int,CaseIterable {
     case inquiry
     case aboutApp
     case cancelTheMembership
+    case developperTestViewController
     
     ///セルに対する情報項目(適宜増やしてOK)
     struct CELLDATA{
@@ -95,6 +98,9 @@ enum CellItem:Int,CaseIterable {
             return CELLDATA
         case .cancelTheMembership:
             let CELLDATA = CELLDATA(cellTitle: "メンバーシップの削除", viewController: nil)
+            return CELLDATA
+        case .developperTestViewController:
+            let CELLDATA = CELLDATA(cellTitle: "テスト画面", viewController: TestViewController())
             return CELLDATA
         }
     }
@@ -197,6 +203,13 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
         ///メンバーシップ削除
         case .cancelTheMembership:
             deleteMemberShipActionSheet(UIVIEWCONTROLLER: self)
+        ///テスト画面
+        case .developperTestViewController:
+            if let nextViewController = CELLITEM.CELLITEMS.viewController {
+                self.delegate?.pushViewController(nextViewController: nextViewController, sideMenuViewcontroller: self)
+            } else {
+                preconditionFailure("Cell列挙型の構造体viewControllerに実態が設置されていない")
+            }
         }
     }
 }
@@ -205,22 +218,40 @@ extension SideMenuViewcontroller {
     
     ///メンバーシップ削除のためのFunction
     func deleteMemberShipActionSheet(UIVIEWCONTROLLER:UIViewController){
-        let action = actionSheets(twoAtcionTitle1: "テスト的ログアウトボタン", twoAtcionTitle2: "テストデータ大量作成")
-        action.showTwoActionSheets(callback: { result in
+        createSheet(callback: {}, for: .Options(["テスト的ログアウトボタン","テストデータ大量作成"], { result in
             switch result {
-            case .one:
+            case 0:
                 do {
                     try Auth.auth().signOut()
                 } catch let signOutError as NSError {
                     print("SignOut Error: %@", signOutError)
                 }
-            case .two:
+                preconditionFailure("強制退会")
+            case 1:
                 let kaihatu = kaihatutouroku()
                 let ramdom = "テストデータ\(Int.random(in: 1..<100000))"
                 kaihatu.tesutotairyou(callback: { document in
                 }, nickName: ramdom, SexNo: 99, ramdomString: ramdom, jibunUID: Auth.auth().currentUser!.uid)
+            default:
+                return
             }
-        }, SelfViewController: self)
+        }), SelfViewController: self)
+//        let action = actionSheets(twoAtcionTitle1: "テスト的ログアウトボタン", twoAtcionTitle2: "テストデータ大量作成")
+//        action.showTwoActionSheets(callback: { result in
+//            switch result {
+//            case .one:
+//                do {
+//                    try Auth.auth().signOut()
+//                } catch let signOutError as NSError {
+//                    print("SignOut Error: %@", signOutError)
+//                }
+//            case .two:
+//                let kaihatu = kaihatutouroku()
+//                let ramdom = "テストデータ\(Int.random(in: 1..<100000))"
+//                kaihatu.tesutotairyou(callback: { document in
+//                }, nickName: ramdom, SexNo: 99, ramdomString: ramdom, jibunUID: Auth.auth().currentUser!.uid)
+//            }
+//        }, SelfViewController: self)
     }
     
     ///利用規約かプライバシーポリシー選択のためのFunction
@@ -229,17 +260,28 @@ extension SideMenuViewcontroller {
         let webPageTermsOfService = WebPage.TermsOfService
         let webPageprivacyPolicy = WebPage.privacyPolicy
         
-        let action = actionSheets(twoAtcionTitle1: webPageprivacyPolicy.info.title, twoAtcionTitle2: webPageTermsOfService.info.title)
-        action.showTwoActionSheets(callback: { result in
+        createSheet(callback: {}, for: .Options([webPageprivacyPolicy.info.title,webPageTermsOfService.info.title], { result in
             switch result {
-                ///プライバシーポリシー用のカスタム列挙型を返却
-            case .one:
+            case 0:
                 callback(webPageprivacyPolicy)
-                ///利用規約用のカスタム列挙型を返却
-            case .two:
+            case 1:
                 callback(webPageTermsOfService)
+            default:
+                return
             }
-        }, SelfViewController: self)
+        }), SelfViewController: self)
+        
+//        let action = actionSheets(twoAtcionTitle1: webPageprivacyPolicy.info.title, twoAtcionTitle2: webPageTermsOfService.info.title)
+//        action.showTwoActionSheets(callback: { result in
+//            switch result {
+//                ///プライバシーポリシー用のカスタム列挙型を返却
+//            case .one:
+//                callback(webPageprivacyPolicy)
+//                ///利用規約用のカスタム列挙型を返却
+//            case .two:
+//                callback(webPageTermsOfService)
+//            }
+//        }, SelfViewController: self)
     }
 }
 
@@ -264,13 +306,9 @@ extension SideMenuViewcontroller:MFMailComposeViewControllerDelegate{
         //メール送信が不可能なら
         } else {
             //アラートで通知
-            let action = actionSheets(dicidedOrOkOnlyTitle: "メールアカウントが存在しません", message: "問い合わせを行うにはメールアカウントのセットアップが必要です。", buttonMessage: "OK")
-            action.okOnlyAction(callback: { result in
-                switch result {
-                case .one:
-                    return
-                }
-            }, SelfViewController: self)
+            createSheet(callback: {
+                return
+            }, for: .Alert(title: "メールアカウントが存在しません", message: "メールアカウントを作成後再度お試しください", buttonMessage: "OK"), SelfViewController: self)
         }
     }
     ///エラー処理

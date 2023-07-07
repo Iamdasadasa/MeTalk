@@ -4,15 +4,17 @@ import InputBarAccessoryView
 
 class ChatViewController: MessagesViewController {
     ///model
-    let CHATHOSTING = TalkDataHostingManager()
+    let CHATSETTER = ChatListSetterManager()
+    let CHATGETTER = ChatListGetterManager()
+    let TALKLISETSETTER = TalkListSetterManager()
     ///ブロック有無変数
     var blocked:Bool = false
     var blocker:Bool = false
     ///init変数　自分のUIDと相手のUID
     var MeUID:String!
     var YouUID:String!
-    var MeInfo:profileInfoLocal
-    var YouInfo:profileInfoLocal
+    var MeInfo:ProfileInfoLocalObject
+    var YouInfo:ProfileInfoLocalObject
     var YouNickName:String
     ///init変数　自分のプロフィール画像と相手のプロフィール画像
     var meProfileImage:UIImage!
@@ -34,7 +36,7 @@ class ChatViewController: MessagesViewController {
     ///時間まとめ用のKeyValue
     var DateGrouping:[String] = []
     
-    init (Youinfo:profileInfoLocal,Meinfo:profileInfoLocal) {
+    init (Youinfo:ProfileInfoLocalObject,Meinfo:ProfileInfoLocalObject) {
         self.YouInfo = Youinfo
         self.MeInfo = Meinfo
         self.YouNickName = Youinfo.lcl_NickName ?? "不明なユーザー"
@@ -106,13 +108,9 @@ class ChatViewController: MessagesViewController {
         ///ネットワーク確認
         let NETWORKSTATUS = Reachabiliting()
         if NETWORKSTATUS.NetworkStatus() == 0{
-            let alert = actionSheets(dicidedOrOkOnlyTitle: "ネットワーク接続がありません", message: "ネットワークを確認してからもう一度実行してください", buttonMessage:  "OK")
-            alert .okOnlyAction(callback: { result in
-                switch result {
-                case .one:
-                    return
-                }
-            }, SelfViewController: self)
+            createSheet(callback: {
+                return
+            }, for: .Alert(title: "ネットワークを確認してからもう一度実行してください", message: "ネットワークを確認してからもう一度実行してください", buttonMessage: "OK"), SelfViewController: self)
             ///メッセージ追加
             messageListAppend()
         }
@@ -157,10 +155,10 @@ class ChatViewController: MessagesViewController {
 
 // MARK: - MessagesDataSource
 extension ChatViewController: MessagesDataSource {
-    
-    func currentSender() -> SenderType {
+    var currentSender: MessageKit.SenderType {
         return userType.me(UID: self.MeUID, displayName: self.MeInfo.lcl_NickName!).data
     }
+    
 
     func otherSender() -> SenderType {
         return userType.you(UID: self.YouUID, displayName: self.YouNickName).data
@@ -314,7 +312,7 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
             
         let attributedText = NSAttributedString(
             string: text, attributes: [.font: UIFont.systemFont(ofSize: 15), .foregroundColor: UIColor.white])
-        let message = MockMessage(attributedText: attributedText, sender:currentSender(), messageId: UUID().uuidString, date: Date(), messageDateGroupingFlag: false)
+        let message = MockMessage(attributedText: attributedText, sender:currentSender, messageId: UUID().uuidString, date: Date(), messageDateGroupingFlag: false)
         if blocked {
             ///ブロックされているので自身のローカルデータに保存してテーブル更新後終了
             ///ローカルデータベースに保存
@@ -326,7 +324,9 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
             let LOCALDATASTRUCT = localTalkDataStruct(roomID: roomID,updateobject: messageLocal)
             LOCALDATASTRUCT.localMessageDataRegist()
             ///自身のデータベースのみ更新
-            CHATHOSTING.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID, message: text, sender: MeUID, nickName1: MeInfo.lcl_NickName!, nickName2: YouNickName, like: false, blocked: true)
+            TALKLISETSETTER.talkListToUserInfoSetter(callback: {result in
+                
+            }, UID1: MeUID, UID2: YouUID, message: text, sender: MeUID, nickName1: MeInfo.lcl_NickName!, nickName2: YouNickName, like: false, blocked: true)
             
             self.messageInputBar.inputTextView.text = String()
             self.messageInputBar.invalidatePlugins()
@@ -334,14 +334,15 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
             return
         } else {
             ///FireBaseにデータ書き込み（書き込みした時点で読み込みリロードhandlerが呼ばれる）
-            if let ERROR = CHATHOSTING.writeMessageData(mockMessage: message, text: text, roomID: self.roomID) {
-                let action = actionSheets(dicidedOrOkOnlyTitle: "書き込みが行われませんでした。", message: "もう一度送信してください。", buttonMessage: "OK")
-                action.okOnlyAction(callback: { result in
+            if let ERROR = CHATSETTER.messageSetter(mockMessage: message, text: text, roomID: self.roomID) {
+                createSheet(callback: {
                     return
-                }, SelfViewController: self)
+                }, for: .Alert(title: "書き込みが行われませんでした。", message: "もう一度送信してください。", buttonMessage: "OK"), SelfViewController: self)
             }
             ///最初のメッセージが存在していない場合のみそれぞれのAuthにUIDを登録、存在していたらデータ更新
-            CHATHOSTING.talkListUserAuthUIDCreate(UID1: MeUID, UID2: YouUID, message: text, sender: MeUID, nickName1: MeInfo.lcl_NickName!, nickName2: YouNickName, like: false, blocked: false)
+            TALKLISETSETTER.talkListToUserInfoSetter(callback: {result in
+                
+            }, UID1: MeUID, UID2: YouUID, message: text, sender: MeUID, nickName1: MeInfo.lcl_NickName!, nickName2: YouNickName, like: false, blocked: false)
         }
 
         self.messageInputBar.inputTextView.text = String()

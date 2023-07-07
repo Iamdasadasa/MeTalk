@@ -21,8 +21,6 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     var handle:AuthStateDidChangeListenerHandle?
     ///カメラピッカーの定義
     let PICKER = UIImagePickerController()
-    
-
     ///インスタンス化(Controller)
     var contentVC:UIViewController?
     let SIDEMENUVIEWCONTROLLER = SideMenuViewcontroller()
@@ -30,8 +28,8 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     ///インスタンス化（View）
     let PROFILEVIEW = ProfileView()
     ///インスタンス化（Model）
-    let USERDATAMANAGE = UserDataManage()
-    let UID = Auth.auth().currentUser?.uid
+    let PROFILEGETTER = TargetProfileGetterManager()
+    let CONTENTSETTER = ContentsSetterManager()
     let localData = localProfileDataStruct(UID: Auth.auth().currentUser!.uid)
     let IMAGELOCALDATASTRUCT = localProfileContentsDataStruct()
     ///RealMオブジェクトをインスタンス化
@@ -74,13 +72,13 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
     }
     
     func hostingDataGetter() {
-        let hosting = profileHosting()
-        hosting.FireStoreProfileDataGetter(callback: { info, err in
+        let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
+        PROFILEGETTER.getter(callback: { info, err in
             if err != nil {
                 print("サーバーにデータがないのに初期画面以外にいるのはありえない")
             }
             self.userInfoDataSetup(userInfoData: info)
-        }, UID: UID!)
+        }, UID: MYUID)
     }
     
     ///コードレイアウトで行う場合はLoadView
@@ -90,10 +88,9 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        
-
+        let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
         ///イメージをローカルから取得
-        let IMAGE = IMAGELOCALDATASTRUCT.chatUserListLocalImageInfoGet(UID: UID!)
+        let IMAGE = IMAGELOCALDATASTRUCT.chatUserListLocalImageInfoGet(UID:MYUID)
         ///プロフィール画像オブジェクトに画像セット（ローカル）
         self.PROFILEVIEW.profileImageButton.setImage(IMAGE.profileImage, for: .normal)
         self.profileImage = IMAGE.profileImage
@@ -114,23 +111,21 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
     /// - Returns: none
     func profileImageButtonTappedDelegate() {
         ///アクションシートを表示してユーザーが選択した内容によって動作を切り替え
-        let action = actionSheets(twoAtcionTitle1: "画像を表示", twoAtcionTitle2: "画像を変更")
-        
-        action.showTwoActionSheets(callback: { result in
-            switch result {
-                ///画像を表示
-            case .one:
+        createSheet(callback: {}, for: .Options(["画像を表示","画像を変更"], { index in
+            switch index {
+            case 0:
                 self.SHOWIMAGEVIEWCONTROLLER.profileImage = self.profileImage
                 self.present(self.SHOWIMAGEVIEWCONTROLLER, animated: true, completion: nil)
-                ///画像を変更
-            case .two:
+            case 1:
                 self.PICKER.delegate = self
                 ///強制的にアルバム
                 self.PICKER.sourceType = .photoLibrary
                 ///カメラピッカー表示
                 self.present(self.PICKER, animated: true, completion: nil)
+            default:
+                return
             }
-        }, SelfViewController: self)
+        }), SelfViewController: self)
     }
     
     ///カメラピッカーでキャンセルを押下した際の処理（デリゲートなので自動で呼ばれる）
@@ -166,17 +161,17 @@ extension ProfileViewController:ProfileViewDelegate,UINavigationControllerDelega
     }
     ///CropView Controllerで画像切り取り処理を決定したら呼ばれる処理
     func cropViewController(_ cropViewController: CropViewController, didCropToCircularImage image: UIImage, withRect cropRect: CGRect, angle: Int) {
-
+        let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
         ///UIimageViewをModelインスタンス先で圧縮するためにImageviewをインスタンス化
         let UIimageView = UIImageView()
         UIimageView.image = image
         ///ローカルDBに取得したデータを上書き保存
-        IMAGELOCALDATASTRUCT.chatUserListLocalImageRegist(UID: self.UID!, profileImage: image, updataDate: Date())
+        IMAGELOCALDATASTRUCT.chatUserListLocalImageRegist(UID: MYUID, profileImage: image, updataDate: Date())
         ///プロフィールイメージ投稿Model
-        USERDATAMANAGE.contentOfFIRStorageUpload(callback: { pressureImage in
+        CONTENTSETTER.contentOfFIRStorageUpload(callback: { pressureImage in
             self.PROFILEVIEW.profileImageButton.setImage(pressureImage, for: .normal)
-            
-        }, UIimagedata: UIimageView, UID: UID)
+        }, UIimagedata: UIimageView, UID: MYUID)
+
         
         ///cropViewControllerを閉じる
         cropViewController.dismiss(animated: true, completion: nil)
@@ -233,7 +228,7 @@ extension ProfileViewController{
     /// - Parameters:
     /// - userInfoData:画面表示の際に取得してきているユーザーデータ
     /// - Returns:
-    func userInfoDataSetup(userInfoData:profileInfoLocal) {
+    func userInfoDataSetup(userInfoData:ProfileInfoLocalObject) {
         ///開始日をもってくる際の日付フォーマットの設定
         let dateFormatter = DateFormatter()
         dateFormatter.locale = .init(identifier: "en_US_POSIX")

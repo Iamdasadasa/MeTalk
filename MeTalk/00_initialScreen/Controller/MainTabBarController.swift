@@ -16,7 +16,7 @@ final class MainTabBarController: UITabBarController {
     }
 
     func setupTab() {
-        let firstViewController = UserListViewController()
+        let firstViewController = showUserListViewController(tabBarHeight: self.tabBar.frame.height)
         let UINavigationController_0 = UINavigationController(rootViewController: firstViewController)
         UINavigationController_0.modalPresentationStyle = .fullScreen
         UINavigationController_0.tabBarItem = UITabBarItem(title: "tab1", image: .none, tag: 0)
