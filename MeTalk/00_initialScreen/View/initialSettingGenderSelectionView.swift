@@ -7,96 +7,9 @@
 
 import Foundation
 import UIKit
-///画面ハイライト用オーバーレイビュークラス
-class OverlayView: UIView {
-    func show() {
-        self.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-        self.alpha = 0
-        
-        UIView.animate(withDuration: 0.3) {
-            self.alpha = 1
-        }
-    }
-    
-    func hide() {
-        UIView.animate(withDuration: 0.3) {
-            self.alpha = 0
-        }
-    }
-}
-///性別画像Viewカスタムクラス
-class genderImageView:UIImageView {
-    var gender:GENDER
-    var selected:Bool = false
-    var centerValue:CGPoint?
-    init(gender: GENDER) {
-        self.gender = gender
-        super.init(image: nil) // 親クラスの指定イニシャライザを呼び出す
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    /// レイアウト設定
-    func setting() {
-        self.contentMode = .scaleAspectFit
-        self.clipsToBounds = true
-        self.layer.borderWidth = 1
-        self.layer.borderColor = UIColor.gray.cgColor
-        
-        self.image = gender.genderImage
-    }
-}
-///性別ボタンカスタムクラス
-class genderButton:UIButton {
-    var gender:GENDER
-    init(gender: GENDER) {
-        self.gender = gender
-        super.init(frame: .zero)// 親クラスの指定イニシャライザを呼び出す
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    ///性別に対するタグ割り当て
-    func setting() {
-        self.backgroundColor = .clear
-        
-        switch gender {
-        case .male:
-            self.tag = 0
-        case .female:
-            self.tag = 1
-        case .none:
-            self.tag = 2
-        }
-    }
-}
 
-///性別テキストラベルカスタムクラス
-class genderTextLabel:UILabel {
-    var gender: GENDER
-    
-    init(gender: GENDER) {
-        self.gender = gender
-        super.init(frame: .zero) // 親クラスの指定イニシャライザを呼び出す
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    /// レイアウト設定
-    func setting() {
-        self.text = gender.genderText
-        self.textColor = UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 1.0)
-        self.backgroundColor = .clear
-        self.font = UIFont.systemFont(ofSize: 25)
-        self.textAlignment = NSTextAlignment.center
-    }
-    
-}
+
+
 ///決定ボタンカスタムクラス
 class decisionCustomButton:UIButton {
     var selectedGender:GENDER?
@@ -110,34 +23,6 @@ class decisionCustomButton:UIButton {
     }
 }
 
-///イメージ名称列挙型配列
-enum GENDER:Int {
-    case male = 1
-    case female = 2
-    case none = 0
-    
-    var genderImage:UIImage {
-        switch self {
-        case .female:
-            return UIImage(named: "Female")!
-        case .male:
-            return UIImage(named: "Male")!
-        case .none:
-            return UIImage(named: "Unknown")!
-        }
-    }
-    
-    var genderText:String {
-        switch self {
-        case .female:
-            return "女性"
-        case .male:
-            return "男性"
-        case .none:
-            return "選択しない"
-        }
-    }
-}
 ///メインクラスプロトコル
 protocol initialSettingGenderSelectionViewDelegate:AnyObject {
     func decisionButtonTappedAction(gender:GENDER)
@@ -337,28 +222,19 @@ extension initialSettingGenderSelectionView:UIScrollViewDelegate {
             ///各インスタンス変数に割り振りおよび初期レイアウト設定
             switch genderPattern {
             case .none:
-                noneGenderImage = genderImageView(gender: genderPattern)
-                noneGenderImage.setting()
+                noneGenderImage = genderImageView(gender: genderPattern, Type: .initial)
                 noneTxtLabel = genderTextLabel(gender: genderPattern)
-                noneTxtLabel.setting()
                 noneGenderButton = genderButton(gender: genderPattern)
-                noneGenderButton.setting()
                 noneGenderButton.addTarget(self, action: #selector(genderButtonClicked(_:)), for: UIControl.Event.touchUpInside)
             case .male:
-                maleImage = genderImageView(gender: genderPattern)
-                maleImage.setting()
+                maleImage = genderImageView(gender: genderPattern, Type: .initial)
                 maleTxtLabel = genderTextLabel(gender: genderPattern)
-                maleTxtLabel.setting()
                 maleButton = genderButton(gender: genderPattern)
-                maleButton.setting()
                 maleButton.addTarget(self, action: #selector(genderButtonClicked(_:)), for: UIControl.Event.touchUpInside)
             case .female:
-                femaleImage = genderImageView(gender: genderPattern)
-                femaleImage.setting()
+                femaleImage = genderImageView(gender: genderPattern, Type: .initial)
                 femaleTxtLabel = genderTextLabel(gender: genderPattern)
-                femaleTxtLabel.setting()
                 femaleButton = genderButton(gender: genderPattern)
-                femaleButton.setting()
                 femaleButton.addTarget(self, action: #selector(genderButtonClicked(_:)), for: UIControl.Event.touchUpInside)
             }
         }

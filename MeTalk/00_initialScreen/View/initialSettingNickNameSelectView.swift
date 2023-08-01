@@ -7,28 +7,7 @@
 
 import Foundation
 import UIKit
-///ニックネーム入力テキストフィールド
-class nickNameCustomTextField:UITextField{
-    override init(frame: CGRect) {
-        super.init(frame: .zero)
-        setting()
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    ///テキストフィールドの修飾
-    private func setting() {
-        self.borderStyle = .roundedRect
-        self.textColor = .black
-        self.borderStyle = .none
-        self.backgroundColor = .clear
-        self.textAlignment = .center
-        self.attributedPlaceholder = NSAttributedString(string: "最大5文字",
-                                                        attributes: [NSAttributedString.Key.foregroundColor: UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 0.5)])
-    }
-}
+
 ///メインクラスプロトコル
 protocol initialSettingNickNameSelectViewDelegate:AnyObject {
     func decisionButtonTappedAction(ageSelectionView:initialSettingNickNameSelectView)

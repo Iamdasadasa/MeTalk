@@ -11,8 +11,6 @@ import SideMenu
 
 
 class TargetProfileViewController:UIViewController{
-
-    
     ///インスタンス化(Controller)
     var contentVC:UIViewController?
     let SHOWIMAGEVIEWCONTROLLER = ShowImageViewController()

@@ -358,5 +358,3 @@ extension ProfileViewController:SemiModalViewControllerProtcol{
         FPC.removePanelFromParent(animated: true)
     }
 }
-
-//この画面のエクステンションでオブザーバが実装できるか確認

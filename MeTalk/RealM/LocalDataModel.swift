@@ -8,6 +8,7 @@
 import Foundation
 import RealmSwift
 
+/// メッセージの内容を保存するマネージドオブジェクト
 class MessageLocalObject:Object {
     @objc dynamic var lcl_RoomID:String?
     @objc dynamic var lcl_MessageID:String?
@@ -58,7 +59,7 @@ struct MessageLocalGetterManager{
         return (message,true)
     }
 }
-
+/// プロフィールの内容を保存するマネージドオブジェクト
 class ProfileInfoLocalObject: Object {
     @objc dynamic var lcl_UID:String?
     override static func primaryKey() -> String? {
@@ -73,8 +74,7 @@ class ProfileInfoLocalObject: Object {
     @objc dynamic var lcl_Area: String?
     @objc dynamic var lcl_LikeButtonPushedFLAG:Bool = false
     @objc dynamic var lcl_LikeButtonPushedDate:Date?
-    
-    /
+
 }
 
 struct TargetProfileLocalDataGetterManager{
@@ -112,5 +112,57 @@ struct TargetProfileLocalDataSetterManager{
         realm.beginWrite()
         ///追加されてメッセージをAdd
         realm.add(profile,update:.modified)
+    }
+}
+
+///検索条件を保存するマネージドオブジェクト
+class PerformSearchLocalObject: Object {
+    @objc dynamic var primaryValue:String = "SearchPerform"
+    override static func primaryKey() -> String {
+        return "primaryValue"
+    }
+    @objc dynamic var lcl_MinAge:Int = 18
+    @objc dynamic var lcl_MaxAge:Int = 100
+    @objc dynamic var lcl_Gender: Int = 0
+    @objc dynamic var lcl_Area: String = "選択しない"
+}
+
+struct PerformSearchLocalDataGetterManager{
+    func getter() -> PerformSearchLocalObject? {
+        let REALM = try! Realm()
+        let LOCALDBGETDATA = REALM.objects(PerformSearchLocalObject.self)
+        return LOCALDBGETDATA.first
+    }
+}
+
+struct PerformSearchLocalDataSetterManager{
+    private let realm = try! Realm()
+    ///アップデートOr新規作成対象のメッセージ
+    private let PerformSearch:PerformSearchLocalObject
+    ///コミットするかどうかを必ず行う。
+    var commiting:Bool = false {
+        willSet {
+            if newValue {
+                try! realm.commitWrite()
+            } else {
+                realm.cancelWrite()
+            }
+        }
+    }
+    ///新規作成
+    init(newAddPerformSearch:PerformSearchLocalObject) {
+        self.PerformSearch = newAddPerformSearch
+        ///書き込みトランザクションを開始
+        realm.beginWrite()
+        ///追加されてメッセージをAdd
+        realm.add(PerformSearch)
+    }
+    ///アップデート
+    init(updatePerformSearch:PerformSearchLocalObject) {
+        self.PerformSearch = updatePerformSearch
+        ///書き込みトランザクションを開始
+        realm.beginWrite()
+        ///追加されてメッセージをAdd
+        realm.add(PerformSearch,update:.modified)
     }
 }

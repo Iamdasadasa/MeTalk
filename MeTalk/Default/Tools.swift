@@ -9,6 +9,7 @@ import Foundation
 import Reachability
 import UIKit
 import FirebaseFirestore
+import RangeUISlider
 ///ネットワーク状況判断
 struct Reachabiliting{
     func NetworkStatus() -> Int {
@@ -78,96 +79,6 @@ func createSheet(callback:@escaping()-> Void,for type: actionSheetsType,SelfView
         SelfViewController.present(alert, animated: true, completion: nil)
     }
 }
-
-//struct actionSheets{
-//    ///必要なアクションシート要素変数
-//    let title01:String
-//    var title02:String?
-//    var message:String?
-//    var buttonMessage:String?
-//    ///返却アクションが1アクション用のカスタム列挙　結果用
-//    enum oneActionResult {
-//        case one
-//    }
-//    ///1アクション使用時のイニシャライザ
-//    init(oneAtcionTitle1:String) {
-//        self.title01 = oneAtcionTitle1
-//    }
-//    ///返却アクションが2アクション用のカスタム列挙　結果用
-//    enum twoActionResult {
-//        case one
-//        case two
-//    }
-//    ///2アクション使用時のイニシャライザ
-//    init(twoAtcionTitle1:String,twoAtcionTitle2:String) {
-//        self.title01 = twoAtcionTitle1
-//        self.title02 = twoAtcionTitle2
-//    }
-//    ///OKボタンと決定ボタンアクションどちらかを使用するときのイニシャライザ
-//    init(dicidedOrOkOnlyTitle:String,message:String,buttonMessage:String) {
-//        self.title01 = dicidedOrOkOnlyTitle
-//        self.message = message
-//        self.buttonMessage = buttonMessage
-//    }
-//    ///タイトル・1ボタン・キャンセル　アクション
-//    func showOneActionSheets(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
-//        //アクションシートを作る
-//        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-//        //ボタン1
-//        alert.addAction(UIAlertAction(title: title01, style: .default, handler: {
-//            (action: UIAlertAction!) in
-//            callback(.one)
-//        }))
-//        //キャンセルボタン
-//        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
-//        //アクションシートを表示する
-//        SelfViewController.present(alert, animated: true, completion: nil)
-//    }
-//    ///タイトル・2ボタン・キャンセル　アクション
-//    func showTwoActionSheets(callback:@escaping(twoActionResult) -> Void,SelfViewController:UIViewController) {
-//        //アクションシートを作る
-//        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-//        //ボタン1
-//        alert.addAction(UIAlertAction(title: title01, style: .default, handler: {
-//            (action: UIAlertAction!) in
-//            callback(.one)
-//        }))
-//        //ボタン２
-//        alert.addAction(UIAlertAction(title: title02, style: .default, handler: {
-//            (action: UIAlertAction!) in
-//            callback(.two)
-//        }))
-//        //キャンセルボタン
-//        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
-//        //アクションシートを表示する
-//        SelfViewController.present(alert, animated: true, completion: nil)
-//    }
-//    ///タイトル・メッセージ・1ボタン・キャンセル　アクション
-//    func dicidedAction(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
-//        let alert = UIAlertController(title: title01, message: message, preferredStyle: UIAlertController.Style.alert)
-//        //ボタン1
-//        alert.addAction(UIAlertAction(title: buttonMessage, style: UIAlertAction.Style.default, handler: {
-//            (action: UIAlertAction!) in
-//            callback(.one)
-//        }))
-//        //ボタン2
-//        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: nil))
-//        //アクションシートを表示する
-//        SelfViewController.present(alert, animated: true, completion: nil)
-//    }
-//    ///タイトル・メッセージ・OK　アクション
-//    func okOnlyAction(callback:@escaping(oneActionResult) -> Void,SelfViewController:UIViewController) {
-//        let alert = UIAlertController(title: title01, message: message, preferredStyle: UIAlertController.Style.alert)
-//        //ボタン1
-//        alert.addAction(UIAlertAction(title: buttonMessage, style: UIAlertAction.Style.default, handler: {
-//            (action: UIAlertAction!) in
-//            callback(.one)
-//        }))
-//        //アクションシートを表示する
-//        SelfViewController.present(alert, animated: true, completion: nil)
-//    }
-//    
-//}
 
 struct LOADING {
     let loadingView:LoadingView
@@ -306,25 +217,85 @@ struct sizeAdjust {
         return maximumFontSize
     }
 }
-///西暦を年齢に変換
+
 struct AgeCalculator {
-    private static let dateFormatter: DateFormatter = {
+    private static let YearToDateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyyMMdd"
         return formatter
     }()
     
+    private static let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMdd"
+        return formatter
+    }()
+    
+    /// 西暦を年齢　西暦を年齢に変換(string To string)
     static func calculateAge(from dateString: String) -> String {
-        if let dateOfBirth = dateFormatter.date(from: dateString) {
+        if let dateOfBirth = YearToDateFormatter.date(from: dateString) {
             let calendar = Calendar.current
             let ageComponents = calendar.dateComponents([.year], from: dateOfBirth, to: Date())
             if let age = ageComponents.year {
                 return "\(age)歳"
             }
         }
-        
         return "未設定"
     }
+    
+    /// 西暦を年齢　西暦を年齢に変換(Int To Int)
+    static func calculateAge(from yearOfBirth: Int) -> Int {
+        let calendar = Calendar.current
+        let currentYear = calendar.component(.year, from: Date())
+        let age = currentYear - yearOfBirth
+        return age
+    }
+    enum minOrNow {
+        case min
+        case max
+    }
+    
+    
+    /// 西暦から検索用の年月日に変換
+    /// - Parameters:
+    ///   - targetYearToDate: 月日を追加したい西暦
+    ///   - minOrMax: 最小年齢か最大年齢か
+    /// - Returns: 西暦に正しい月を追加した年月日
+    static func convertDefaultYearOfBirth(targetYear:Int,minOrMax:minOrNow) -> Int {
+        var convertedYearToDate:String
+        if minOrMax == .min {
+            let NowDate = dateFormatter.string(from: Date())
+            convertedYearToDate = String(targetYear) + NowDate
+        } else {
+            let tomorrowDate = dateFormatter.calendar.date(byAdding: .day, value: 1, to: Date())
+            let tomorrowString = dateFormatter.string(from: tomorrowDate!)
+            
+            convertedYearToDate = String(targetYear - 1) + tomorrowString
+        }
+        ///桁数チェック
+        if convertedYearToDate.count > 9 {
+            return targetYear
+        }
+        return Int(convertedYearToDate)!
+    }
+    
+    /// 検索用の年月日から西暦に変換
+    /// - Parameters:
+    ///   - targetYearToDate: 月日を追加したい西暦
+    ///   - minOrMax: 最小年齢か最大年齢か
+    /// - Returns: 西暦に正しい月を追加した年月日
+    static func conbertDefaultYear(targetYearOfBirth:Int,minOrMax:minOrNow) -> Int {
+        var convertedYear:Int
+        if minOrMax == .min {
+            ///後方4桁を削除
+            convertedYear = targetYearOfBirth / 10000
+        } else {
+            convertedYear = targetYearOfBirth / 10000
+            convertedYear = convertedYear + 1
+        }
+        return convertedYear
+    }
+    
 }
 ///時間を適切な文言に変換
 struct TimeCalculator {
@@ -362,5 +333,71 @@ struct AgoDateGetter {
             return modifiedDate
         }
         return Date()
+    }
+}
+///カスタム年齢スライダー
+class CustomAgeSlider:RangeUISlider {
+    override init(frame: CGRect) {
+        super.init(frame: .zero)
+        setting()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setting() {
+        let grayColor = UIColor(red: 0.8, green: 0.8, blue: 0.8, alpha: 1.0)
+        self.scaleMinValue = 18
+        self.scaleMaxValue = 100
+        self.defaultValueLeftKnob = 18
+        self.defaultValueRightKnob = 100
+        self.leftKnobColor = .clear
+        self.leftShadowColor = .black
+        self.leftShadowOffset = CGSize(width: -3, height: 3)
+        self.leftKnobBorderColor = .gray
+        self.leftKnobBorderWidth = 1
+        self.rightKnobColor = .clear
+        self.rightShadowColor = .black
+        self.rightShadowOffset = CGSize(width: -3, height: 3)
+        self.rightKnobBorderColor = .gray
+        self.rightKnobBorderWidth = 1
+        self.showKnobsLabels = true
+        self.knobsLabelNumberOfDecimal = 0
+        self.stepIncrement = 1
+        self.rangeSelectedColor = .gray
+        self.rangeNotSelectedColor = grayColor
+        self.barHeight = 1.5
+        self.knobsLabelFontColor = .gray
+    }
+}
+
+///検索用ピッカー
+class SearchCustomPicker:UIPickerView {
+    enum pickerType {
+        case area
+    }
+    
+    var list:[String] = []
+    
+    init(Type: pickerType) {
+        super.init(frame: .zero)
+        setting(Type: Type)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setting(Type:pickerType) {
+        switch Type {
+        case .area:
+            list = ["未設定",
+                    "北海道", "青森", "岩手", "宮城", "秋田", "山形", "福島", "茨城", "栃木", "群馬",
+                    "埼玉", "千葉", "東京", "神奈川", "新潟", "富山", "石川", "福井", "山梨", "長野",
+                    "岐阜", "静岡", "愛知", "三重", "滋賀", "京都", "大阪", "兵庫", "奈良", "和歌山",
+                    "鳥取", "島根", "岡山", "広島", "山口", "徳島", "香川", "愛媛", "高知", "福岡",
+                    "佐賀", "長崎", "熊本", "大分", "宮崎", "鹿児島", "沖縄"]
+        }
     }
 }

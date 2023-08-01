@@ -46,23 +46,14 @@ class UserListTableViewCell: UITableViewCell {
         ///セルが再利用されることを考慮して遅延実行
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-        
-            self.messageLabelBaseView.layer.cornerRadius = 10
-            self.messageLabelBaseView.clipsToBounds = true
-            /// メッセージラベルに陰影をつける（ボタンっぽくする）
-            self.messageLabelBaseView.layer.masksToBounds = false
-            self.messageLabelBaseView.layer.shadowColor = UIColor.black.cgColor
-            self.messageLabelBaseView.layer.shadowOffset = CGSize(width: 3, height: -3)
-            self.messageLabelBaseView.layer.shadowOpacity = 0.2
-            self.messageLabelBaseView.layer.shadowRadius = 2
-            /// シャドウパスとして保持
-            self.messageLabelBaseView.layer.shadowPath = UIBezierPath(rect: messageLabelBaseView.bounds).cgPath
+            ///陰影処理
+            self.messageLabelBaseView.shadowSetting()
             
             ///フォントサイズ調整
             self.nicknameLabel.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 5, objectWidth: self.nicknameLabel.frame.width))
             self.ageTextView.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 3, objectWidth: self.ageTextView.frame.width))
             self.areaTextView.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 3, objectWidth: self.areaTextView.frame.width))
-            self.loginTimeView.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 4, objectWidth: self.loginTimeView.frame.width))
+            self.loginTimeView.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 3, objectWidth: self.loginTimeView.frame.width))
         }
 
     }
@@ -145,11 +136,7 @@ class UserListTableViewCell: UITableViewCell {
         return returnLabel
     }()
     ///メッセージラベルベースUIVIEW
-    let messageLabelBaseView:UIView = {
-        let view  = UIView()
-        view.backgroundColor = .white
-        return view
-    }()
+    let messageLabelBaseView:ShadowBaseView = ShadowBaseView()
     
     ///ライクボタン用ImageView
     let ImageView:LottieAnimationView = {

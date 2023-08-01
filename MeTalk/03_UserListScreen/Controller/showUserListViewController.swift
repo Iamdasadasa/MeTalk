@@ -10,36 +10,6 @@ import UIKit
 import Firebase
 import RealmSwift
 import CoreAudio
-///このビューコントローラのみで使用するデータ構造体（Nil無し）
-class RequiredProfileInfoLocalData {
-    init(UID:String,DateCreatedAt:Date,DateUpdatedAt:Date,
-         Sex:Int,AboutMeMassage: String,NickName: String,
-         Age: Int,Area: String){
-        self.Required_UID = UID
-        self.Required_DateCreatedAt = DateCreatedAt
-        self.Required_DateUpdatedAt = DateUpdatedAt
-        self.Required_Sex = Sex
-        self.Required_AboutMeMassage = AboutMeMassage
-        self.Required_NickName = NickName
-        self.Required_Age = Age
-        self.Required_Area = Area
-    }
-    var Required_UID:String
-    var Required_DateCreatedAt: Date
-    var Required_DateUpdatedAt: Date
-    var Required_Sex:Int
-    var Required_AboutMeMassage: String
-    var Required_NickName: String
-    var Required_Age: Int
-    var Required_Area: String
-    var Required_LikeButtonPushedFLAG:Bool = false
-    var Required_LikeButtonPushedDate:Date?
-}
-
-struct ImageDataHolder{
-    var targetUID:String?
-    var UIImage:UIImage?
-}
 
 class showUserListViewController:UIViewController,UINavigationControllerDelegate{
     ///インスタンス化(View)
@@ -51,6 +21,8 @@ class showUserListViewController:UIViewController,UINavigationControllerDelegate
     let TALKDATASETTER:TalkListSetterManager = TalkListSetterManager()
     let TALKDATAGETTER:TalkListGetterManager = TalkListGetterManager()
     let CONTENTSHOSTING:ContentsGetterManager = ContentsGetterManager()
+    let LOCALPERFORMSEARCH:PerformSearchLocalDataGetterManager = PerformSearchLocalDataGetterManager()
+    var QUERY:QueryFilter = QueryFilter(minAge: nil, maxAge: nil, gender: nil, area: nil)
     ///情報格納用変数
     var LOCALUSERSPROFILEARRAY:[RequiredProfileInfoLocalData] = []
     var ImageDataArray:[ImageDataHolder] = []
@@ -65,23 +37,58 @@ class showUserListViewController:UIViewController,UINavigationControllerDelegate
     let loading = LOADING(loadingView: LoadingView(), BackClear: true)
     ///スクロールでロードした際のカウンター
     var scrollExtraUserCounter:Int = 0
-    ///固定ユーザー取得件数
-    var fixedLoadingCount:Int = 3
+    ///スクロール完全停止フラグ
+    var isReadyToLoadPosition:Bool = false
+    ///画像データ用のキャッシュ
+    let cache = NSCache<NSString, UIImage>()
+    
+    
+    ///ここから⭐️
+    var visibleItemCount:Int {
+        get {
+            return self.QUERY.fixCount * self.QUERY.scrollCounter
+        }
+    }
+    
+    ///件数オーバーOr件数が少ない際のチェック
+    enum OverOrLack {
+        case Over
+        case Lack
+    }
+    var gettingUserCountChecker:OverOrLack? {
+        willSet {
+            ///件数オーバー
+            if newValue == .Over {
+                ///差分
+                let countToRemove = self.scrollExtraUserCounter - (self.QUERY.fixCount * self.QUERY.scrollCounter)
+                ///配列の下から差分の数を削除
+                self.LOCALUSERSPROFILEARRAY = self.LOCALUSERSPROFILEARRAY.dropLast(countToRemove)
+            } else {
+            ///件数が足りない
+                ///件数倍数を追加して再度呼び出す
+                self.QUERY.scrollCounter = self.QUERY.scrollCounter + 1
+                userDataServerGetting(filter: QUERY)
+            }
+        }
+    }
+    
+    ///ここまで⭐️
+
+
+
     ///ユーザーローディングフラグ
     var reloading = true {
         ///ロードインジケータ表示可否
         willSet {
             if newValue {
+                ///インジケータ非表示
                 ActivityIndicatorShow(showing: false)
             } else {
+                ///インジケータ表示
                 ActivityIndicatorShow(showing: true)
             }
         }
     }
-    ///スクロール完全停止フラグ
-    var isReadyToLoadPosition:Bool = false
-    ///画像データ用のキャッシュ
-    let cache = NSCache<NSString, UIImage>()
     
     init(tabBarHeight:CGFloat) {
         self.tabBarHeight = tabBarHeight
@@ -110,8 +117,34 @@ class showUserListViewController:UIViewController,UINavigationControllerDelegate
         activityIndicatorView.color = UIColor.gray
         ///インジケータの余白を設定
         self.CHATUSERLISTTABLEVIEW.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
+        // スクロールビューの下方向への引っ張りを監視する
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        CHATUSERLISTTABLEVIEW.refreshControl = refreshControl
         ///セルの登録
         CHATUSERLISTTABLEVIEW.register(UserListTableViewCell.self, forCellReuseIdentifier: "UserListTableViewCell")
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        ///ローカルから検索条件を取得してクエリ変数に適用
+        let queVal = LOCALPERFORMSEARCH.getter()
+        ///年齢
+        QUERY.minAge = queVal?.lcl_MinAge
+        QUERY.maxAge = queVal?.lcl_MaxAge
+        ///エリアが未選択の場合は条件無し
+        if queVal?.lcl_Area == "未設定" {
+            QUERY.area = nil
+        } else {
+            QUERY.area = queVal?.lcl_Area
+        }
+        ///性別が0(未選択の場合)は条件無し
+        if queVal?.lcl_Gender == 0 {
+            QUERY.gender = nil
+        } else {
+            QUERY.gender = queVal?.lcl_Gender
+        }
+
         ///自身のプロフィールをあらかじめ取得
         let profileGetter = TargetProfileGetterManager()
         ///自身のUIDを取得
@@ -123,10 +156,12 @@ class showUserListViewController:UIViewController,UINavigationControllerDelegate
             }
             ///グローバルな変数に自身のプロフィールを格納
             self.MYPROFILE = SelfProfile
-            ///ユーザー一覧情報取得開始
-            self.userDataServerGetting(latestTime: nil, limitCount: self.fixedLoadingCount)
+            // データリロード
+            self.basicReloadData()
         }, UID: MYUID)
+
     }
+    
 }
 ///EXTENSION[UITableView関連]
 extension showUserListViewController:UITableViewDelegate, UITableViewDataSource{
@@ -237,20 +272,15 @@ extension showUserListViewController:UITableViewDelegate, UITableViewDataSource{
         if isReadyToLoadPosition {
             ///最下層に到達している
             if self.reloading {
-                ///カウンター初期化
+                ///スクロールカウンターを追加
+                self.QUERY.scrollCounter = self.QUERY.scrollCounter + 1
+                ///追加できたユーザーのカウンター初期化
                 scrollExtraUserCounter = 0
                 // デリゲートは何回も呼ばれてしまうので、リロード中はfalseにしておく
                 self.reloading = false
-                ///１分以内にログインしているユーザーを取得して格納
-                oneMinuteLoginUserDataServerGetting(callback: { _ in
-                ///1分以内のユーザー取得完了後
-                    ///現在の配列から一番古い時間を取得
-                    let oldestTime:Date? = self.LOCALUSERSPROFILEARRAY.min(by: { $0.Required_DateUpdatedAt < $1.Required_DateUpdatedAt })?.Required_DateUpdatedAt
-                    
-                    ///指定時間より遅いユーザーを取得
-                    self.userDataServerGetting(latestTime: oldestTime, limitCount: self.fixedLoadingCount)
-                }, limitCount: fixedLoadingCount)
 
+                ///ユーザー情報取得
+                self.userDataServerGetting(filter: self.QUERY)
             }
         }
     }
@@ -330,33 +360,16 @@ extension showUserListViewController {
             }, for: .Retry(title: "相手にライクを送れせんでした。もう一度お試しください"), SelfViewController: self)
         }
     }
-    /// ユーザー情報取得処理（１分以内にログインしているもの）
-    func oneMinuteLoginUserDataServerGetting(callback:@escaping(Bool) -> Void,limitCount:Int) {
-        TALKDATAGETTER.onlineUsersGetter(callback: { gettingData,Err in
-            ///一件ずつ処理
-            for data in gettingData {
-                if let RequiredProfile = self.CheckingDataAndlikeDataExtra(PROFILE: data){
-                    ///スクロール時のユーザー追加カウンター
-                    self.scrollExtraUserCounter += 1
-                    ///トークリスト配列に追加
-                    self.LOCALUSERSPROFILEARRAY.append(RequiredProfile)
-                }
-            }
-            callback(true)
-        }, latedTime: nil, oneMinuteWithin: true, limitCount: limitCount)
-    }
     
-    /// ユーザー情報取得処理（時間指定）
-    /// - Parameter latestTime: 取得時間(指定した時間よりも前のユーザーを取得)
-    func userDataServerGetting(latestTime:Date?,limitCount:Int) {
-        TALKDATAGETTER.onlineUsersGetter(callback: { gettingData,Err in
+    func userDataServerGetting(filter:QueryFilter) {
+        TALKDATAGETTER.onlineUsersDataGetter(callback: { gettingData, Err in
             ///エラー時の処理
             if let Err = Err{
                 self.err(Type: .targetDataFailedData)
                 return
             }
-            ///サーバーからの取得件数が0の場合
-            if gettingData.count == 0 {
+            ///サーバーからの取得件数が0
+            if gettingData.count == 0{
                 self.reloading = true
                 return
             }
@@ -368,18 +381,26 @@ extension showUserListViewController {
                     self.LOCALUSERSPROFILEARRAY.append(RequiredProfile)
                 }
             }
-
-            ///件数調整(スクロールで追加したユーザーが固定の追加数を超えたら)
-            if self.scrollExtraUserCounter > self.fixedLoadingCount {
-                ///差分
-                let countToRemove = self.scrollExtraUserCounter - self.fixedLoadingCount
-                ///配列の下から差分の数を削除
-                self.LOCALUSERSPROFILEARRAY = self.LOCALUSERSPROFILEARRAY.dropLast(countToRemove)
+            ///サーバーから取得したユーザー数が指定した件数を取れずに頭打ちしていない場合
+            if self.visibleItemCount < gettingData.count {
+                ///件数調整(スクロールで追加したユーザーが固定の追加数を超えたら)
+                if self.scrollExtraUserCounter > self.QUERY.fixCount {
+                    self.gettingUserCountChecker = .Over
+                }
+                
+                ///配列の件数が最低表示件数に満たない場合のチェック
+                if self.LOCALUSERSPROFILEARRAY.count < (self.QUERY.fixCount * self.QUERY.scrollCounter) {
+                    self.gettingUserCountChecker = .Lack
+                }
             }
+            ///最後に更新時間順にソート
+            self.LOCALUSERSPROFILEARRAY.sort(by: {$0.Required_DateUpdatedAt > $1.Required_DateUpdatedAt})
+            
             self.reloading = true
             self.CHATUSERLISTTABLEVIEW.reloadData()
-        }, latedTime: latestTime, oneMinuteWithin: false, limitCount: limitCount)
+        }, filter: filter)
     }
+    
     /// ライクデータをホスティングで取得してきたデータに付与
     /// - Parameter PROFILE: ホスティングで取得したデータ
     /// - Returns: ローカルに保存してあるライクデータを付与して返却
@@ -518,24 +539,43 @@ extension showUserListViewController {
     }
     ///リロードボタンタップ時のアクション
     @objc func reloadButtonTapped() {
+        // データリロード
+        basicReloadData()
+    }
+    
+    ///検索ボタンタップ時のアクション
+    @objc func filterButtonTapped() {
+        let searchViewController = SearchSettingViewController()
+        let UINavigationController = UINavigationController(rootViewController: searchViewController)
+        UINavigationController.modalPresentationStyle = .fullScreen
+        self.present(UINavigationController, animated: false, completion: nil)
+        self.slideOutToLeft() // 遷移先の画面を横スライドで表示
+    }
+    
+    // 引っ張り操作でのリフレッシュ処理
+    @objc func refreshData() {
+        // データリロード
+        basicReloadData()
+        // リフレッシュコントロールの終了処理
+        CHATUSERLISTTABLEVIEW.refreshControl?.endRefreshing()
+    }
+}
+
+///EXTENSION[各種機能群]
+extension showUserListViewController {
+    
+    ///初期リロード（ベーシック）
+    func basicReloadData() {
         ///ユーザー一覧格納配列初期化
         self.LOCALUSERSPROFILEARRAY = []
         self.CHATUSERLISTTABLEVIEW.reloadData()
         reloading = false
         ///スクロール時のユーザー追加カウンターは0に戻す
         self.scrollExtraUserCounter = 0
-        ///ユーザー一覧情報取得開始
-        self.userDataServerGetting(latestTime: nil, limitCount: self.fixedLoadingCount)
+        ///スクロールカウンターは1に戻す
+        self.QUERY.scrollCounter = 1
+        self.userDataServerGetting(filter: self.QUERY)
     }
-    
-    ///検索ボタンタップ時のアクション
-    @objc func filterButtonTapped() {
-        // リロードボタンがタップされた時の処理を記述する
-    }
-}
-
-///EXTENSION[各種機能群]
-extension showUserListViewController {
     
     /// 最下層に来た際のインジケータ表示
     /// - Parameter showing: 表示するか否か

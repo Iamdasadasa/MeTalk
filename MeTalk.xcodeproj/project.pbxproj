@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D6262D142A5D2E2500456B73 /* ShowUserListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6262D132A5D2E2500456B73 /* ShowUserListModel.swift */; };
+		D6262D192A5D2ED000456B73 /* SearchSettingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6262D182A5D2ED000456B73 /* SearchSettingViewController.swift */; };
+		D6262D1B2A5D2FBB00456B73 /* searchSettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6262D1A2A5D2FBB00456B73 /* searchSettingView.swift */; };
+		D6262D1E2A5E604D00456B73 /* CustomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6262D1D2A5E604D00456B73 /* CustomView.swift */; };
+		D6262D212A5E96FC00456B73 /* RangeUISlider in Frameworks */ = {isa = PBXBuildFile; productRef = D6262D202A5E96FC00456B73 /* RangeUISlider */; };
 		D62B508D2A452C7C00986760 /* LocalDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D62B508C2A452C7C00986760 /* LocalDataModel.swift */; };
 		D631EBEE27A581BE00800693 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBED27A581BE00800693 /* AppDelegate.swift */; };
 		D631EBF027A581BE00800693 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D631EBEF27A581BE00800693 /* SceneDelegate.swift */; };
@@ -37,8 +42,6 @@
 		D673C2A029EDB6FD00DCB995 /* typingUILabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D673C29F29EDB6FD00DCB995 /* typingUILabel.swift */; };
 		D673C2A229EE67C300DCB995 /* initialSettingGenderSelectViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D673C2A129EE67C300DCB995 /* initialSettingGenderSelectViewController.swift */; };
 		D673C2A429EE934500DCB995 /* initialSettingGenderSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D673C2A329EE934500DCB995 /* initialSettingGenderSelectionView.swift */; };
-		D67C27D028F88B2F00C25BA3 /* UserListStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */; };
-		D67C27D428F88CDA00C25BA3 /* UserListManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27D328F88CDA00C25BA3 /* UserListManager.swift */; };
 		D67C27D628FE959100C25BA3 /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27D528FE959100C25BA3 /* Extension.swift */; };
 		D67C27D829026A8200C25BA3 /* Tools.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27D729026A8200C25BA3 /* Tools.swift */; };
 		D67C27DA2907C8CD00C25BA3 /* TargetProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27D92907C8CD00C25BA3 /* TargetProfileView.swift */; };
@@ -54,6 +57,7 @@
 		D696850627D23FBD006D85DC /* showImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D696850527D23FBD006D85DC /* showImageViewController.swift */; };
 		D696850827D24100006D85DC /* ShowImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D696850727D24100006D85DC /* ShowImageView.swift */; };
 		D698A0CB27E0BA66002C64DE /* WebViewTempleteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D698A0CA27E0BA66002C64DE /* WebViewTempleteController.swift */; };
+		D69EA1742A791D0200C8F72E /* AlgoliaSearchClient in Frameworks */ = {isa = PBXBuildFile; productRef = D69EA1732A791D0200C8F72E /* AlgoliaSearchClient */; };
 		D69EC37427AA55DA00290B18 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D69EC37327AA55DA00290B18 /* GoogleService-Info.plist */; };
 		D69EC37A27AA681200290B18 /* MainTabBarController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37927AA681100290B18 /* MainTabBarController.swift */; };
 		D69EC37C27AA85C300290B18 /* loadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D69EC37B27AA85C300290B18 /* loadingView.swift */; };
@@ -86,7 +90,6 @@
 		D6D8032C2A36C18100107DBB /* SideMenu in Frameworks */ = {isa = PBXBuildFile; productRef = D6D8032B2A36C18100107DBB /* SideMenu */; };
 		D6D803312A36D42500107DBB /* Reachability in Frameworks */ = {isa = PBXBuildFile; productRef = D6D803302A36D42500107DBB /* Reachability */; };
 		D6DE5C1F28085CB4006C6236 /* TalkUsersListMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */; };
-		D6E1F779292B419C0005212C /* userListFunctionStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6E1F778292B419C0005212C /* userListFunctionStruct.swift */; };
 		D6EA09F12976ACA0003801F7 /* ModalBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6EA09F02976ACA0003801F7 /* ModalBaseView.swift */; };
 		D6EEB0E02992BDA000EBDFA3 /* HostingMock.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6EEB0DF2992BDA000EBDFA3 /* HostingMock.swift */; };
 /* End PBXBuildFile section */
@@ -109,6 +112,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D6262D132A5D2E2500456B73 /* ShowUserListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowUserListModel.swift; sourceTree = "<group>"; };
+		D6262D182A5D2ED000456B73 /* SearchSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingViewController.swift; sourceTree = "<group>"; };
+		D6262D1A2A5D2FBB00456B73 /* searchSettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = searchSettingView.swift; sourceTree = "<group>"; };
+		D6262D1D2A5E604D00456B73 /* CustomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomView.swift; sourceTree = "<group>"; };
 		D62B508C2A452C7C00986760 /* LocalDataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalDataModel.swift; sourceTree = "<group>"; };
 		D631EBEA27A581BE00800693 /* MeTalk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MeTalk.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D631EBED27A581BE00800693 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -143,8 +150,6 @@
 		D673C29F29EDB6FD00DCB995 /* typingUILabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = typingUILabel.swift; sourceTree = "<group>"; };
 		D673C2A129EE67C300DCB995 /* initialSettingGenderSelectViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingGenderSelectViewController.swift; sourceTree = "<group>"; };
 		D673C2A329EE934500DCB995 /* initialSettingGenderSelectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = initialSettingGenderSelectionView.swift; sourceTree = "<group>"; };
-		D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListStruct.swift; sourceTree = "<group>"; };
-		D67C27D328F88CDA00C25BA3 /* UserListManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListManager.swift; sourceTree = "<group>"; };
 		D67C27D528FE959100C25BA3 /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
 		D67C27D729026A8200C25BA3 /* Tools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tools.swift; sourceTree = "<group>"; };
 		D67C27D92907C8CD00C25BA3 /* TargetProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetProfileView.swift; sourceTree = "<group>"; };
@@ -177,7 +182,6 @@
 		D6C70F662A3C921800D3737E /* HostingDataSetter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostingDataSetter.swift; sourceTree = "<group>"; };
 		D6D8030D2A31756500107DBB /* showUserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = showUserListViewController.swift; sourceTree = "<group>"; };
 		D6DE5C1E28085CB4006C6236 /* TalkUsersListMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkUsersListMock.swift; sourceTree = "<group>"; };
-		D6E1F778292B419C0005212C /* userListFunctionStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = userListFunctionStruct.swift; sourceTree = "<group>"; };
 		D6EA09F02976ACA0003801F7 /* ModalBaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalBaseView.swift; sourceTree = "<group>"; };
 		D6EEB0DF2992BDA000EBDFA3 /* HostingMock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostingMock.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -196,8 +200,10 @@
 				D6D803112A36BF7F00107DBB /* FirebaseAuth in Frameworks */,
 				D6D803212A36C02B00107DBB /* Realm in Frameworks */,
 				D6D803192A36BF7F00107DBB /* FirebaseFirestoreSwift in Frameworks */,
+				D69EA1742A791D0200C8F72E /* AlgoliaSearchClient in Frameworks */,
 				D6D803132A36BF7F00107DBB /* FirebaseDatabase in Frameworks */,
 				D6D8031B2A36BF7F00107DBB /* FirebaseStorage in Frameworks */,
+				D6262D212A5E96FC00456B73 /* RangeUISlider in Frameworks */,
 				D6D803232A36C02B00107DBB /* RealmSwift in Frameworks */,
 				D6D803292A36C10B00107DBB /* MessageKit in Frameworks */,
 				D696850227D08BD4006D85DC /* CropViewController in Frameworks */,
@@ -227,6 +233,39 @@
 			children = (
 			);
 			path = Pods;
+			sourceTree = "<group>";
+		};
+		D6262D122A5D2DB100456B73 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				D6262D152A5D2E7B00456B73 /* Model */,
+				D6262D172A5D2E8C00456B73 /* View */,
+				D6262D162A5D2E8200456B73 /* Controller */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
+		D6262D152A5D2E7B00456B73 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		D6262D162A5D2E8200456B73 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				D6262D182A5D2ED000456B73 /* SearchSettingViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		D6262D172A5D2E8C00456B73 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D6262D1A2A5D2FBB00456B73 /* searchSettingView.swift */,
+			);
+			path = View;
 			sourceTree = "<group>";
 		};
 		D631EBE127A581BE00800693 = {
@@ -362,6 +401,7 @@
 				D67C27D528FE959100C25BA3 /* Extension.swift */,
 				D67C27D729026A8200C25BA3 /* Tools.swift */,
 				D6C70F5A2A3BFC6D00D3737E /* Singleton.swift */,
+				D6262D1D2A5E604D00456B73 /* CustomView.swift */,
 			);
 			path = Default;
 			sourceTree = "<group>";
@@ -464,6 +504,7 @@
 				D67C27D228F88B9E00C25BA3 /* Model */,
 				D65BD34E28F8895400DDAFA4 /* View */,
 				D65BD34F28F8895B00DDAFA4 /* Controller */,
+				D6262D122A5D2DB100456B73 /* Search */,
 			);
 			path = 03_UserListScreen;
 			sourceTree = "<group>";
@@ -480,10 +521,8 @@
 		D65BD34F28F8895B00DDAFA4 /* Controller */ = {
 			isa = PBXGroup;
 			children = (
-				D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */,
 				D6D8030D2A31756500107DBB /* showUserListViewController.swift */,
 				D67C27DB2908FAAF00C25BA3 /* TargetProfileViewController.swift */,
-				D6E1F778292B419C0005212C /* userListFunctionStruct.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -510,8 +549,7 @@
 		D67C27D228F88B9E00C25BA3 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				D67C27CF28F88B2F00C25BA3 /* UserListStruct.swift */,
-				D67C27D328F88CDA00C25BA3 /* UserListManager.swift */,
+				D6262D132A5D2E2500456B73 /* ShowUserListModel.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -582,6 +620,7 @@
 		D6D8030C2A2F32F200107DBB /* Dust最後に全部消して使ってたら修正 */ = {
 			isa = PBXGroup;
 			children = (
+				D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */,
 				D631EC2027A582A200800693 /* initialSettingViewcontroller.swift */,
 				D631EC2227A5831400800693 /* initialSettingView.swift */,
 			);
@@ -629,6 +668,8 @@
 				D6D8032B2A36C18100107DBB /* SideMenu */,
 				D6D803302A36D42500107DBB /* Reachability */,
 				D6B670C92A3AB37A00330F75 /* Lottie */,
+				D6262D202A5E96FC00456B73 /* RangeUISlider */,
+				D69EA1732A791D0200C8F72E /* AlgoliaSearchClient */,
 			);
 			productName = MeTalk;
 			productReference = D631EBEA27A581BE00800693 /* MeTalk.app */;
@@ -711,6 +752,8 @@
 				D6D8032A2A36C18100107DBB /* XCRemoteSwiftPackageReference "SideMenu" */,
 				D6D8032F2A36D42500107DBB /* XCRemoteSwiftPackageReference "Reachability" */,
 				D6B670C82A3AB37A00330F75 /* XCRemoteSwiftPackageReference "lottie-ios" */,
+				D6262D1F2A5E96FC00456B73 /* XCRemoteSwiftPackageReference "RangeUISlider" */,
+				D69EA1722A791D0100C8F72E /* XCRemoteSwiftPackageReference "algoliasearch-client-swift" */,
 			);
 			productRefGroup = D631EBEB27A581BE00800693 /* Products */;
 			projectDirPath = "";
@@ -764,12 +807,11 @@
 				D67C27D829026A8200C25BA3 /* Tools.swift in Sources */,
 				D68FB39227D5AC5300E57F5A /* sideMenuViewController.swift in Sources */,
 				D631EC2127A582A200800693 /* initialSettingViewcontroller.swift in Sources */,
-				D67C27D428F88CDA00C25BA3 /* UserListManager.swift in Sources */,
 				D6BC3C082A1CD05600E00A2A /* initialSettingAgeSelectViewController.swift in Sources */,
+				D6262D1B2A5D2FBB00456B73 /* searchSettingView.swift in Sources */,
 				D68FB3AD27D9D65400E57F5A /* BlockListViewController.swift in Sources */,
 				D673C2A029EDB6FD00DCB995 /* typingUILabel.swift in Sources */,
 				D6BC3C0C2A259AB200E00A2A /* initialSettingNicknameSelectViewController.swift in Sources */,
-				D67C27D028F88B2F00C25BA3 /* UserListStruct.swift in Sources */,
 				D663007F2950471D00C59657 /* HostingBasicObjec.swift in Sources */,
 				D67C27DC2908FAAF00C25BA3 /* TargetProfileViewController.swift in Sources */,
 				D67C27D628FE959100C25BA3 /* Extension.swift in Sources */,
@@ -783,13 +825,14 @@
 				D6C70F632A3C91CB00D3737E /* HostingDataGetter.swift in Sources */,
 				D655504927E3608900C86E34 /* ChatViewController.swift in Sources */,
 				D67C27DA2907C8CD00C25BA3 /* TargetProfileView.swift in Sources */,
-				D6E1F779292B419C0005212C /* userListFunctionStruct.swift in Sources */,
 				D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */,
 				D6543DBD27B0DC6E00444454 /* ProfileChildView.swift in Sources */,
 				D68FB3A227D7410800E57F5A /* NotificationViewController.swift in Sources */,
 				D6543DCB27BA7AC200444454 /* UserDataManageData.swift in Sources */,
 				D655504D27E4260C00C86E34 /* ChatDataManagedData.swift in Sources */,
+				D6262D192A5D2ED000456B73 /* SearchSettingViewController.swift in Sources */,
 				D6C5ACDE29E91D3900CED90C /* initialSettingWelcomeView.swift in Sources */,
+				D6262D142A5D2E2500456B73 /* ShowUserListModel.swift in Sources */,
 				D6BC3C0E2A25A13600E00A2A /* initialSettingNickNameSelectView.swift in Sources */,
 				D6C5ACE029E92A7700CED90C /* initialSettingWelcomeViewController.swift in Sources */,
 				D655504F27EADB7600C86E34 /* ChatUserListViewController.swift in Sources */,
@@ -814,6 +857,7 @@
 				D698A0CB27E0BA66002C64DE /* WebViewTempleteController.swift in Sources */,
 				D6543DD027C4822300444454 /* ModalImageData.swift in Sources */,
 				D673C2A229EE67C300DCB995 /* initialSettingGenderSelectViewController.swift in Sources */,
+				D6262D1E2A5E604D00456B73 /* CustomView.swift in Sources */,
 				D6A8C0D8286345AD0017171A /* UserListLocalModel.swift in Sources */,
 				D68FB3A927D884F700E57F5A /* NotificationTableViewCell.swift in Sources */,
 			);
@@ -1167,12 +1211,28 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		D6262D1F2A5E96FC00456B73 /* XCRemoteSwiftPackageReference "RangeUISlider" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/chicio/RangeUISlider";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.0;
+			};
+		};
 		D696850027D08BD4006D85DC /* XCRemoteSwiftPackageReference "TOCropViewController" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/TimOliver/TOCropViewController.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.0.0;
+			};
+		};
+		D69EA1722A791D0100C8F72E /* XCRemoteSwiftPackageReference "algoliasearch-client-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/algolia/algoliasearch-client-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
 			};
 		};
 		D6B670C82A3AB37A00330F75 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
@@ -1234,6 +1294,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		D6262D202A5E96FC00456B73 /* RangeUISlider */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D6262D1F2A5E96FC00456B73 /* XCRemoteSwiftPackageReference "RangeUISlider" */;
+			productName = RangeUISlider;
+		};
 		D696850127D08BD4006D85DC /* CropViewController */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = D696850027D08BD4006D85DC /* XCRemoteSwiftPackageReference "TOCropViewController" */;
@@ -1243,6 +1308,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = D696850027D08BD4006D85DC /* XCRemoteSwiftPackageReference "TOCropViewController" */;
 			productName = TOCropViewController;
+		};
+		D69EA1732A791D0200C8F72E /* AlgoliaSearchClient */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = D69EA1722A791D0100C8F72E /* XCRemoteSwiftPackageReference "algoliasearch-client-swift" */;
+			productName = AlgoliaSearchClient;
 		};
 		D6B670C92A3AB37A00330F75 /* Lottie */ = {
 			isa = XCSwiftPackageProductDependency;

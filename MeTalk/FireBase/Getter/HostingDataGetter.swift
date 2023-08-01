@@ -8,6 +8,7 @@
 import Foundation
 import Firebase
 import FirebaseStorage
+import AlgoliaSearchClient
 
 ///
 //--------------------------------------------------
@@ -170,48 +171,36 @@ protocol TalkListGetterManagerDI {
     func onlineUsersGetter(callback: @escaping ([ProfileInfoLocalObject],Error?) -> Void, latedTime:Date?,oneMinuteWithin:Bool,limitCount:Int)
 }
 ///ユーザー取得時のフィルター
-struct QueryFilter {
+class QueryFilter {
     let COMVERTER = TimeTools()
     let cloudDB = Firestore.firestore()
-    var oneMinuteWithIn:Bool
-    var latedTime:Date?
-    var minute:Int
-    let minAge: Int?
-    let maxAge: Int?
-    let gender: String?
-    let area: String?
-    
-    init(oneMinuteWithIn: Bool, latedTime: Date?, minute: Int, minAge: Int?, maxAge: Int?, gender: String?, area: String?) {
-        self.oneMinuteWithIn = oneMinuteWithIn
-        self.latedTime = latedTime
-        self.minute = minute
+    var fetchDocument:DocumentSnapshot?
+    var scrollCounter:Int = 1
+    let fixCount = 10
+    var minAge: Int?
+    var maxAge: Int?
+    var gender: Int?
+    var area: String?
+
+    init(minAge: Int?, maxAge: Int?, gender: Int?, area: String?) {
         self.minAge = minAge
         self.maxAge = maxAge
         self.gender = gender
         self.area = area
     }
     
-    
     func apply() -> Query {
-        var BaseQuery = cloudDB.collection("users").order(by: "updatedAt", descending: true)
-
+        //FireStoreでIndexを貼った上で実行
+        var BaseQuery = cloudDB.collection("users").order(by: "updatedAt", descending: true).limit(to: fixCount * scrollCounter)
         var filteredQuery = BaseQuery
-        //スクロール時のクエリ
-        if oneMinuteWithIn {
-            ///1分前を取得
-            let oneMinuteAgo = AgoDateGetter.oneMinuteAgo()
-            ///1分前のユーザー
-            filteredQuery = filteredQuery.whereField("updatedAt", isGreaterThan: oneMinuteAgo)
-        } else {
-            if let latedTime = latedTime {
-                let COMVERTEDTIME = COMVERTER.convertToTimestamp(date: latedTime)
-                filteredQuery = filteredQuery.whereField("updatedAt", isLessThan: COMVERTEDTIME)
-            }
-        }
         // 年齢範囲のフィルター
         if let minAge = minAge, let maxAge = maxAge {
-            filteredQuery = filteredQuery.whereField("age", isGreaterThanOrEqualTo: minAge)
-            filteredQuery = filteredQuery.whereField("age", isLessThanOrEqualTo: maxAge)
+            ///生年月日の桁数に変換
+            let minYearToDate = AgeCalculator.convertDefaultYearOfBirth(targetYear: minAge, minOrMax: .min)
+            let maxYearToDate =  AgeCalculator.convertDefaultYearOfBirth(targetYear: maxAge, minOrMax: .max)
+            ///適用
+            filteredQuery = filteredQuery.whereField("age", isGreaterThanOrEqualTo: maxYearToDate)
+            filteredQuery = filteredQuery.whereField("age", isLessThanOrEqualTo: minYearToDate)
         }
         
         // 性別のフィルター
@@ -228,32 +217,12 @@ struct QueryFilter {
     }
 }
 
-class TalkListGetterManager:TalkListGetterManagerDI {
-    let cloudDB = Firestore.firestore()
-    var filter:Filter?
+class TalkListGetterManager{
     
-    func onlineUsersGetter(callback: @escaping ([ProfileInfoLocalObject],Error?) -> Void, latedTime:Date?,oneMinuteWithin:Bool,limitCount:Int){
-        let COMVERTER = TimeTools()
-        ///ベースの取得方法
-        var Ref = cloudDB.collection("users").order(by: "updatedAt", descending: true)
-        ///件数条件追加
-        Ref = Ref.limit(to: limitCount)
-        ///時間指定があった場合はその時間より後のユーザーのみの条件を追加
-        if let Time = latedTime {
-            let COMVERTEDTIME = COMVERTER.convertToTimestamp(date: Time)
-            Ref = Ref.whereField("updatedAt", isLessThan: COMVERTEDTIME)
-        } else {
-            ///時間指定は無いが1分以内にログインしているユーザーを取得
-            if oneMinuteWithin {
-                ///1分前を取得
-                let oneMinuteAgo = AgoDateGetter.oneMinuteAgo()
-                Ref = Ref.whereField("updatedAt", isGreaterThan: oneMinuteAgo)
-            } else {
-                
-            }
-        }
-        ///取得開始
-        Ref.getDocuments(){ (querySnapshot, err) in
+    func onlineUsersDataGetter(callback: @escaping ([ProfileInfoLocalObject],Error?) -> Void,filter:QueryFilter) {
+
+        filter.apply().getDocuments(){ (querySnapshot, err) in
+            
             var USERLIST:[ProfileInfoLocalObject] = []
             if let err = err {
                 callback([ProfileInfoLocalObject()],err)
@@ -261,9 +230,11 @@ class TalkListGetterManager:TalkListGetterManagerDI {
             }
             for USER in querySnapshot!.documents {
                 if let USERINFO = self.dataMapping(HostData: USER){
+
                     USERLIST.append(USERINFO)
                 }
             }
+            
             callback(USERLIST, nil)
         }
     }
@@ -299,6 +270,9 @@ class TalkListGetterManager:TalkListGetterManagerDI {
     }
     
 }
+
+
+
 ///
 //--------------------------------------------------
 //--ブロックリスト関連--
