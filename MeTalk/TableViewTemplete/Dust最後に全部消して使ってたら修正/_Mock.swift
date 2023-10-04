@@ -1,6 +1,6 @@
 import MessageKit
 import UIKit
-import InputBarAccessoryView
+//import InputBarAccessoryView
 
 struct User: SenderType {
     var senderId: String
@@ -92,7 +92,7 @@ struct MessageMediaEntity: MediaItem {
     var image: UIImage?
 
     var placeholderImage: UIImage {
-        return UIImage(named: "questionmark.app.fill")!
+        return UIImage()
     }
     var size: CGSize {
         return CGSize(width: UIScreen.main.bounds.width/4,
