@@ -35,7 +35,7 @@ enum Section:Int,CaseIterable {
             let SectionItem = SectionItem(sectionTitle: "アプリケーション", numberOfRowsInSection: 2)
             return SectionItem
         case .user:
-            let SectionItem = SectionItem(sectionTitle: "ユーザー関連", numberOfRowsInSection: 2)
+            let SectionItem = SectionItem(sectionTitle: "ユーザー関連", numberOfRowsInSection: 1)
             return SectionItem
         }
     }
@@ -57,9 +57,7 @@ enum CellItem:Int,CaseIterable {
         case [1,1]:
             return.aboutApp
         case[2,0]:
-            return.cancelTheMembership
-        case[2,1]:
-            return.developperTestViewController
+            return.adminViewController
         default:
             preconditionFailure("Sectionの数が多すぎているか、セルの数が多すぎているためにenum Sectionを要確認")
         }
@@ -70,8 +68,7 @@ enum CellItem:Int,CaseIterable {
     case blockList
     case inquiry
     case aboutApp
-    case cancelTheMembership
-    case developperTestViewController
+    case adminViewController
     
     ///セルに対する情報項目(適宜増やしてOK)
     struct CELLDATA{
@@ -96,11 +93,8 @@ enum CellItem:Int,CaseIterable {
         case .aboutApp:
             let CELLDATA = CELLDATA(cellTitle: "このアプリについて", viewController: nil)
             return CELLDATA
-        case .cancelTheMembership:
-            let CELLDATA = CELLDATA(cellTitle: "メンバーシップの削除", viewController: nil)
-            return CELLDATA
-        case .developperTestViewController:
-            let CELLDATA = CELLDATA(cellTitle: "テスト画面", viewController: TestViewController())
+        case .adminViewController:
+            let CELLDATA = CELLDATA(cellTitle: "管理者画面", viewController: AdminMenuViewController())
             return CELLDATA
         }
     }
@@ -111,22 +105,38 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
     var backButtonItem: UIBarButtonItem! // 戻るボタン
     ///インスタンス化(View)
     let sideMenuTableView = UITableView()
+    var SELFINFO:RequiredProfileInfoLocalData ///自身の情報
+    var adminEnabled:Bool = false
 
     ///デリゲート変数設定
     weak var delegate:SideMenuViewControllerDelegate?
     
+    init(SELFINFO:RequiredProfileInfoLocalData) {
+
+        self.SELFINFO = SELFINFO
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.view.backgroundColor = .white
         ///barボタン初期設定
-        backButtonItem = UIBarButtonItem(barButtonSystemItem: .reply, target: self, action: #selector(backButtonPressed(_:)))
-        self.navigationItem.leftBarButtonItem = backButtonItem
+        let barButtonArrowItem = barButtonItem(frame: .zero, BarButtonItemKind: .left)
+        barButtonArrowItem.addTarget(self, action: #selector(backButtonPressed(_:)), for: .touchUpInside)
+        let customBarButtonItem = UIBarButtonItem(customView: barButtonArrowItem)
+        self.navigationItem.leftBarButtonItem = customBarButtonItem
         
         self.view = sideMenuTableView
-        self.view.backgroundColor = .black
+        self.view.backgroundColor = .white
         sideMenuTableView.dataSource = self
         sideMenuTableView.delegate = self
         sideMenuTableView.register(SideMenuTableViewCell.self, forCellReuseIdentifier: "SideMenuTableViewCell")
-        
+        ///管理者確認
+        adminMenu()
     }
     
     @objc func backButtonPressed(_ sender: UIBarButtonItem) {
@@ -157,8 +167,22 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
         return Section.Items.sectionTitle
     }
     
+    // セクションの背景とテキストの色を変更する
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        let header = view as! UITableViewHeaderFooterView
+        // テキスト色を変更する
+        header.textLabel?.textColor = .gray
+    }
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 50
+        guard indexPath == [2,0] else {
+            return 50
+        }
+        if adminEnabled {
+            return 50
+        } else {
+            return  0
+        }
     }
         
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -168,6 +192,8 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
         let CELLITEM = CellItem.dicidedCase(section: indexPath.section, Row: indexPath.row)
         ///セルタイトルを設定
         cell.setCell(Item: CELLITEM.CELLITEMS.cellTitle)
+        ///セルの選択状態を拒否
+        cell.selectionStyle = .none
         return cell
     }
     
@@ -200,11 +226,8 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
             chooseAboutAppActionSheet(callback: { webPage in
                 self.delegate?.pushViewController(nextViewController: WebViewTempleteController(webPageItem: webPage), sideMenuViewcontroller: self)
             }, UIVIEWCONTROLLER: self)
-        ///メンバーシップ削除
-        case .cancelTheMembership:
-            deleteMemberShipActionSheet(UIVIEWCONTROLLER: self)
-        ///テスト画面
-        case .developperTestViewController:
+        ///管理者画面
+        case .adminViewController:
             if let nextViewController = CELLITEM.CELLITEMS.viewController {
                 self.delegate?.pushViewController(nextViewController: nextViewController, sideMenuViewcontroller: self)
             } else {
@@ -212,13 +235,19 @@ class SideMenuViewcontroller:UIViewController, UITableViewDelegate, UITableViewD
             }
         }
     }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.backgroundColor = .white
+    }
+    
+    
 }
 ///列挙型に関連する関数
 extension SideMenuViewcontroller {
     
     ///メンバーシップ削除のためのFunction
     func deleteMemberShipActionSheet(UIVIEWCONTROLLER:UIViewController){
-        createSheet(callback: {}, for: .Options(["テスト的ログアウトボタン","テストデータ大量作成"], { result in
+        createSheet(for: .Options(["テスト的ログアウトボタン","テストデータ大量作成"], { result in
             switch result {
             case 0:
                 do {
@@ -260,7 +289,7 @@ extension SideMenuViewcontroller {
         let webPageTermsOfService = WebPage.TermsOfService
         let webPageprivacyPolicy = WebPage.privacyPolicy
         
-        createSheet(callback: {}, for: .Options([webPageprivacyPolicy.info.title,webPageTermsOfService.info.title], { result in
+        createSheet(for: .Options([webPageprivacyPolicy.info.title,webPageTermsOfService.info.title], { result in
             switch result {
             case 0:
                 callback(webPageprivacyPolicy)
@@ -306,9 +335,7 @@ extension SideMenuViewcontroller:MFMailComposeViewControllerDelegate{
         //メール送信が不可能なら
         } else {
             //アラートで通知
-            createSheet(callback: {
-                return
-            }, for: .Alert(title: "メールアカウントが存在しません", message: "メールアカウントを作成後再度お試しください", buttonMessage: "OK"), SelfViewController: self)
+            createSheet(for: .Retry(title: "メールアカウントが存在しません"), SelfViewController: self)
         }
     }
     ///エラー処理
@@ -338,6 +365,18 @@ extension SideMenuViewcontroller:MFMailComposeViewControllerDelegate{
                 break
             }
             controller.dismiss(animated: true, completion: nil)
+        }
+    }
+}
+
+//管理者メニュー表示
+extension SideMenuViewcontroller {
+    func adminMenu() {
+        let defaults = UserDefaults.standard
+
+        if defaults.bool(forKey: "admin") {
+            self.adminEnabled = true
+            self.sideMenuTableView.reloadData()
         }
     }
 }

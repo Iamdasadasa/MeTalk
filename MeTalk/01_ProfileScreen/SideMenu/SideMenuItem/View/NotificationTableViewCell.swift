@@ -11,7 +11,7 @@ class NotificationTableViewCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: "NotificationTableViewCell")
-        self.backgroundColor = UIColor.black
+        self.backgroundColor = UIColor.white
         autoLayoutSetUp()
         autoLayout()
     }

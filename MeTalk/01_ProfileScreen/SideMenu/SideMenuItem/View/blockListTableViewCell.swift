@@ -7,11 +7,15 @@
 
 import UIKit
 
+protocol blockListTableViewCellDelegate:AnyObject{
+    func blockCanceldTapped(TARGETUID:String?,nickName:String?)
+}
+
 class blockListTableViewCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: .subtitle, reuseIdentifier: "BlockListTableViewCell")
-        self.backgroundColor = UIColor.black
+        self.backgroundColor = UIColor.white
         autoLayoutSetUp()
         autoLayout()
     }
@@ -22,7 +26,12 @@ class blockListTableViewCell: UITableViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-
+        ///セルが再利用されることを考慮して遅延実行
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            ///陰影処理
+            blockCancelButtonBaseView.shadowSetting(offset: .buttomReft)
+        }
     }
     
     ///layoutSubviewsの中で下記の処理を書くと何故か        returnUIButton.titleLabel?.adjustsFontSizeToFitWidth = trueを追記した際に
@@ -34,40 +43,43 @@ class blockListTableViewCell: UITableViewCell {
         
     }
     
+    var UID:String?
+    var nickName:String?
+    weak var delegate:blockListTableViewCellDelegate?
     
     ///プロフィール画像ボタン
     let blockUserProfileImageView:UIImageView = {
         let returnUIImageView = UIImageView()
         returnUIImageView.layer.borderWidth = 1
         returnUIImageView.clipsToBounds = true
-        returnUIImageView.layer.borderColor = UIColor.orange.cgColor
+        returnUIImageView.layer.borderColor = UIColor.gray.cgColor
         return returnUIImageView
     }()
     
     let blockUserNicknameLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.textColor = .white
+        returnLabel.textColor = .gray
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
-//        returnLabel.font = returnLabel.font.withSize(returnLabel.font.pointSize*3)
         returnLabel.adjustsFontSizeToFitWidth = true
         return returnLabel
     }()
+    ///メッセージラベルベースUIVIEW
+    let blockCancelButtonBaseView:ShadowBaseView = ShadowBaseView()
     
     let blockCancelButton:UIButton = {
         let returnUIButton = UIButton()
         returnUIButton.setTitle("ブロック解除", for: .normal)
+        returnUIButton.setTitleColor(.gray, for: .normal)
         returnUIButton.titleLabel?.adjustsFontSizeToFitWidth = true
-        returnUIButton.layer.cornerRadius = 10
-        returnUIButton.layer.borderWidth = 1
         returnUIButton.clipsToBounds = true
-        returnUIButton.layer.borderColor = UIColor.orange.cgColor
+        returnUIButton.layer.borderColor = UIColor.gray.cgColor
         returnUIButton.addTarget(self, action: #selector(blockCancelButtonTapped), for: .touchUpInside)
         return returnUIButton
     }()
     
     @objc func blockCancelButtonTapped(){
-//        delegate?
+        delegate?.blockCanceldTapped(TARGETUID: UID, nickName: nickName)
     }
     
     func setCell(Item: String) {
@@ -79,10 +91,12 @@ class blockListTableViewCell: UITableViewCell {
         ///各オブジェクトをViewに追加(CELLにオブジェクトを追加する際にはContentViewに追加)
         self.contentView.addSubview(blockUserProfileImageView)
         self.contentView.addSubview(blockUserNicknameLabel)
+        self.contentView.addSubview(blockCancelButtonBaseView)
         self.contentView.addSubview(blockCancelButton)
         ///UIオートレイアウトと競合させない処理
         blockUserProfileImageView.translatesAutoresizingMaskIntoConstraints = false
         blockUserNicknameLabel.translatesAutoresizingMaskIntoConstraints = false
+        blockCancelButtonBaseView.translatesAutoresizingMaskIntoConstraints = false
         blockCancelButton.translatesAutoresizingMaskIntoConstraints = false
     }
 //※レイアウト※
@@ -98,9 +112,14 @@ class blockListTableViewCell: UITableViewCell {
         blockUserNicknameLabel.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
         
         blockCancelButton.leadingAnchor.constraint(equalTo: self.blockUserNicknameLabel.trailingAnchor).isActive = true
-        blockCancelButton.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
-        blockCancelButton.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-        blockCancelButton.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+        blockCancelButton.trailingAnchor.constraint(equalTo: self.trailingAnchor,constant: -15).isActive = true
+        blockCancelButton.topAnchor.constraint(equalTo: self.topAnchor,constant: 5).isActive = true
+        blockCancelButton.bottomAnchor.constraint(equalTo: self.bottomAnchor,constant: -5).isActive = true
+        
+        blockCancelButtonBaseView.topAnchor.constraint(equalTo: blockCancelButton.topAnchor).isActive = true
+        blockCancelButtonBaseView.bottomAnchor.constraint(equalTo: blockCancelButton.bottomAnchor).isActive = true
+        blockCancelButtonBaseView.leftAnchor.constraint(equalTo: blockCancelButton.leftAnchor).isActive = translatesAutoresizingMaskIntoConstraints
+        blockCancelButtonBaseView.trailingAnchor.constraint(equalTo: blockCancelButton.trailingAnchor).isActive = true
      }
     
     override func awakeFromNib() {

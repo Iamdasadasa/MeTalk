@@ -23,7 +23,7 @@ class SideMenuTableViewCell: UITableViewCell {
     
     let titleLabel1:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.textColor = .white
+        returnLabel.textColor = .gray
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
 //        returnLabel.font = returnLabel.font.withSize(returnLabel.font.pointSize*3)

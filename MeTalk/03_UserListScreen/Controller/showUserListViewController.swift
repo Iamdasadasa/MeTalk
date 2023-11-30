@@ -10,87 +10,64 @@ import UIKit
 import Firebase
 import RealmSwift
 import CoreAudio
-
+//ユーザー一覧画面
 class showUserListViewController:UIViewController,UINavigationControllerDelegate{
-    ///インスタンス化(View)
-    let CHATUSERLISTTABLEVIEW = UITableView()
-    ///UIDインスタンス
-    private var MYUID:String!
-    private var MYPROFILE:ProfileInfoLocalObject!
-    ///データ処理関連
-    let TALKDATASETTER:TalkListSetterManager = TalkListSetterManager()
-    let TALKDATAGETTER:TalkListGetterManager = TalkListGetterManager()
-    let CONTENTSHOSTING:ContentsGetterManager = ContentsGetterManager()
-    let LOCALPERFORMSEARCH:PerformSearchLocalDataGetterManager = PerformSearchLocalDataGetterManager()
-    var QUERY:QueryFilter = QueryFilter(minAge: nil, maxAge: nil, gender: nil, area: nil)
-    ///情報格納用変数
-    var LOCALUSERSPROFILEARRAY:[RequiredProfileInfoLocalData] = []
-    var ImageDataArray:[ImageDataHolder] = []
-    ///相手との一意ID作成インスタンス
-    let ROOMID = chatTools()
-    ///タブバーの高さ
-    let tabBarHeight:CGFloat
-    let defaultInsets:UIEdgeInsets
-    ///インジケータロードビュー
-    let activityIndicatorView = UIActivityIndicatorView(style: .large)
-    ///画面ロードビュー
-    let loading = LOADING(loadingView: LoadingView(), BackClear: true)
-    ///スクロールでロードした際のカウンター
-    var scrollExtraUserCounter:Int = 0
-    ///スクロール完全停止フラグ
-    var isReadyToLoadPosition:Bool = false
-    ///画像データ用のキャッシュ
-    let cache = NSCache<NSString, UIImage>()
-    
-    
-    ///ここから⭐️
-    var visibleItemCount:Int {
-        get {
-            return self.QUERY.fixCount * self.QUERY.scrollCounter
-        }
-    }
-    
-    ///件数オーバーOr件数が少ない際のチェック
-    enum OverOrLack {
-        case Over
-        case Lack
-    }
-    var gettingUserCountChecker:OverOrLack? {
-        willSet {
-            ///件数オーバー
-            if newValue == .Over {
-                ///差分
-                let countToRemove = self.scrollExtraUserCounter - (self.QUERY.fixCount * self.QUERY.scrollCounter)
-                ///配列の下から差分の数を削除
-                self.LOCALUSERSPROFILEARRAY = self.LOCALUSERSPROFILEARRAY.dropLast(countToRemove)
-            } else {
-            ///件数が足りない
-                ///件数倍数を追加して再度呼び出す
-                self.QUERY.scrollCounter = self.QUERY.scrollCounter + 1
-                userDataServerGetting(filter: QUERY)
-            }
-        }
-    }
-    
-    ///ここまで⭐️
-
-
-
-    ///ユーザーローディングフラグ
-    var reloading = true {
+    //++変数宣言　クロージャー++//
+    let CHATUSERLISTTABLEVIEW = UITableView()   ///Viewのインスタンス化
+    let SEARCHVIEWCONTROLLER = SearchSettingViewController()    ///検索画面インスタンス化
+    let CHATDATAHOSTSETTER = ChatDataHostSetterManager()    ///チャットデータを保存するインスタンス(FIREBASE)
+    let LISTDATAHOSTSETTER = ListDataHostSetter()   ///リストデータを保存するインスタンス(FIREBASE)
+    let TALKLISTDATAHOSTGETTER = TalkListGetterManager()    ///トークリストのユーザーを取得するインスタンス(FIREBASE)
+    let CONTENTSHOSTINGSETTER = ContentsHostSetter()    ///画像データを保存するインスタンス(FIREBASE)
+    let CONTENTSHOSTINGGETTER = ContentsHostGetter()    ///画像データを取得するインスタンス(FIREBASE)
+    let PERFORMSEARCHLOCALGETTER = PerformSearchLocalDataGetterManager()
+    let BLOCKHOSTGETTER = BlockHostGetterManager() ///ブロック情報を取得するインスタンス
+    ///検索条件を取得するインスタンス(Realm)
+    var QUERY:QueryFilter = QueryFilter(minAge: nil, maxAge: nil, gender: nil, area: nil)   ///検索条件を管理するインスタンス
+    let APIKEYLOCALGETTER :ApiKeyDataLocalGetterManager = ApiKeyDataLocalGetterManager()    ///Apiキー関連
+    var USERSPROFILEARRAY:[RequiredProfileInfoLocalData] = []  ///ユーザー一覧格納配列
+    var SELFINFO:RequiredProfileInfoLocalData ///自身の情報
+    let ROOMID = chatTools()    ///相手との一意ID作成インスタンス
+    let tabBarHeight:CGFloat    ///タブバーの高さ
+    let defaultInsets:UIEdgeInsets  ///表示位置の基準
+    let activityIndicatorView = UIActivityIndicatorView(style: .large)      ///インジケータロードビュー
+    let loading = LOADING(loadingView: LoadingView(), BackClear: true)  ///画面ロードビュー
+    var isReadyToLoadPosition:Bool = false  ///スクロール完全停止フラグ
+    var scrollServerAccessPermFlag:Bool = true  ///サーバーアクセス停止フラグ
+    var selectingCell = UserListTableViewCell() ///現在選択中のセル
+    let cache = NSCache<NSString, UIImage>()    ///画像データ用のキャッシュ
+    let TIMETOOL = TimeTools()
+    var reloading = true {   ///ユーザーローディングフラグ
         ///ロードインジケータ表示可否
         willSet {
             if newValue {
                 ///インジケータ非表示
                 ActivityIndicatorShow(showing: false)
+                self.loading.loadingViewIndicator(isVisible: false)
             } else {
                 ///インジケータ表示
                 ActivityIndicatorShow(showing: true)
             }
         }
     }
+    var BLOCKUSERIDLISTARRAY:[BlockUserObj] = [] {    ///ブロックユーザーの格納リスト
+        willSet {
+            ///ブロックユーザーを確認
+            for BlockUser in newValue {
+                ///配列に存在しているかを確認
+                if let index = self.USERSPROFILEARRAY.firstIndex(where: { $0.Required_UID == BlockUser.UID }) {
+                    let indexPath = IndexPath(row: index, section: 0) // セクション0の指定行のIndexPathを作成
+                    self.USERSPROFILEARRAY.remove(at: index)
+                    ///テーブルから削除
+                    CHATUSERLISTTABLEVIEW.deleteRows(at: [indexPath], with: .automatic)
+                }
+            }
+        }
+    }
     
-    init(tabBarHeight:CGFloat) {
+    init(tabBarHeight:CGFloat,SELFINFO:RequiredProfileInfoLocalData) {
+        
+        self.SELFINFO = SELFINFO
         self.tabBarHeight = tabBarHeight
         self.defaultInsets = UIEdgeInsets(top: 0, left: 0, bottom: tabBarHeight, right: 0)
         super.init(nibName: nil, bundle: nil)
@@ -101,16 +78,16 @@ class showUserListViewController:UIViewController,UINavigationControllerDelegate
     }
     
     override func viewDidLoad() {
-        print(Realm.Configuration.defaultConfiguration.fileURL!)
         ///テーブルビューレイアウト
         CHATUSERLISTTABLEVIEW.backgroundColor = .white
         CHATUSERLISTTABLEVIEW.contentInset = defaultInsets
         CHATUSERLISTTABLEVIEW.scrollIndicatorInsets = defaultInsets
         self.view = CHATUSERLISTTABLEVIEW
-
         ///テーブルビューのデリゲート処理
         CHATUSERLISTTABLEVIEW.dataSource = self
         CHATUSERLISTTABLEVIEW.delegate = self
+        ///検索画面のデリゲート委任
+        SEARCHVIEWCONTROLLER.delegate = self
         ///ナビゲーションバーセットアップ
         navigationBarSetUp()
         ///インジケータレイアウト
@@ -123,73 +100,67 @@ class showUserListViewController:UIViewController,UINavigationControllerDelegate
         CHATUSERLISTTABLEVIEW.refreshControl = refreshControl
         ///セルの登録
         CHATUSERLISTTABLEVIEW.register(UserListTableViewCell.self, forCellReuseIdentifier: "UserListTableViewCell")
+        
+//        /// データリロード
+        self.basicReloadData()
+        ///ブロックユーザーの取得
+        BLOCKHOSTGETTER.blockUserListListener(callback: { BlockList in
+            self.BLOCKUSERIDLISTARRAY = []
+            self.BLOCKUSERIDLISTARRAY = BlockList
+        }, UID: SELFINFO.Required_UID)
     }
     
     override func viewWillAppear(_ animated: Bool) {
+
         super.viewWillAppear(animated)
-        ///ローカルから検索条件を取得してクエリ変数に適用
-        let queVal = LOCALPERFORMSEARCH.getter()
-        ///年齢
-        QUERY.minAge = queVal?.lcl_MinAge
-        QUERY.maxAge = queVal?.lcl_MaxAge
-        ///エリアが未選択の場合は条件無し
-        if queVal?.lcl_Area == "未設定" {
-            QUERY.area = nil
-        } else {
-            QUERY.area = queVal?.lcl_Area
-        }
-        ///性別が0(未選択の場合)は条件無し
-        if queVal?.lcl_Gender == 0 {
-            QUERY.gender = nil
-        } else {
-            QUERY.gender = queVal?.lcl_Gender
-        }
+    }
+}
+//EXTENSION[UITableView関連]
+extension showUserListViewController:UITableViewDelegate, UITableViewDataSource{
 
-        ///自身のプロフィールをあらかじめ取得
-        let profileGetter = TargetProfileGetterManager()
-        ///自身のUIDを取得
-        self.MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
-        profileGetter.getter(callback: { SelfProfile, Err in
-            ///自身のデータがサーバー登録にない場合ログアウトして強制終了
-            if Err != nil {
-                self.err(Type: .InvalidSelfData)
-            }
-            ///グローバルな変数に自身のプロフィールを格納
-            self.MYPROFILE = SelfProfile
-            // データリロード
-            self.basicReloadData()
-        }, UID: MYUID)
-
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return USERSPROFILEARRAY.count
     }
     
-}
-///EXTENSION[UITableView関連]
-extension showUserListViewController:UITableViewDelegate, UITableViewDataSource{
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return LOCALUSERSPROFILEARRAY.count
-    }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
     }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         ///セルのインスタンス化
         var cell = tableView.dequeueReusableCell(withIdentifier: "UserListTableViewCell", for: indexPath ) as! UserListTableViewCell
-        
         ///cellのインデックス番号の箇所のユーザー情報格納
-        let PROFILEINFOLOCAL = LOCALUSERSPROFILEARRAY[indexPath.row]
-
+        let PROFILEINFOLOCAL = USERSPROFILEARRAY[indexPath.row]
+        
         cell.celluserStruct = PROFILEINFOLOCAL
+
         ///基本情報設定
         cell = usersProfileSetting(cell: cell,LOCALUSERSPROFILE: PROFILEINFOLOCAL)
         ///プロフィール画像設定
         userProfileImageDataSetting(cell: cell,TARGETCELLID: PROFILEINFOLOCAL.Required_UID)
         ///ライクボタン設定
         likeButtonSetting(cell: cell)
-
         ///セルのデリゲート設定
         cell.delegate = self
         
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        /// 選択された行のセルを一時的に取得
+        guard let cell = tableView.cellForRow(at: indexPath) as? UserListTableViewCell else {
+            createSheet(for: .Retry(title: "選択したユーザー情報を取得できませんでした"), SelfViewController: self)
+            return
+        }
+        let targetProfileViewController = ProfileViewController(TARGETINFO: USERSPROFILEARRAY[indexPath.row], SELFINFO: SELFINFO, TARGETIMAGE: cell.profileImageView.image ?? UIImage(named: "defProfile")!)
+
+        selectingCell = cell
+        ///デリゲートを設定
+        targetProfileViewController.delegate = self
+        targetProfileViewController.PROFILEVIEW.TargetProfileLikeButtonTappedDelegate = self
+        targetProfileViewController.modalPresentationStyle = .fullScreen
+        self.present(targetProfileViewController, animated: false, completion: nil)
+        self.slideInFromRight() // 遷移先の画面を横スライドで表示
     }
     
     /// セルのプロフィール画像設定(非同期処理のためすでにあるセルに対して処理を行う)
@@ -206,11 +177,15 @@ extension showUserListViewController:UITableViewDelegate, UITableViewDataSource{
             ///キャッシュに存在していなければサーバー取得
             let TOOL = TIME()
             ///画像サーバーに対して画像取得要求
-            self.CONTENTSHOSTING.ImageDataGetter(callback: { Image, err in
-                ///セルに設定
-                cell.profileImageView.image = Image.profileImage
-                ///キャッシュに保存
-                self.cache.setObject(Image.profileImage, forKey: cacheID)
+            self.CONTENTSHOSTINGGETTER.MappingDataGetter(callback: { imageObject, err in
+                ///取得した画像データをキャッシュに保存
+                self.cache.setObject(imageObject.profileImage, forKey: cacheID)
+                ///再利用時の誤設定を防ぐために識別処理を入れる。
+                guard cell.celluserStruct.Required_UID == TARGETCELLID else {
+                    return
+                }
+                ///取得した画像データをプロフィール画像に設定
+                cell.profileImageView.image = imageObject.profileImage
             }, UID: TARGETCELLID, UpdateTime: TOOL.pastTimeGet())
         }
     }
@@ -235,9 +210,10 @@ extension showUserListViewController:UITableViewDelegate, UITableViewDataSource{
         cell.areaSetCell(area: LOCALUSERSPROFILE.Required_Area)
         ///ログイン時間を設定
         cell.loginTimeSetCell(loginTime: TimeCalculator.calculateRemainingTime(from: LOCALUSERSPROFILE.Required_DateUpdatedAt))
+        ///セルの選択状態の不可
+        cell.selectionStyle = .none
         return cell
     }
-    
     /// セルのライクボタンの設定
     /// - Parameters:
     ///   - cell: ターゲットとなるセル
@@ -271,21 +247,19 @@ extension showUserListViewController:UITableViewDelegate, UITableViewDataSource{
         ///スクロール完全停止時
         if isReadyToLoadPosition {
             ///最下層に到達している
-            if self.reloading {
+            if self.reloading && self.scrollServerAccessPermFlag {
                 ///スクロールカウンターを追加
                 self.QUERY.scrollCounter = self.QUERY.scrollCounter + 1
-                ///追加できたユーザーのカウンター初期化
-                scrollExtraUserCounter = 0
                 // デリゲートは何回も呼ばれてしまうので、リロード中はfalseにしておく
                 self.reloading = false
-
                 ///ユーザー情報取得
                 self.userDataServerGetting(filter: self.QUERY)
             }
         }
     }
 }
-///EXTENSION[画面上のボタンを押下時のアクション関連]
+
+//EXTENSION[画面上のボタンを押下時のアクション関連]
 extension showUserListViewController:UserListTableViewCellDelegate {
     
     /// 画面上のライクボタンを押下した際の処理
@@ -293,13 +267,13 @@ extension showUserListViewController:UserListTableViewCellDelegate {
     ///   - CELL: 対象のセルそのもの
     ///   - CELLUSERSTRUCT: 対象のセルに格納されているプロフィールデータ
     func likebuttonPushed(CELL: UserListTableViewCell, CELLUSERSTRUCT: RequiredProfileInfoLocalData) {
-        CELL.likeAnimationPlay(targetImageView: CELL.ImageView)
+        CELL.likeAnimationPlay()
         ///アニメーション中に連続押下防止
         CELL.LikeButton.isEnabled = false
         ///ライクデータ更新
         LikeButtonPushedInfoUpdate(CELL: CELL)
         ///セル再利用時に正しい押下データになるようデータ格納
-        guard let ArrayInTargetProfile = self.LOCALUSERSPROFILEARRAY.first(where: {$0.Required_UID == CELLUSERSTRUCT.Required_UID}) else {
+        guard let ArrayInTargetProfile = self.USERSPROFILEARRAY.first(where: {$0.Required_UID == CELLUSERSTRUCT.Required_UID}) else {
             return
         }
         ArrayInTargetProfile.Required_LikeButtonPushedDate = Date()
@@ -317,112 +291,85 @@ extension showUserListViewController:UserListTableViewCellDelegate {
     /// ライクボタンを押下した際のデータ関連の処理
     ///   - CELLUSERSTRUCT: 対象のセルに格納されているプロフィールデータ
     private func LikeButtonPushedInfoUpdate(CELL: UserListTableViewCell) {
+        ///すべての処理が終了するまでロードインジケータ表示
+        loading.loadingViewIndicator(isVisible: true)
         ///セルのユーザー情報
         guard let targetProfile = CELL.celluserStruct else {
-            err(Type: .likeButtonInvalid)
+            err(Type: .likeButtonInvalid, TargetVC: self)
             return
         }
-        
         ///相手とのルームIDを作成
-        let roomID = ROOMID.roomIDCreate(UID1: MYUID, UID2: targetProfile.Required_UID)
-        ///ローカルトークデータ処理
-        localTalkDataCreateAndRegister(ROOMID: roomID)
-        ///ローカルプロファイルデータ処理
+        let roomID = ROOMID.roomIDCreate(UID1: self.SELFINFO.Required_UID, UID2: targetProfile.Required_UID)
+        ///更新処理
         hostAndlocalProfileDataCreateAndRegister(roomID: roomID, CELL: CELL)
     }
 }
-///EXTENSION[ユーザーデータ取得関連]
+///EXTENSION[ネットワーク通信関連]
 extension showUserListViewController {
-    enum ErrType{
-        case InvalidSelfData
-        case targetDataFailedData
-        case likeButtonInvalid
-    }
     
-    func err(Type:ErrType) {
-        switch Type {
-        case .InvalidSelfData:
-            createSheet(callback: {
-                do {
-                    try Auth.auth().signOut()
-                } catch let signOutError as NSError {
-                    print("SignOut Error: %@", signOutError)
-                }
-                preconditionFailure("強制退会")
-            }, for: .Retry(title: "あなたのデータは不正です。再度登録を行なってください。アプリを終了します。"), SelfViewController: self)
-        case .targetDataFailedData:
-            createSheet(callback: {
-                return
-            }, for: .Retry(title: "ユーザーの取得に失敗しました。もう一度お試しください"), SelfViewController: self)
-        case .likeButtonInvalid:
-            createSheet(callback: {
-                return
-            }, for: .Retry(title: "相手にライクを送れせんでした。もう一度お試しください"), SelfViewController: self)
-        }
-    }
-    
+    /// ユーザー一覧をサーバーから取得
+    /// - Parameter filter: 検索条件
     func userDataServerGetting(filter:QueryFilter) {
-        TALKDATAGETTER.onlineUsersDataGetter(callback: { gettingData, Err in
-            ///エラー時の処理
-            if let Err = Err{
-                self.err(Type: .targetDataFailedData)
-                return
-            }
-            ///サーバーからの取得件数が0
-            if gettingData.count == 0{
+        ///まずはAPI Keyの取得
+        self.ApiKeyGetter { APPID,APIKEY,VERSION  in
+            ///APIキーが取得でき次第サーバアクセスしてデータを取得
+            self.TALKLISTDATAHOSTGETTER.userListDataFetching(callback: { gettingData, Err in
+                let errMessage = {
+                    createSheet(for: .Alert(title: "トークする人が見つかりませんでした...", message: "検索条件を変えて再度お試しください", buttonMessage: "OK", {_ in } ), SelfViewController: self)
+                }
+                if Err != nil {
+                    self.reloading = true
+                    self.scrollServerAccessPermFlag = false
+                    errMessage()
+                    return
+                }
+                ///サーバーからの取得件数が0
+                if gettingData.count == 0{
+                    self.reloading = true
+                    self.scrollServerAccessPermFlag = false
+                    errMessage()
+                    return
+                }
+                ///一件ずつ処理
+                for data in gettingData{
+                    if let RequiredProfile = self.CheckingDataAndlikeDataExtra(PROFILE: data){
+                        ///トークリスト配列に追加
+                        self.USERSPROFILEARRAY.append(RequiredProfile)
+                    }
+                }
                 self.reloading = true
-                return
-            }
-            ///一件ずつ処理
-            for data in gettingData {
-                if let RequiredProfile = self.CheckingDataAndlikeDataExtra(PROFILE: data){
-                    self.scrollExtraUserCounter += 1
-                    ///トークリスト配列に追加
-                    self.LOCALUSERSPROFILEARRAY.append(RequiredProfile)
-                }
-            }
-            ///サーバーから取得したユーザー数が指定した件数を取れずに頭打ちしていない場合
-            if self.visibleItemCount < gettingData.count {
-                ///件数調整(スクロールで追加したユーザーが固定の追加数を超えたら)
-                if self.scrollExtraUserCounter > self.QUERY.fixCount {
-                    self.gettingUserCountChecker = .Over
-                }
-                
-                ///配列の件数が最低表示件数に満たない場合のチェック
-                if self.LOCALUSERSPROFILEARRAY.count < (self.QUERY.fixCount * self.QUERY.scrollCounter) {
-                    self.gettingUserCountChecker = .Lack
-                }
-            }
-            ///最後に更新時間順にソート
-            self.LOCALUSERSPROFILEARRAY.sort(by: {$0.Required_DateUpdatedAt > $1.Required_DateUpdatedAt})
-            
-            self.reloading = true
-            self.CHATUSERLISTTABLEVIEW.reloadData()
-        }, filter: filter)
+                self.loading.loadingViewIndicator(isVisible: false)
+                self.CHATUSERLISTTABLEVIEW.reloadData()
+            }, appID: APPID, apiKey: APIKEY, query: filter)
+        }
     }
     
     /// ライクデータをホスティングで取得してきたデータに付与
     /// - Parameter PROFILE: ホスティングで取得したデータ
     /// - Returns: ローカルに保存してあるライクデータを付与して返却
     func CheckingDataAndlikeDataExtra(PROFILE:ProfileInfoLocalObject) -> RequiredProfileInfoLocalData? {
+        ///自分は除外
+        if PROFILE.lcl_UID == SELFINFO.Required_UID {
+            return nil
+        }
         /// データ不備が一つでもあれば追加しない
         guard let UID = PROFILE.lcl_UID,let DateCreatedAt = PROFILE.lcl_DateCreatedAt,let DateUpdatedAt = PROFILE.lcl_DateUpdatedAt,let AboutMeMassage = PROFILE.lcl_AboutMeMassage,let NickName = PROFILE.lcl_NickName,let Area = PROFILE.lcl_Area else {
             return nil
         }
-        ///既にトーク配列に存在していたら追加しない
-        if  self.LOCALUSERSPROFILEARRAY.first(where: {$0.Required_UID == UID}) != nil {
+        ///既にトーク配列に存在しているもしくはブロックリストにいたら追加しない
+        if self.USERSPROFILEARRAY.first(where: {$0.Required_UID == UID}) != nil || self.BLOCKUSERIDLISTARRAY.first(where: {$0.UID == UID}) != nil {
             return nil
         }
-        
+
+        ///安全なデータとして格納
         let RequiredProfile = RequiredProfileInfoLocalData(UID: UID, DateCreatedAt: DateCreatedAt, DateUpdatedAt: DateUpdatedAt, Sex: PROFILE.lcl_Sex, AboutMeMassage: AboutMeMassage, NickName: NickName, Age: PROFILE.lcl_Age, Area: Area)
-        
         ///ローカルからライク押下データのみを最新データに反映
-        let LOCALTALKDATAGETTER = TargetProfileLocalDataGetterManager(targetUID: PROFILE.lcl_UID!)
-        let localTargetProfile = LOCALTALKDATAGETTER.getter()
+        let LOCALTALKLISTDATAHOSTGETTER = TargetProfileLocalDataGetterManager(targetUID: PROFILE.lcl_UID!)
+        let localTargetProfile = LOCALTALKLISTDATAHOSTGETTER.getter()
         ///ライク押下データ処理
         if let pushDate = localTargetProfile?.lcl_LikeButtonPushedDate{
             RequiredProfile.Required_LikeButtonPushedDate = pushDate
-            RequiredProfile.Required_LikeButtonPushedFLAG = self.pushTimeDiffDate(pushTime: pushDate)
+            RequiredProfile.Required_LikeButtonPushedFLAG = TIMETOOL.pushTimeDiffDate(pushTime: pushDate)
             ///付与して返却
             return RequiredProfile
         } else {
@@ -431,91 +378,100 @@ extension showUserListViewController {
             return RequiredProfile
         }
     }
-    
-    /// ローカルトークデータ用の構造体を作成して登録する処理-ここではライクボタンを押下した情報-
-    /// - Parameter ROOMID: 一意となるトーク対象と自分のID
-    func localTalkDataCreateAndRegister(ROOMID:String) {
-        let likeMessage = MessageLocalObject()
-        //トークデータローカル保存
-        likeMessage.lcl_RoomID = ROOMID
-        likeMessage.lcl_MessageID = UUID().uuidString
-        likeMessage.lcl_Listend = true
-        likeMessage.lcl_Date = Date()
-        likeMessage.lcl_Sender = self.MYUID
-        likeMessage.lcl_LikeButtonFLAG = true
-        likeMessage.lcl_Message = ""
-        ///作成もしくは更新処理
-        var LocalUpdateObject = MessageLocalSetterManager(updateMessage: likeMessage)
-        ///コミット
-        LocalUpdateObject.commiting = true
-    }
-    
     /// ライクボタンを押した相手の情報をローカルとサーバーに登録
     /// - Parameters:
     ///   - roomID: 一意となるトーク対象と自分のID
     ///   - targetUID: 相手のUID
     func hostAndlocalProfileDataCreateAndRegister(roomID:String,CELL:UserListTableViewCell) {
+        ///コミット可否
+        var CommitFlag:Bool = true
         ///セルのユーザー情報
         guard let targetProfile = CELL.celluserStruct else {
-            err(Type: .likeButtonInvalid)
+            err(Type: .likeButtonInvalid, TargetVC: self)
             return
         }
         ///Update用新規アンマネージドオブジェクト
         var UpdateProfile = ProfileInfoLocalObject()
-        ///すべての処理が終了するまでロードインジケータ表示
-        loading.loadingViewIndicator(isVisible: true)
         ///アンマネージドオブジェクトの更新対象以外をマッピング
-        UpdateProfile = updateObjectMapping(unManagedObject: UpdateProfile, managedObject: targetProfile)
+        UpdateProfile = realmMapping.updateObjectMapping(unManagedObject: UpdateProfile, managedObject: targetProfile)
         UpdateProfile.lcl_LikeButtonPushedFLAG = true
         UpdateProfile.lcl_LikeButtonPushedDate = Date()
+
         ///ローカル保存開始
         var profileDataSetter = TargetProfileLocalDataSetterManager(updateProfile: UpdateProfile)
         ///サーバ処理失敗時のクロージャ
         let failedToRetry = {
-            self.err(Type: .likeButtonInvalid)
+            err(Type: .likeButtonInvalid, TargetVC: self)
             CELL.likePush = false
-            profileDataSetter.commiting = false
+            CommitFlag = false
+            ///ロードインジケータ非表示
+            self.loading.loadingViewIndicator(isVisible: false)
+            return
         }
-        ///トークデータの複数回コールバックカウント
-        var callbackCount = 0
         ///サーバー保存
-        ///それぞれのトーク情報にライクボタン情報を送信
-        self.TALKDATASETTER.likePushingChatDataSetter(
-            callback:{hostingresult in
-                ///チャット失敗
-                guard hostingresult else {
-                    failedToRetry()
+        ///それぞれのトーク情報とチャット情報にライク情報を送信
+        let message = Message(Entity: MessageEntity(message: "", senderID: self.SELFINFO.Required_UID, displayName: self.SELFINFO.Required_NickName, messageID: UUID().uuidString, sentDate:  Date(), DateGroupFlg: false, SENDUSER: .SELF))
+        CHATDATAHOSTSETTER.messageUpload(callback: { err in
+            ///チャット失敗
+            if let err = err {
+                failedToRetry()
+                ///ロードインジケータ非表示
+                self.loading.loadingViewIndicator(isVisible: false)
+                CELL.likePush = false
+                return
+            }
+            
+            ///それぞれのトークリストを更新
+            self.LISTDATAHOSTSETTER.talkListToUserInfoSetter(
+                callback: {hostingresult in
+                    ///トークリスト更新失敗
+                    guard hostingresult else {
+                        failedToRetry()
+                        ///ロードインジケータ非表示
+                        self.loading.loadingViewIndicator(isVisible: false)
+                        CELL.likePush = false
+                        return
+                    }
+                    ///トランザクション中のローカルデータもコミット
+                    CommitFlag = true
                     ///ロードインジケータ非表示
                     self.loading.loadingViewIndicator(isVisible: false)
+                    CELL.likeAnimationPlay()
                     return
-                }
-                ///それぞれのトークリストを更新
-                self.TALKDATASETTER.talkListToUserInfoSetter(
-                    callback: {hostingresult in
-                        callbackCount += 1
-                        ///トークリスト更新失敗
-                        guard hostingresult else {
-                            failedToRetry()
-                            ///ロードインジケータ非表示
-                            self.loading.loadingViewIndicator(isVisible: false)
-                            return
-                        }
-                        ///自分と相手も問題なく登録できたら
-                        if callbackCount == 2 {
-                            ///トランザクション中のローカルデータもコミット
-                            profileDataSetter.commiting = true
-                            ///ロードインジケータ非表示
-                            self.loading.loadingViewIndicator(isVisible: false)
-                        }
-
-                    }, UID1: self.MYUID,UID2: targetProfile.Required_UID,message: "",
-                    sender: self.MYUID,nickName1: self.MYPROFILE.lcl_NickName!,
-                    nickName2: targetProfile.Required_NickName,like: true,blocked: false
-                )
-            ///
-            }, message: "",messageId: UUID().uuidString,sender: self.MYUID,
-            Date: Date(),roomID: roomID,TargetUID: targetProfile.Required_UID)
+                }, UID1: self.SELFINFO.Required_UID,UID2: targetProfile.Required_UID,message: "",
+                sender: self.SELFINFO.Required_UID,nickName1: self.SELFINFO.Required_NickName,
+                nickName2: targetProfile.Required_NickName,like: true,blocked: false
+            )
+            
+        }, Message: message, text: "", roomID: roomID, Like: true)
+        
+        DispatchQueue.main.async {
+            profileDataSetter.commiting = CommitFlag
+        }
     }
+    
+    /// クエリ条件の呼び出しと適用
+    func querySetting() {
+        ///ローカルから検索条件を取得してクエリ変数に適用
+        let queVal = PERFORMSEARCHLOCALGETTER.getter()
+        ///年齢
+        QUERY.minAge = queVal?.lcl_MinAge ?? 30001231
+        QUERY.maxAge = queVal?.lcl_MaxAge ?? 19000101
+        ///エリアが未選択の場合は条件無し
+        if queVal?.lcl_Area == "未設定" {
+            QUERY.area = nil
+        } else {
+            QUERY.area = queVal?.lcl_Area
+        }
+
+        ///性別が0(未選択の場合)は条件無し
+        if queVal?.lcl_Gender == 0 {
+            QUERY.gender = nil
+        } else {
+            QUERY.gender = queVal?.lcl_Gender ?? nil
+        }
+    }
+    
 }
 ///EXTENSION[NavigationBar関連]
 extension showUserListViewController {
@@ -524,29 +480,36 @@ extension showUserListViewController {
         /// カスタムのタイトルビューを作成
         let titleLabel = UILabel()
         titleLabel.text = "コミュニケーション"
-        titleLabel.textColor = UIColor.black
+        titleLabel.textColor = UIColor.gray
         /// ナビゲーションバーのタイトルビューを設定
         self.navigationItem.titleView = titleLabel
+        ///ナビゲーションバーの背景色の設定
+        navigationController?.navigationBar.barTintColor = UIColor.white
+        
         ///リロードボタン設定
-        let reloadButton = UIBarButtonItem(barButtonSystemItem: .refresh, target: self, action: #selector(reloadButtonTapped))
+        let barReloadButtonItem = barButtonItem(frame: .zero, BarButtonItemKind: .any("reload"))
+        barReloadButtonItem.addTarget(self, action: #selector(reloadButtonTapped), for: .touchUpInside)
+        let rightBarButtonItem = UIBarButtonItem(customView: barReloadButtonItem)
         ///リロードボタンセット
-        navigationItem.rightBarButtonItem = reloadButton
+        self.navigationItem.rightBarButtonItem = rightBarButtonItem
         ///検索ボタン設定
-        let filterButton = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(filterButtonTapped))
+        let barfilterButtonItem = barButtonItem(frame: .zero, BarButtonItemKind: .any("filter01"))
+        barfilterButtonItem.addTarget(self, action: #selector(filterButtonTapped), for: .touchUpInside)
+        let leftBarButtonItem = UIBarButtonItem(customView: barfilterButtonItem)
         ///検索ボタンセット
-        navigationItem.leftBarButtonItem = filterButton
+        self.navigationItem.leftBarButtonItem = leftBarButtonItem
 
     }
     ///リロードボタンタップ時のアクション
     @objc func reloadButtonTapped() {
+        self.loading.loadingViewIndicator(isVisible: true)
         // データリロード
         basicReloadData()
     }
     
     ///検索ボタンタップ時のアクション
     @objc func filterButtonTapped() {
-        let searchViewController = SearchSettingViewController()
-        let UINavigationController = UINavigationController(rootViewController: searchViewController)
+        let UINavigationController = UINavigationController(rootViewController: SEARCHVIEWCONTROLLER)
         UINavigationController.modalPresentationStyle = .fullScreen
         self.present(UINavigationController, animated: false, completion: nil)
         self.slideOutToLeft() // 遷移先の画面を横スライドで表示
@@ -554,26 +517,37 @@ extension showUserListViewController {
     
     // 引っ張り操作でのリフレッシュ処理
     @objc func refreshData() {
+        reloading = false
         // データリロード
         basicReloadData()
         // リフレッシュコントロールの終了処理
         CHATUSERLISTTABLEVIEW.refreshControl?.endRefreshing()
     }
 }
+///EXTENSION[プロフィール画面のデリゲート]
+extension showUserListViewController:ProfileViewControllerDelegate {
+    func blockUserReport(userID: String) {
+        var BUser = BlockUserObj(KIND: .IBlocked, UID: userID)
+        BLOCKUSERIDLISTARRAY.append(BUser)
+    }
+}
+
 
 ///EXTENSION[各種機能群]
 extension showUserListViewController {
     
     ///初期リロード（ベーシック）
     func basicReloadData() {
+        ///クエリ設定呼び出し
+        querySetting()
         ///ユーザー一覧格納配列初期化
-        self.LOCALUSERSPROFILEARRAY = []
+        self.USERSPROFILEARRAY = []
         self.CHATUSERLISTTABLEVIEW.reloadData()
-        reloading = false
-        ///スクロール時のユーザー追加カウンターは0に戻す
-        self.scrollExtraUserCounter = 0
         ///スクロールカウンターは1に戻す
         self.QUERY.scrollCounter = 1
+        ///スクロール時のサーバーアクセス停止フラグを許可
+        self.scrollServerAccessPermFlag = true
+        ///サーバーアクセス
         self.userDataServerGetting(filter: self.QUERY)
     }
     
@@ -599,31 +573,69 @@ extension showUserListViewController {
             self.CHATUSERLISTTABLEVIEW.layoutIfNeeded()
         }
     }
-    
-    /// ローカルデータ更新時のUpdate用オブジェクトに既存オブジェクトをマッピング
-    /// - Parameters:
-    ///   - unManagedObject: Realmに保村されていないアンマネージドオブジェクト
-    ///   - managedObject: Realmに保存済みのマネージドオブジェクト
-    /// - Returns: トランザクションに影響しない更新対象となるアンマネージドオブジェクト
-    func updateObjectMapping(unManagedObject:ProfileInfoLocalObject,managedObject:RequiredProfileInfoLocalData)-> ProfileInfoLocalObject{
-        unManagedObject.lcl_UID = managedObject.Required_UID
-        unManagedObject.lcl_DateCreatedAt = managedObject.Required_DateCreatedAt
-        unManagedObject.lcl_DateUpdatedAt = managedObject.Required_DateUpdatedAt
-        unManagedObject.lcl_Sex = managedObject.Required_Sex
-        unManagedObject.lcl_AboutMeMassage = managedObject.Required_AboutMeMassage
-        unManagedObject.lcl_NickName = managedObject.Required_NickName
-        unManagedObject.lcl_Age = managedObject.Required_Age
-        unManagedObject.lcl_Area = managedObject.Required_Area
-        
-        return unManagedObject
+
+
+    /// ローカルに保存してあるApiKeyとそのバージョンを取得。存在していない場合はバックエンドサーバーから取得
+    /// - Parameter callback: apikey = APIキー　,version = バージョン
+    func ApiKeyGetter(callback: @escaping (String,String,String) -> Void) {
+        ///ローカルからAPIKEYを取得
+        if let APIKEYOBJECT = APIKEYLOCALGETTER.getter() {
+            callback(APIKEYOBJECT.appID!,APIKEYOBJECT.APIKey!,APIKEYOBJECT.version!)
+            return
+        }
+        ///ローカルに存在しない場合はバックエンドサーバーから取得
+        searchAPIKeySingleton().generateSecuredApiKey { apikey,appID,version in
+            if apikey == "ERROR" {
+                createSheet(for: .Alert(title: "初期設定に失敗しました。エラーCODE301", message: "運営にお問い合わせください。アプリを終了します", buttonMessage: "OK", { result in
+                    preconditionFailure("")
+                }), SelfViewController: self)
+            }
+            ///ローカルに保存
+            self.apiKeyLocalSave(APIKEY: apikey, appID: appID, VERSION: version)
+            ///返却
+            callback(appID,apikey,version)
+            return
+        }
     }
     
-    /// 指定された時間より60分経ってるか
-    /// - Parameter pushTime: 指定時間
-    /// - Returns: 経っている場合か否かのBool値
-    func pushTimeDiffDate(pushTime: Date) -> Bool {
-        let minute = round(Date().timeIntervalSince(pushTime) / 60)
-        return minute <= 0.01
+    ///APIKEYのローカル保存
+    /// - Parameters:
+    ///   - APIKEY: 保存するAPIKey
+    ///   - appID: 保存するappID
+    ///   - VERSION: バージョン指定
+    func apiKeyLocalSave(APIKEY:String,appID:String,VERSION:String) {
+        ///保存用のアンマネージドオブジェクト
+        let newAPIKey = ApiKeyLocalObject()
+        newAPIKey.APIKey = APIKEY
+        newAPIKey.version = VERSION
+        newAPIKey.appID = appID
+        ///セッターマネージャをインスタンス化してコミット準備
+        var APIKEYSETTER = ApiKeyDataLocalSetterManager(newAddApiKey: newAPIKey)
+        ///コミット
+        APIKEYSETTER.commiting = true
+    }
+    
+    /// 不正エラー検出時処理
+    func invalidUserCompletion() {
+        createSheet(for: .Completion(title: "不正なユーザーの可能性があるため強制終了します。再登録してください。", {
+            preconditionFailure()
+        }), SelfViewController: self)
     }
 }
 
+//検索画面からのDelegate
+extension showUserListViewController:SearchSettingViewControllerBackActionDelegate{
+    ///検索画面から戻ってきたらユーザーリロード
+    func searchViewBackAction() {
+        basicReloadData()
+    }
+}
+
+
+//ターゲットのプロフィール画面からのデリゲート
+extension showUserListViewController:TargetProfileLikeButtonTappedDelegate {
+    func likeButtonPushListControllerDelegate() {
+        selectingCell.likePush = true
+        USERSPROFILEARRAY.first(where: {$0.Required_UID == selectingCell.celluserStruct.Required_UID})?.Required_LikeButtonPushedFLAG = true
+    }
+}

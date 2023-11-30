@@ -9,6 +9,7 @@ import UIKit
 import Firebase
 import FirebaseCore
 @main
+
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
@@ -20,16 +21,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         var rootViewController:UIViewController?
         
+        
         // 1. 初期化
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
 
+
         // 2. 最初に表示する画面を設定
         if let uid = Auth.auth().currentUser?.uid {
-            rootViewController = initialSettingGenderSelectionViewController()
+            rootViewController = profileSetting()
+
         } else {
-//            let USERHOSTING = profileInitHosting()
-            rootViewController = initialSettingGenderSelectionViewController()
+            rootViewController = initialSettingWelcomeViewController()
         }
         
         window?.rootViewController = rootViewController

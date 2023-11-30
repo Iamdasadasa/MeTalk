@@ -15,9 +15,6 @@ enum ERROR:Error{
 }
 
 enum setterKind{
-    case block
-    case MyNew
-    case MyExtra
-    case YouNew
-    case YouExtra
+    case Me
+    case You
 }

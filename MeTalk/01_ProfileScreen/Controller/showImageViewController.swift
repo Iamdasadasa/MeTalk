@@ -29,7 +29,7 @@ class ShowImageViewController:UIViewController{
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         guard let profileImage = profileImage else {
-            self.showImageView.imageView.image = UIImage(named: "InitIMage")
+            self.showImageView.imageView.image = UIImage(named: "defProfile")
             return
         }
             self.showImageView.imageView.image = profileImage

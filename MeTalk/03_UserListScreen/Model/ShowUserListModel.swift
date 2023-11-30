@@ -7,7 +7,7 @@
 
 import Foundation
 import UIKit
-//このビューコントローラのみで使用するデータ構造体（Nil無し）
+//このビューコントローラがメインで使用するデータ構造体（Nil無し）
 class RequiredProfileInfoLocalData {
     init(UID:String,DateCreatedAt:Date,DateUpdatedAt:Date,
          Sex:Int,AboutMeMassage: String,NickName: String,

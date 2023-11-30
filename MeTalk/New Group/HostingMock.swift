@@ -61,73 +61,68 @@ class TestViewController: UIViewController {
 //--------------------------------------------------
 ///
 
-extension TestViewController:TalkListGetterManagerDI {
+extension TestViewController{
     
     
     @objc private func buttonTapped() {
-        onlineUsersGetter(callback: { info, err in
-            info.map({
-                self.button.setTitle($0.lcl_AboutMeMassage, for: .normal)
-                
-            })
-            
-        }, latedTime: Date(), oneMinuteWithin: false, limitCount: 3)
-    }
-    
-    enum hostingError:Error {
-        case FormattError
-    }
-    
-    func onlineUsersGetter(callback: @escaping ([ProfileInfoLocalObject], Error?) -> Void, latedTime: Date?,oneMinuteWithin: Bool,limitCount: Int) {
-        var profileArray:[Int?] = []
         
-        profileArray.append(nil)
-        profileArray.append(2)
-        profileArray.append(3)
-        
-        var profileLocalArray:[ProfileInfoLocalObject] = []
-        
-        do {
-            for array in profileArray {
-                if let array = array {
-                    if array == 1 {
-                        ///変換等でデータの取得まではできたけどローカル側でエラーになってしまった場合を想定
-                        throw hostingError.FormattError
-                    } else if array == 2 {
-                        ///正常に処理完了
-                        let profile = ProfileInfoLocalObject()
-                        profile.lcl_AboutMeMassage = "エネゴリくん"
-                        profileLocalArray.append(profile)
-                    } else if array == 3 {
-                        ///正常に処理完了
-                        let profile = ProfileInfoLocalObject()
-                        profile.lcl_AboutMeMassage = "酒でらくん"
-                        profileLocalArray.append(profile)
-                    }
-                    callback(profileLocalArray,nil)
-                }
-
-            }
-        } catch let Err {
-            let nsERR = Err as NSError
-            print(nsERR.domain)
-        }
     }
+}
+//
+//    enum hostingError:Error {
+//        case FormattError
+//    }
+//
+//    func onlineUsersGetter(callback: @escaping ([ProfileInfoLocalObject], Error?) -> Void, latedTime: Date?,oneMinuteWithin: Bool,limitCount: Int) {
+//        var profileArray:[Int?] = []
+//
+//        profileArray.append(nil)
+//        profileArray.append(2)
+//        profileArray.append(3)
+//
+//        var profileLocalArray:[ProfileInfoLocalObject] = []
+//
+//        do {
+//            for array in profileArray {
+//                if let array = array {
+//                    if array == 1 {
+//                        ///変換等でデータの取得まではできたけどローカル側でエラーになってしまった場合を想定
+//                        throw hostingError.FormattError
+//                    } else if array == 2 {
+//                        ///正常に処理完了
+//                        let profile = ProfileInfoLocalObject()
+//                        profile.lcl_AboutMeMassage = "エネゴリくん"
+//                        profileLocalArray.append(profile)
+//                    } else if array == 3 {
+//                        ///正常に処理完了
+//                        let profile = ProfileInfoLocalObject()
+//                        profile.lcl_AboutMeMassage = "酒でらくん"
+//                        profileLocalArray.append(profile)
+//                    }
+//                    callback(profileLocalArray,nil)
+//                }
+//
+//            }
+//        } catch let Err {
+//            let nsERR = Err as NSError
+//            print(nsERR.domain)
+//        }
+//    }
     
-    ///
-    //--------------------------------------------------
-    //--ユーザー初期登録単体テスト--
-    //--------------------------------------------------
-    ///
-    //extension TestViewController:ProfileRegisterProtocol{
-    //    func SignUpAuthRegister(callback: @escaping (HostingResult) -> Void) {
-    //        callback(.Success("DI結果;成功しました。"))
-    //    }
-    //
-    //    func UserInfoRegister(callback: @escaping (HostingResult) -> Void, USER: profileInfoLocal, uid: String) {
-    //
-    //        callback(.failure(ERROR.err))
-    //    }
+//    /
+//    --------------------------------------------------
+//    --ユーザー初期登録単体テスト--
+//    --------------------------------------------------
+//    /
+//    extension TestViewController:ProfileRegisterProtocol{
+//        func SignUpAuthRegister(callback: @escaping (HostingResult) -> Void) {
+//            callback(.Success("DI結果;成功しました。"))
+//        }
+//
+//        func UserInfoRegister(callback: @escaping (HostingResult) -> Void, USER: profileInfoLocal, uid: String) {
+//
+//            callback(.failure(ERROR.err))
+//        }
     //
     //
     //
@@ -153,4 +148,4 @@ extension TestViewController:TalkListGetterManagerDI {
     //
     //    }
     //}
-}
+//}

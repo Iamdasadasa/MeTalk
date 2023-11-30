@@ -42,15 +42,24 @@ class NotificationViewController:UIViewController{
         super.viewDidLoad()
         ///Viewの適用
         self.view = notificationTableView
+        self.view.backgroundColor = .white
         notificationTableView.dataSource = self
         notificationTableView.delegate = self
         notificationTableView.register(NotificationTableViewCell.self, forCellReuseIdentifier: "NotificationTableViewCell")
-        
         ///barボタン初期設定
-        backButtonItem = UIBarButtonItem(barButtonSystemItem: .reply, target: self, action: #selector(backButtonPressed(_:)))
-        self.navigationItem.leftBarButtonItem = backButtonItem
+        let barButtonArrowItem = barButtonItem(frame: .zero, BarButtonItemKind: .left)
+        barButtonArrowItem.addTarget(self, action: #selector(backButtonPressed), for: .touchUpInside)
+        let customBarButtonItem = UIBarButtonItem(customView: barButtonArrowItem)
+        self.navigationItem.leftBarButtonItem = customBarButtonItem
         ///タイトルラベル追加
-        navigationItem.title = "通知設定"
+        let titleLabel = UILabel()
+        titleLabel.text = "通知設定"
+        titleLabel.textColor = UIColor.gray
+        /// ナビゲーションバーのタイトルビューを設定
+        self.navigationItem.titleView = titleLabel
+        navigationController?.navigationBar.barTintColor = UIColor.white
+        ///スワイプで前画面に戻れるようにする
+        edghPanGestureSetting(selfVC: self, selfView: self.view,gestureDirection: .left)
     }
     
     @objc func backButtonPressed(_ sender: UIBarButtonItem) {

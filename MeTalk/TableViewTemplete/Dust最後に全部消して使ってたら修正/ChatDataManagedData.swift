@@ -16,8 +16,8 @@
 //
 //    let MeUID = Auth.auth().currentUser?.uid
 //    var databaseRef: DatabaseReference! = Database.database().reference()
-//    let cloudDB = Firestore.firestore()
-//    ///データベース書き込み（メッセージ）
+////    let cloudDB = Firestore.firestore()
+    ///データベース書き込み（メッセージ）
 //    func writeMassageData(mockMassage:MockMessage?,text:String?,roomID:String) {
 //        let date = ChatDataManagedData.dateToStringFormatt(date: mockMassage?.sentDate, formatFlg: 0)
 //        if let message = text,let messageId = mockMassage?.messageId,let sender = mockMassage?.sender.senderId{

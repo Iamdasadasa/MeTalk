@@ -17,7 +17,7 @@ class initialSettingFinalConfirmViewController:UIViewController{
     ///サーバー接続中のローディング画面
     let LOADINGVIEW = LOADING(loadingView: LoadingView(),BackClear: false)
     ///ユーザーの基本的な通信処理をまとめた構造体（DIが行えるようにProtcol型とする)
-    let USERHOSTING:ProfileRegisterProtocol = MyProfileSetterManager()
+    let USERHOSTING = RegisterHostSetter()
     ///前画面より取得されるデータの格納変数
     var gender:GENDER = .none
     var nickName:String = ""
@@ -41,10 +41,9 @@ class initialSettingFinalConfirmViewController:UIViewController{
             ///年齢変換
             guard let EightDigitAge = age.convertToFormattedDateInt(targetAgeString: age, Type: .EightDigit) else {
                 ///エラー対応
-                createSheet(callback: {
-                    ///ローディング画面非表示
-                    self.LOADINGVIEW.loadingViewIndicator(isVisible: false)
-                }, for: .Retry(title: "登録中にエラーが発生しました"), SelfViewController: self)
+                createSheet(for: .Retry(title: "登録中にエラーが発生しました"), SelfViewController: self)
+                //ローディング画面非表示
+                self.LOADINGVIEW.loadingViewIndicator(isVisible: false)
                 return
             }
             ///情報格納
@@ -69,11 +68,17 @@ class initialSettingFinalConfirmViewController:UIViewController{
     
     ///前の画面に戻させる処理
     func infoErrorBackToView() {
-        createSheet(callback: {
-            self.dismiss(animated: false, completion: nil)
-            self.slideOutToLeft()
-            return
-        }, for: .Alert(title: "登録処理で問題が発生しました", message: "もう一度試してください1", buttonMessage: "OK"), SelfViewController: self)
+        createSheet(for: .Alert(title: "登録処理で問題が発生しました", message: "もう一度試してください", buttonMessage: "OK", { result in
+            if result {
+                self.dismiss(animated: false, completion: nil)
+                self.slideOutToLeft()
+                return
+            } else {
+                self.dismiss(animated: false, completion: nil)
+                self.slideOutToLeft()
+                return
+            }
+        }), SelfViewController: self)
     }
     
     
@@ -90,6 +95,7 @@ class initialSettingFinalConfirmViewController:UIViewController{
             LOCALPROFILEDATA.lcl_AboutMeMassage = USERINFODEFAULTVALUE.aboutMeMassage.value
             LOCALPROFILEDATA.lcl_Age = EightDigitAge
             LOCALPROFILEDATA.lcl_Area = USERINFODEFAULTVALUE.area.value
+            LOCALPROFILEDATA.lcl_UID = USERUID
             LOCALPROFILEDATA.lcl_DateCreatedAt = Date()
             LOCALPROFILEDATA.lcl_DateUpdatedAt = Date()
             
@@ -115,49 +121,51 @@ extension initialSettingFinalConfirmViewController:initialSettingFinalConfirmVie
     
     private func SignUp() {
         ///権限登録処理
-        USERHOSTING.SignUpAuthRegister(callback: { Result in
+        USERHOSTING.signUpAuthRegister(callback: { Result in
             if case.Success(let UID) = Result {
                 self.USERUID = UID
             }
             
             if case .failure(_) = Result {
                     ///エラー対応
-                createSheet(callback: {
-                        ///ローディング画面非表示
-                    self.LOADINGVIEW.loadingViewIndicator(isVisible: false)
-                    }, for: .Retry(title: "ユーザー権限登録処理に失敗しました"), SelfViewController: self)
+                createSheet(for: .Retry(title: "ユーザー権限登録処理に失敗しました"), SelfViewController: self)
                 return
             }
         })
     }
     
     private func authRegister(MYUID:String) {
+        ///安全なデータにMapping準備
+        let mapping = profileSafeDataMapping()
         ///ユーザー情報登録
-        USERHOSTING.UserInfoRegister(callback: { Result in
+        USERHOSTING.userInfoRegister(callback: { Result in
             ///情報登録成功
             if case.Success(let successMessage) = Result {
                 ///ローディングビュー非表示
                 self.LOADINGVIEW.loadingViewIndicator(isVisible: false)
-                ///遷移先ページのインスタンス
-                let mainTabBarController = MainTabBarController()
-                //.partialCurlにするとバグるのでflipHorizontalに変更
-                mainTabBarController.modalTransitionStyle = .flipHorizontal
-                mainTabBarController.modalPresentationStyle = .fullScreen
                 ///自身のデータをローカルに登録
                 var LOCALSETTER = TargetProfileLocalDataSetterManager(updateProfile: self.LOCALPROFILEDATA)
                 LOCALSETTER.commiting = true
-                
-                self.present(mainTabBarController, animated: true, completion: nil)
+                ///データを安全な型に変える
+                mapping.USERLISTPROFILEMAPPING(callback: { safeData in
+                    ///遷移先ページのインスタンス
+                    let mainTabBarController = MainTabBarController(SELFINFO: safeData, ImageLocalObject: listUsersImageLocalObject())
+                    //.partialCurlにするとバグるのでflipHorizontalに変更
+                    mainTabBarController.modalTransitionStyle = .flipHorizontal
+                    mainTabBarController.modalPresentationStyle = .fullScreen
+                    self.present(mainTabBarController, animated: true, completion: nil)
+                }, PROFILEINFO: self.LOCALPROFILEDATA, VC: self)
             }
             ///情報登録失敗
             if case .failure(let error) = Result {
+                print(error.localizedDescription)
                 ///エラー対応
-                createSheet(callback: {
-                    ///ローディング画面非表示
-                    self.LOADINGVIEW.loadingViewIndicator(isVisible: false)
-                }, for: .Retry(title: "ユーザー情報登録処理に失敗しました"), SelfViewController: self)
+                createSheet(for: .Retry(title: "ユーザー権限登録処理に失敗しました"), SelfViewController: self)
+                ///ローディング画面非表示
+                self.LOADINGVIEW.loadingViewIndicator(isVisible: false)
+                self.finalConfirmView.decisionButton.isEnabled = true
             }
-        }, USER: LOCALPROFILEDATA, uid: MYUID)
+        }, USER: LOCALPROFILEDATA, uid: MYUID, signUpFlg: .general)
     }
     
 }

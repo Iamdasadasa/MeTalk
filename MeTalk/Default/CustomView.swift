@@ -18,16 +18,26 @@ class ShadowBaseView:UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    enum offset{
+        case topRight
+        case buttomReft
+    }
     ///陰影付与処理
-    ///適用は使用する側のlayoutSubviews内で
-    func shadowSetting() {
+    ///適用は使用する側のlayoutSubviews内で(super.layoutSubviews()入れるの忘れないで)
+    func shadowSetting(offset:offset) {
         ///角丸
         self.layer.cornerRadius = 10
         self.clipsToBounds = true
-        /// メッセージラベルに陰影をつける（ボタンっぽくする）
+        /// 陰影をつける（ボタンっぽくする）
+        switch offset {
+        case .topRight:
+            self.layer.shadowOffset = CGSize(width: 3, height: -3)
+        case .buttomReft:
+            self.layer.shadowOffset = CGSize(width: -3, height: 3)
+        }
         self.layer.masksToBounds = false
         self.layer.shadowColor = UIColor.black.cgColor
-        self.layer.shadowOffset = CGSize(width: 3, height: -3)
+
         self.layer.shadowOpacity = 0.2
         self.layer.shadowRadius = 2
         /// シャドウパスとして保持
@@ -284,7 +294,7 @@ class AgeCustomDataPickerView:UIPickerView{
         ///西暦要素設定
         case .year:
             minBirth = 1950
-            maxBirth = Calendar.current.component(.year, from: Date())
+            maxBirth = Calendar.current.component(.year, from: Date()) - 18
         }
         super.init(frame: .zero)
         setting()
@@ -368,8 +378,114 @@ class CustomFilterImageView:UIImageView {
     }
     
     func setting() {
-        self.image = UIImage(named: "Filter")
+        self.image = UIImage(named: "filter02")
         self.backgroundColor = .clear
+    }
+    
+}
+enum BarButtonItemKind {
+    case up
+    case down
+    case left
+    case right
+    case any(String)  // String型のプロパティを持つケース
+
+    var ImageValue: String {
+        switch self {
+        case .up: return "upArrow"
+        case .down: return "downArrow"
+        case .left: return "leftArrow"
+        case .right: return "rightArrow"
+        case .any(let value): return value
+        }
+    }
+}
+class barButtonItem:UIButton {
+
+    // 引数付きのカスタムイニシャライザ
+    init(frame: CGRect, BarButtonItemKind: BarButtonItemKind) {
+        super.init(frame: frame)
+        setUp(ItemKind: BarButtonItemKind)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func setUp(ItemKind:BarButtonItemKind) {
+        self.setImage(UIImage(named: ItemKind.ImageValue), for: .normal)
+        self.translatesAutoresizingMaskIntoConstraints = false
+        self.widthAnchor.constraint(equalToConstant: 30).isActive = true
+        self.heightAnchor.constraint(equalToConstant: 30).isActive = true
+    }
+}
+
+class LogoShowLoadingView: UIView {
+
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
+    private let imageView = UIImageView()
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupViews()
+        startLoading()
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        setupViews()
+        startLoading()
+    }
+
+    private func setupViews() {
+        // ローディングインジケータの設定
+        self.backgroundColor = .white
+        addSubview(activityIndicator)
+        activityIndicator.hidesWhenStopped = true
+        activityIndicator.color = UIColor.gray
+
+        // 画像の設定
+        let image = UIImage(named: "appLogo")
+        imageView.image = image
+
+        addSubview(imageView)
+        
+
+        
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        imageView.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.5).isActive = true
+        imageView.heightAnchor.constraint(equalTo: imageView.widthAnchor).isActive = true
+        imageView.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        imageView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
+        
+        activityIndicator.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        activityIndicator.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.2).isActive = true
+        activityIndicator.heightAnchor.constraint(equalTo: activityIndicator.widthAnchor).isActive = true
+        activityIndicator.topAnchor.constraint(equalTo: self.imageView.bottomAnchor,constant:1).isActive = true
+    }
+
+    // ローディング開始
+    func startLoading() {
+        activityIndicator.startAnimating()
+    }
+
+    // ローディング停止
+    func stopLoading() {
+        activityIndicator.stopAnimating()
+    }
+    
+    func animateViewToCenter(callback: @escaping () -> Void) {
+        // アニメーション開始前の初期位置とサイズを設定
+        self.transform = CGAffineTransform(scaleX: 7.5, y: 7.5)
+        
+        // ズームインアニメーション
+        UIView.animate(withDuration: 1.5, delay: 0.0, options: [.curveEaseInOut], animations: {
+            self.transform = CGAffineTransform(scaleX: 50, y: 50)
+        }, completion: { _ in
+            callback()
+        })
     }
     
 }

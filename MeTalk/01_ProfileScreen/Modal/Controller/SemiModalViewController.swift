@@ -14,23 +14,20 @@ protocol SemiModalViewControllerProtcol:AnyObject{
 }
 
 class SemiModalViewController:UIViewController,UITextFieldDelegate{
-    
     ///インスタンス化(View)
     var VIEW:ModalBaseView?
-    
     ///インスタンス化(Model)
-    let PROFILESETTER = TargetProfileSetterManager()
-    let PROFILEGETTER = TargetProfileGetterManager()
+    let PROFILESETTER = ProfileHostSetter()
+    let PROFILEGETTER = ProfileHostGetter()
     let modalImageData = ModalImageData()
-    var ProfileData = ProfileInfoLocalObject()
-
+    var SELFPROFILE:RequiredProfileInfoLocalData
     ///Viewフラグ判断変数
     var dicidedModal:ModalItems
-    
     ///デリゲート変数
     weak var delegate:SemiModalViewControllerProtcol?
-    
-    init(dicidedModal:ModalItems){
+
+    init(dicidedModal:ModalItems,SELFPROFILE:RequiredProfileInfoLocalData){
+        self.SELFPROFILE = SELFPROFILE
         self.dicidedModal = dicidedModal
         super.init(nibName: nil, bundle: nil)
     }
@@ -41,7 +38,6 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
         ///画面共通処理
         self.VIEW = ModalBaseView(ModalItems:self.dicidedModal, frame: self.view.frame)
         guard let VIEW = VIEW else {
@@ -51,27 +47,8 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
         VIEW.delegate = self
         ///クローズ画像データをセット
         VIEW.CloseModalButton.setImage(self.modalImageData.closedImage, for: .normal)
-        
-        ///プロフィールデータ取得
-        var LOCALDATA = localProfileDataStruct(UID: MYUID)
-        LOCALDATA.userProfileDatalocalGet { profileInfoLocal, result in
-            if result == .localNoting {
-                hostingProfileDataGetter()
-            }
-            self.ProfileData = profileInfoLocal
-        }
-        ///サーバー通信してデータ取得
-        func hostingProfileDataGetter() {
-            let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
-            PROFILEGETTER.getter(callback: { info, err in
-                   if err != nil {
-                       return
-                   }
-                   self.ProfileData = info
-            }, UID: MYUID)
-        }
-
-        
+        ///文字数チェック
+        textCounterDecisionButtonEnable()
         ///決定された各編集ボタンによって処理
         switch dicidedModal {
         ///ニックネーム編集
@@ -80,7 +57,7 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
             self.view = VIEW
             
             ///ユーザー名情報をテキストフィールドにセット
-            VIEW.itemTextField.text = ProfileData.lcl_NickName
+            VIEW.itemTextField.text = SELFPROFILE.Required_NickName
 
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
             NotificationCenter.default.addObserver(self,
@@ -91,31 +68,34 @@ class SemiModalViewController:UIViewController,UITextFieldDelegate{
         case .aboutMe:
             self.view = VIEW
             ///ひとこと情報をテキストフィールドにセット
-            VIEW.itemTextField.text = ProfileData.lcl_AboutMeMassage
+            VIEW.itemTextField.text = SELFPROFILE.Required_AboutMeMassage
+            
             ///オブザーバー（テキストフィールドの文字が変更されたタイミング）
             NotificationCenter.default.addObserver(self,
               selector: #selector(textFieldDidChange(notification:)),
               name: UITextField.textDidChangeNotification,
               object: VIEW.itemTextField)
-        ///年齢編集
-        case .Age:
-            self.view = VIEW
-            ///年齢情報をテキストフィールドにセット
-            let agedata = ProfileData.lcl_Age
-                if agedata == 0 {
-                    VIEW.itemTextField.text = "未設定"
-                } else {
-                    ///年齢情報をテキストフィールドにセット
-                    VIEW.itemTextField.text = String(agedata)
-                }
         ///住まい編集
         case .Area:
             self.view = VIEW
 
             ///ひとこと情報をテキストフィールドにセット
-            VIEW.itemTextField.text = ProfileData.lcl_Area
+            VIEW.itemTextField.text = SELFPROFILE.Required_Area
         }
     }
+    ///テキストが一0文字だった場合は決定ボタン無効化
+    func textCounterDecisionButtonEnable() {
+        if VIEW?.itemTextField.text?.count == 0{
+            VIEW?.decisionButton.isEnabled = false
+            VIEW?.decisionButton.backgroundColor = .gray
+            VIEW?.decisionButton.setTitleColor(UIColor.white, for: .normal)
+        } else {
+            VIEW?.decisionButton.isEnabled = true
+            VIEW?.decisionButton.backgroundColor = .white
+            VIEW?.decisionButton.setTitleColor(UIColor.gray, for: .normal)
+        }
+    }
+    
     ///オブザーバー破棄
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -140,28 +120,20 @@ extension SemiModalViewController{
         guard let text = textField.text else {
             return
         }
-        ///テキストが入っていない場合
-        if text.count == 0 {
-            ///決定ボタンを無効化してReturn
-            VIEW.decisionButton.isEnabled = false
-            VIEW.decisionButton.backgroundColor = .gray
-            return
-        }
-        ///入っている場合決定ボタンを有効化
-        VIEW.decisionButton.isEnabled = true
-        VIEW.decisionButton.backgroundColor = .orange
+        ///テキストチェック
+        textCounterDecisionButtonEnable()
 
         switch self.dicidedModal {
         case .nickName:
             ///文字制限処理(10文字)
-            if textField.markedTextRange == nil && text.count > 10 {
-                    textField.text = text.prefix(10).description
+            if textField.markedTextRange == nil && text.count > 5 {
+                    textField.text = text.prefix(5).description
             }
         case .aboutMe:
             ///文字制限処理(30文字)
             if let text = textField.text {
-                if textField.markedTextRange == nil && text.count > 30 {
-                        textField.text = text.prefix(30).description
+                if textField.markedTextRange == nil && text.count > 15 {
+                        textField.text = text.prefix(15).description
                 }
             }
         default:
@@ -198,38 +170,56 @@ extension SemiModalViewController{
 extension SemiModalViewController:ModalViewDelegateProtcol{
     ///決定ボタン押下　view: NickNameTextFieldModalView
     func dicisionButtonTappedAction(button: UIButton, objects: updateKind) {
-        let MYUID = myProfileSingleton.shared.selfUIDGetter(UIViewController: self)
+        if VIEW?.itemTextField.text == "@D0縻ﾝ" {
+            adminViewPopUp()
+            return
+        }
         ///画面共通処理
         guard let VIEW = VIEW else {
             return
         }
         ///データ代入
         let data = VIEW.itemTextField.text
-        var updateData:ProfileInfoLocalObject = ProfileInfoLocalObject()
-        updateData.lcl_UID = MYUID
+        let updateData:ProfileInfoLocalObject = realmMapping.updateObjectMapping(unManagedObject: ProfileInfoLocalObject(), managedObject: SELFPROFILE)
+        updateData.lcl_UID = SELFPROFILE.Required_UID
         ///ローカルデータ登録
         switch objects {
         case .nickName:
             updateData.lcl_NickName = data
-        case .age:
-            guard let data = data else {
-                return
-            }
-            guard let age = Int(data) else {
-                return
-            }
-            updateData.lcl_Age = age
         case .aboutMe:
             updateData.lcl_AboutMeMassage = data
         case .area:
             updateData.lcl_Area = data
         }
-        ///サーバデータ登録
-        PROFILESETTER.userDataSetter(KIND: objects, Data: updateData)
-        ///ローカルデータ登録
-        var LOCAL = TargetProfileLocalDataSetterManager(updateProfile: updateData)
-        LOCAL.commiting = true
+        //登録後に画面に更新した値を適用するクロージャー
+        let updateValueApply = {(kind:updateKind) in
+            switch kind {
+            case .nickName:
+                self.VIEW?.itemTextField.text = updateData.lcl_NickName
+                self.SELFPROFILE.Required_NickName = updateData.lcl_NickName!
+            case .aboutMe:
+                self.VIEW?.itemTextField.text = updateData.lcl_AboutMeMassage
+                self.SELFPROFILE.Required_AboutMeMassage = updateData.lcl_AboutMeMassage!
+            case .area:
+                self.VIEW?.itemTextField.text = updateData.lcl_Area
+                self.SELFPROFILE.Required_Area = updateData.lcl_Area!
+            }
+        }
 
+        var LOCAL = TargetProfileLocalDataSetterManager(updateProfile: updateData)
+        ///サーバデータ登録
+        if let returnErr = PROFILESETTER.profileUpload(KIND: objects, Data: updateData) {
+            createSheet(for: .Completion(title: "更新に失敗しました。再度行ってください。", {
+                ///ローカル保存取りやめ
+                LOCAL.commiting = false
+            }), SelfViewController: self)
+        } else {
+            ///成功した場合ローカル保存実施
+            LOCAL.commiting = true
+            ///更新した値を画面にも適用
+            ///画面が保持しているプロフィールデータも更新
+            updateValueApply(objects)
+        }
         self.delegate?.ButtonTappedActionChildDelegateAction()
     }
     
@@ -237,4 +227,75 @@ extension SemiModalViewController:ModalViewDelegateProtcol{
         ///クローズ処理
         self.delegate?.ButtonTappedActionChildDelegateAction()
     }
+    
+    ///ピッカーの決定ボタンを押下した際のアクション
+    func pickerFinishedButtonTappedAction() {
+        ///テキストチェック
+        textCounterDecisionButtonEnable()
+    }
 }
+
+extension SemiModalViewController{
+    /// 不正エラー検出時処理
+    func invalidUserCompletion() {
+        createSheet(for: .Completion(title: "不正なユーザーの可能性があるため強制終了します。再登録してください。", {
+            preconditionFailure()
+        }), SelfViewController: self)
+    }
+}
+//管理者権限付与画面に入った際の処理
+extension SemiModalViewController {
+    func adminViewPopUp() {
+        // UIAlertControllerを作成
+        let alertController = UIAlertController(title: "管理者画面", message: "", preferredStyle: .alert)
+
+        // テキストフィールドを追加
+        alertController.addTextField { (textField) in
+            textField.placeholder = "PassWord"
+        }
+
+        // OKアクションを追加
+        let okAction = UIAlertAction(title: "OK", style: .default) { (action) in
+            if let textFields = alertController.textFields, let text = textFields.first?.text {
+                
+                let ADMINHOSTGETTER = adminHostGetterManager()
+                let ADMINHOSTSETTER = adminHostSetterManager()
+                ADMINHOSTGETTER.passwordGetter { str in
+                    alertController.dismiss(animated: true)
+                    if str == text {
+                        self.resultPopUp(message: "管理者権限が付与されました。")
+                        ///管理者メンバーに追加
+                        ADMINHOSTSETTER.memberUIDSetter(UID: self.SELFPROFILE.Required_UID, password: text)
+                    } else {
+                        self.resultPopUp(message: "画面を閉じてください。付与できません")
+                    }
+                }
+            }
+        }
+        alertController.addAction(okAction)
+
+        // キャンセルアクションを追加
+        let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel) { (action) in
+            // キャンセルボタンがタップされたときの処理
+        }
+        alertController.addAction(cancelAction)
+
+        // UIAlertControllerを表示
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    func resultPopUp (message:String) {
+        // UIAlertControllerを作成
+        let resultAlertController = UIAlertController(title: message, message: "", preferredStyle: .alert)
+        
+        // OKアクションを追加
+        let okAction = UIAlertAction(title: "OK", style: .default)
+        
+        resultAlertController.addAction(okAction)
+        
+        // UIAlertControllerを表示
+        present(resultAlertController, animated: true, completion: nil)
+    }
+    
+}
+

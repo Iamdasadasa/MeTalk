@@ -65,22 +65,34 @@ class WebViewTempleteController:UIViewController,WKUIDelegate{
     override func viewDidLoad() {
         super.viewDidLoad()
         ///barボタン初期設定
-        backButtonItem = UIBarButtonItem(barButtonSystemItem: .reply, target: self, action: #selector(backButtonPressed(_:)))
-        self.navigationItem.leftBarButtonItem = backButtonItem
+        let barButtonArrowItem = barButtonItem(frame: .zero, BarButtonItemKind: .left)
+        barButtonArrowItem.addTarget(self, action: #selector(backButtonPressed), for: .touchUpInside)
+        let customBarButtonItem = UIBarButtonItem(customView: barButtonArrowItem)
+        self.navigationItem.leftBarButtonItem = customBarButtonItem
+        navigationController?.navigationBar.barTintColor = UIColor.white
+        ///タイトルラベル追加
+        let titleLabel = UILabel()
+
         ///イニシャライザされたカスタム列挙型によって処理を分岐
         switch self.webPageItem {
             ///プライバシーポリシー
         case .privacyPolicy:
             ///画面上タイトルとしてプライバシーポリシーの文言をセット
-            navigationItem.title = self.webPageItem.info.title
+            titleLabel.text = self.webPageItem.info.title
+            titleLabel.textColor = UIColor.gray
+            navigationItem.titleView = titleLabel
             ///Webページを表示
             webview.load(URLRequest(url: self.webPageItem.info.MyURL))
         case .TermsOfService:
-            ///画面上タイトルとして利用規約の文言をセット
-            navigationItem.title = self.webPageItem.info.title
+            ///画面上タイトルとしてプライバシーポリシーの文言をセット
+            titleLabel.text = self.webPageItem.info.title
+            titleLabel.textColor = UIColor.gray
+            navigationItem.titleView = titleLabel
             ///Webページを表示
             webview.load(URLRequest(url: self.webPageItem.info.MyURL))
         }
+        ///スワイプで前画面に戻れるようにする
+        edghPanGestureSetting(selfVC: self, selfView: self.view,gestureDirection: .left)
     }
     
     @objc func backButtonPressed(_ sender: UIBarButtonItem) {

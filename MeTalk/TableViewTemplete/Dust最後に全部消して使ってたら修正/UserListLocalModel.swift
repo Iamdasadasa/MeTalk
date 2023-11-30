@@ -435,8 +435,8 @@
 //            print("エラー")
 //        }
 //    }
-//
-//    ///ローカルDBの画像情報取得
+
+    ///ローカルDBの画像情報取得
 //    func chatUserListLocalImageInfoGet(UID:String) -> ListUsersImageLocal{
 //        ///暗号化したRealmを生成
 //        var realm:Realm = {

@@ -74,6 +74,9 @@ class initialSettingNickNameSelectView:UIView {
 
 extension initialSettingNickNameSelectView{
     func viewSetUp() {
+        ///はじめは決定ボタンは表示しない
+        self.decisionButton.isEnabled = false
+        self.decisionImageView.isHidden = true
         ///背景画像設定
         backGroundViewImageSetUp(imageName: "gemderSelectBack")
         

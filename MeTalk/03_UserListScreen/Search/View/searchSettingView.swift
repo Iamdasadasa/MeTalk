@@ -29,7 +29,7 @@ class SearchSettingView:UIView {
         fatalError("init(coder:) has not been implemented")
     }
     ///Delegate
-    var delegate:dicitionButtonClicked?
+    weak var delegate:dicitionButtonClicked?
     ///共通性別画像インスタンス
     var femaleImage:genderImageView!
     var maleImage:genderImageView!
@@ -91,7 +91,8 @@ class SearchSettingView:UIView {
         let label = CustomThemaLabel(text: "")
         label.textColor = .white
         label.textAlignment = .center
-        label.backgroundColor = UIColor(red: 1.0, green: 0.4, blue: 0.4, alpha: 0.5)
+        label.backgroundColor = UIColor(red: 1.0, green: 0.4, blue: 0.4, alpha: 0.3
+        )
         label.layer.cornerRadius = 10
         label.clipsToBounds = true
         return label
@@ -103,10 +104,10 @@ class SearchSettingView:UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         ///陰影付与
-        femaleshadowView.shadowSetting()
-        maleShadowView.shadowSetting()
-        noneShadowView.shadowSetting()
-        pickerShadowView.shadowSetting()
+        femaleshadowView.shadowSetting(offset: .topRight)
+        maleShadowView.shadowSetting(offset: .topRight)
+        noneShadowView.shadowSetting(offset: .topRight)
+        pickerShadowView.shadowSetting(offset: .topRight)
         ///テキストサイズ
         genderThemaLabel.font = UIFont.systemFont(ofSize: 25)
         ageThemaLabel.font = UIFont.systemFont(ofSize: 25)
@@ -375,16 +376,23 @@ class SearchSettingView:UIView {
         }
         ///年齢の保存済みデータ
         ///ノブ位置調整+年齢変数に格納
-        ///年月日から西暦に変換
-        let convertMinYear = AgeCalculator.conbertDefaultYear(targetYearOfBirth: searchLocalData.lcl_MinAge, minOrMax: .min)
-        let convertMaxYear = AgeCalculator.conbertDefaultYear(targetYearOfBirth: searchLocalData.lcl_MaxAge, minOrMax: .max)
-        ///西暦から年齢に変換
-        let convertMinAge = AgeCalculator.calculateAge(from: convertMinYear)
-        let convertMaxAge = AgeCalculator.calculateAge(from: convertMaxYear)
-        ageSlider.defaultValueLeftKnob = CGFloat(convertMinAge)
-        ageSlider.defaultValueRightKnob = CGFloat(convertMaxAge)
-        minAge = convertMinAge
-        maxAge = convertMaxAge
+        ///初回の検索画面表示で保存オブジェクトが値が初期値だった場合
+        if searchLocalData.lcl_MinAge == 0 || searchLocalData.lcl_MaxAge == 0 {
+            ageSlider.defaultValueLeftKnob = CGFloat(minAge)
+            ageSlider.defaultValueRightKnob = CGFloat(maxAge)
+        } else {
+        ///検索保存データが存在している場合
+            ///年月日から西暦に変換
+            let convertMinYear = AgeCalculator.conbertDefaultYear(targetYearOfBirth: searchLocalData.lcl_MinAge, minOrMax: .min)
+            let convertMaxYear = AgeCalculator.conbertDefaultYear(targetYearOfBirth: searchLocalData.lcl_MaxAge, minOrMax: .max)
+            ///西暦から年齢に変換
+            let convertMinAge = AgeCalculator.calculateAge(from: convertMinYear)
+            let convertMaxAge = AgeCalculator.calculateAge(from: convertMaxYear)
+            ageSlider.defaultValueLeftKnob = CGFloat(convertMinAge)
+            ageSlider.defaultValueRightKnob = CGFloat(convertMaxAge)
+            minAge = convertMinAge
+            maxAge = convertMaxAge
+        }
         ///住まいの保存済みデータ
         ///住まい表示
         pickerTextField.text = searchLocalData.lcl_Area
@@ -406,8 +414,8 @@ extension SearchSettingView:UIPickerViewDelegate,UIPickerViewDataSource {
         // 決定・キャンセル用ツールバーの生成
         let toolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: self.frame.size.width, height: 35))
         let spaceItem = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
-        let doneItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done))
-        let cancelItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel))
+        let doneItem = UIBarButtonItem(title: "決定", style: .plain, target: self, action: #selector(done))
+        let cancelItem = UIBarButtonItem(title: "キャンセル", style: .plain, target: self, action: #selector(cancel))
         toolbar.setItems([cancelItem, spaceItem, doneItem], animated: true)
         
         ///テキストフィールドにピッカーを適用

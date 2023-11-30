@@ -10,7 +10,7 @@ import UIKit
 
 struct ModalImageData {
     let closedImage:UIImage = {
-        var returnImage = UIImage(named: "Down")!
+        var returnImage = UIImage(named: "downArrow")!
         return returnImage
     }()
     let clearImage:UIImage = {

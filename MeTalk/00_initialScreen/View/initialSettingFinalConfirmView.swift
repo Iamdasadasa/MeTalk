@@ -131,7 +131,7 @@ extension initialSettingFinalConfirmView {
         finalConfirmInfo.text = "準備はいいですか？"
         finalConfirmInfo.textColor = UIColor(red: 0.4, green: 0.4, blue: 0.4, alpha: 1.0)
         ///警告ラベルセットアップ
-        finalConfirmCannotChanged.text = "※性別は後から変更することができません"
+        finalConfirmCannotChanged.text = "※性別・年齢は後から変更することができません※"
         finalConfirmCannotChanged.textColor = UIColor(red: 1, green: 0.2, blue: 0.2, alpha: 0.7)
         
         self.addSubview(finalConfirmInfo)

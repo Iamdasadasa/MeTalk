@@ -10,6 +10,7 @@ import Reachability
 import UIKit
 import FirebaseFirestore
 import RangeUISlider
+import FirebaseAuth
 ///ネットワーク状況判断
 struct Reachabiliting{
     func NetworkStatus() -> Int {
@@ -29,55 +30,58 @@ struct Reachabiliting{
 
 enum actionSheetsType {
     case Retry(title:String)      //リトライ
-    case Completion(title:String) //処理完了
-    case Alert(title:String,message:String,buttonMessage:String)      //警告
+    case Completion(title:String,(() -> Void)) //処理完了
+    case Alert(title:String,message:String,buttonMessage:String,((Bool) -> Void))      //警告
     case Options([String],((Int) -> Void))     //選択
 }
 
-
-func createSheet(callback:@escaping()-> Void,for type: actionSheetsType,SelfViewController:UIViewController){
+func createSheet(for type: actionSheetsType,SelfViewController:UIViewController){
     switch type {
     case .Retry(let title):
         let alert = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
         //リトライボタン
         alert.addAction(UIAlertAction(title: "リトライ", style: .default, handler: {
             (action: UIAlertAction!) in
-            callback()
+
         }))
         //アクションシートを表示する
         SelfViewController.present(alert, animated: true, completion: nil)
-    case .Completion(let title):
-        let alert = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
+    case .Completion(let title,let result):
+        let alert = UIAlertController(title: title, message: nil, preferredStyle: UIAlertController.Style.alert)
         //OKボタン
         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: {
             (action: UIAlertAction!) in
-            callback()
+            result()
         }))
         //アクションシートを表示する
         SelfViewController.present(alert, animated: true, completion: nil)
-    case .Alert(let title,let message,let buttonMessage):
+    case .Alert(let title,let message,let buttonMessage,let result):
         let alert = UIAlertController(title: title, message: message, preferredStyle: UIAlertController.Style.alert)
         ///ボタン
         alert.addAction(UIAlertAction(title: buttonMessage, style: .default, handler: {
             (action: UIAlertAction!) in
-            callback()
+            result(true)
+        }))
+        alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: { _ in
+            result(false)  // キャンセルをfalseで返す
         }))
         //アクションシートを表示する
         SelfViewController.present(alert, animated: true, completion: nil)
-    case .Options(let choices,let callback):
+    case .Options(let choices,let indexBack):
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         // 選択アクションの処理
         for (index, choice) in choices.enumerated() {
             alert.addAction(UIAlertAction(title: choice, style: .default, handler: { _ in
-                callback(index)  // 選択された項目のインデックスをコールバックで返す
+                indexBack(index)  // 選択された項目のインデックスをコールバックで返す
             }))
         }
         alert.addAction(UIAlertAction(title: "キャンセル", style: .cancel, handler: { _ in
-            callback(-1)  // キャンセルをコールバックで返す（例として-1とする）
+            indexBack(-1)  // キャンセルをコールバックで返す（例として-1とする）
         }))
         //アクションシートを表示する
         SelfViewController.present(alert, animated: true, completion: nil)
     }
+    
 }
 
 struct LOADING {
@@ -100,6 +104,18 @@ struct LOADING {
         let window = windowScene?.windows.first
         
         isVisible ? window?.addSubview(loadingView) : loadingView.removeFromSuperview()
+    }
+}
+
+///所在パス生成
+struct PathCreate {
+    ///画像データ
+    func imagePathCreate(UID:String) -> URL {
+        let fileName = "\(UID)_profileimage.png"
+        var documentDirectoryFileURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        documentDirectoryFileURL = documentDirectoryFileURL.appendingPathComponent(fileName)
+
+        return documentDirectoryFileURL
     }
 }
 
@@ -127,19 +143,16 @@ struct chatTools {
 }
 
 struct TimeTools {
+    
+    ///日付変換の基本定義
     private let formatter = DateFormatter()
     public func string(from date: Date) -> String {
         configureDateFormatter(for: date)
         formatter.locale = Locale(identifier: "ja_JP")
         return formatter.string(from: date)
     }
-
-    public func attributedString(from date: Date, with attributes: [NSAttributedString.Key: Any]) -> NSAttributedString {
-        let dateString = string(from: date)
-        return NSAttributedString(string: dateString, attributes: attributes)
-    }
-
-    public func configureDateFormatter(for date: Date) {
+    
+    private func configureDateFormatter(for date: Date) {
         switch true {
         case Calendar.current.isDateInToday(date) || Calendar.current.isDateInYesterday(date):
             formatter.doesRelativeDateFormatting = true
@@ -151,9 +164,16 @@ struct TimeTools {
         }
     }
     
-    enum DateFormatt {
-        case HM
-        case YMDHMS
+    ///
+//    public func attributedString(from date: Date, with attributes: [NSAttributedString.Key: Any]) -> NSAttributedString {
+//        let dateString = string(from: date)
+//        return NSAttributedString(string: dateString, attributes: attributes)
+//    }
+    
+    /// 日付の種類
+    enum DateFormatt:String {
+        case HM = "HH:mm"
+        case YMDHMS = "yyyy/MM/dd/HH:mm:ss"
     }
     ///Date⇨String
     func dateToStringFormatt(date:Date?,formatFlg:DateFormatt) -> String{
@@ -166,12 +186,10 @@ struct TimeTools {
         // フォーマット設定
         switch formatFlg{
         case .HM:
-            dateFormatter.dateFormat = "HH:mm"
+            dateFormatter.dateFormat = formatFlg.rawValue
         case .YMDHMS:
-            dateFormatter.dateFormat = "yyyy/MM/dd/HH:mm:ss"
+            dateFormatter.dateFormat = formatFlg.rawValue
         }
-        //dateFormatter.dateFormat = "yyyyMMddHHmmssSSS" // ミリ秒込み
-
         // ロケール設定（端末の暦設定に引きづられないようにする）
         dateFormatter.locale = Locale(identifier: "en_US_POSIX")
 
@@ -206,11 +224,18 @@ struct TimeTools {
     func convertToTimestamp(date: Date) -> Timestamp {
         return Timestamp(date: date)
     }
+    /// 指定された時間より60分経ってるか
+    /// - Parameter pushTime: 指定時間
+    /// - Returns: 経っている場合か否かのBool値
+    func pushTimeDiffDate(pushTime: Date) -> Bool {
+        let minute = round(Date().timeIntervalSince(pushTime) / 60)
+        return minute <= 60
+    }
 }
 
 struct sizeAdjust {
     static func objecFontSizeAutoResize(MaxCharacterDigit:Int,objectWidth:CGFloat) -> CGFloat {
-        // 最大文字サイズの計算
+        // 最大文字サイズの計算(半角の場合は２倍の文字で計算してもいいと思う)
         let textFieldWidth = objectWidth
         let characterWidth = textFieldWidth / CGFloat(MaxCharacterDigit)
         let maximumFontSize = UIFont.systemFont(ofSize: 1).pointSize * characterWidth
@@ -321,6 +346,46 @@ struct TimeCalculator {
         }
         return "今"
     }
+    
+    static func calculateTimeDisplay(from date: Date) -> String {
+        let now = Date()
+        let calendar = Calendar(identifier: .japanese)
+        let NowDate = calendar.startOfDay(for: now)
+        let vauleDate = calendar.startOfDay(for: date)
+        let nowYear = calendar.component(.year, from: now)
+        let valueYear = calendar.component(.year, from: date)
+        let components = calendar.dateComponents([.year, .month, .day,.hour], from: vauleDate, to:NowDate )
+        if nowYear - valueYear > 0 {
+            return formatDate(date, format: "yyyy/MM/dd")
+        } else if let day = components.day,let year = components.year, year == 0  && day >= 7{
+            return formatDate(date, format: "MM/dd")
+        } else if let day = components.day, day >= 2 && day <= 6 {
+            return formatWeekday(date)
+        } else if let day = components.day, day == 1 {
+            return "昨日"
+        } else {
+            return formatTime(date)
+        }
+    }
+
+    private static func formatDate(_ date: Date, format: String) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = format
+        return dateFormatter.string(from: date)
+    }
+
+    private static func formatWeekday(_ date: Date) -> String {
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: date)
+        let weekdays = ["", "日", "月", "火", "水", "木", "金", "土"]
+        return weekdays[weekday] + "曜日"
+    }
+
+    private static func formatTime(_ date: Date) -> String {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "HH:mm"
+        return dateFormatter.string(from: date)
+    }
 }
 ///60秒前の時間を取得
 struct AgoDateGetter {
@@ -401,3 +466,34 @@ class SearchCustomPicker:UIPickerView {
         }
     }
 }
+
+///エラー種別
+enum ErrType{
+    case InvalidSelfData
+    case targetDataFailedData
+    case likeButtonInvalid
+}
+
+/// ネットワークエラー処理
+/// - Parameter Type: エラー種別
+func err(Type:ErrType,TargetVC:UIViewController) {
+    switch Type {
+    ///不正データ
+    case .InvalidSelfData:
+        createSheet(for: .Completion(title: "あなたのデータは不正です。再度登録を行なってください。アプリを終了します。", {
+            do {
+                try Auth.auth().signOut()
+            } catch let signOutError as NSError {
+                print("SignOut Error: %@", signOutError)
+            }
+            preconditionFailure("強制退会")
+        }), SelfViewController: TargetVC)
+    ///ユーザー取得リトライ
+    case .targetDataFailedData:
+        createSheet(for: .Retry(title: "ユーザーの取得に失敗しました。もう一度お試しください"), SelfViewController: TargetVC)
+    ///ボタン押下リトライ
+    case .likeButtonInvalid:
+        createSheet(for: .Retry(title: "相手にライクを送れせんでした。もう一度お試しください"), SelfViewController: TargetVC)
+    }
+}
+

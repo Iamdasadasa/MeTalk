@@ -315,8 +315,9 @@ extension initialSettingAgeSelectView:UIPickerViewDataSource, UIPickerViewDelega
         let spaceItem = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
         ///各フィールド分の終了とキャンセル、ベースのツールバー用意
         let toolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: self.frame.size.width, height: 35))
-        let doneItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done))
-        let cancelItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel))
+        let doneItem = UIBarButtonItem(title: "決定", style: .plain, target: self, action: #selector(done))
+//        UIBarButtonItem(barButtonSystemItem: .,
+        let cancelItem = UIBarButtonItem(title: "キャンセル", style: .plain, target: self, action: #selector(cancel))
         toolbar.backgroundColor = .clear
         toolbar.setItems([cancelItem, spaceItem, doneItem], animated: true)
         
@@ -366,6 +367,13 @@ extension initialSettingAgeSelectView:UIPickerViewDataSource, UIPickerViewDelega
         }
         ///完了後にラベル色を変更
         if allAgeSelected() {
+            //生年月日不正チェック
+            if !isValidDate(month: self.monthPicker.birthList[self.monthPicker.selectedRow(inComponent: 0)], day: self.dayPicker.birthList[self.dayPicker.selectedRow(inComponent: 0)], year: self.yearPicker.birthList[self.yearPicker.selectedRow(inComponent: 0)]) {
+                //不正だった場合決定ボタン無効化
+                self.decisionButton.isEnabled = false
+                self.decisionImageView.isHidden = true
+                return
+            }
             self.decisionButton.isEnabled = true
             self.decisionImageView.isHidden = false
         } else {
@@ -455,6 +463,7 @@ extension initialSettingAgeSelectView:UIPickerViewDataSource, UIPickerViewDelega
     /// - Returns: 生年月日画像データ
     func getTargetBirthImage(targetDigitNum:Int,type:birthType) -> UIImage {
         let birthValue:Int
+        
         switch type {
         case .year:
             birthValue = self.yearPicker.birthList[self.yearPicker.selectedRow(inComponent: 0)]
@@ -524,5 +533,24 @@ extension initialSettingAgeSelectView:UIPickerViewDataSource, UIPickerViewDelega
             }
         }
         return true
+    }
+    
+    /// 年齢の論理チェック
+    /// - Returns: 論理的に合致しているか。
+    func isValidDate(month: Int?, day: Int?, year: Int?) -> Bool {
+        guard let month = month , let day = day , let year = year else {
+            return true
+        }
+        let calendar = Calendar.current
+        let components = DateComponents(year: year, month: month)
+        
+        guard let date = calendar.date(from: components),
+              let range = calendar.range(of: .day, in: .month, for: date) else {
+            // 日付が無効な場合の処理（例: デフォルトの日を設定したり、エラーメッセージを表示したりする）
+            return false
+        }
+        
+        let maxDay = range.upperBound - 1
+        return day >= 1 && day <= maxDay
     }
 }

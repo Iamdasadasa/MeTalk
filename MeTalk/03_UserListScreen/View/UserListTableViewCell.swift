@@ -47,13 +47,13 @@ class UserListTableViewCell: UITableViewCell {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             ///陰影処理
-            self.messageLabelBaseView.shadowSetting()
+            self.messageLabelBaseView.shadowSetting(offset: .topRight)
             
             ///フォントサイズ調整
-            self.nicknameLabel.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 5, objectWidth: self.nicknameLabel.frame.width))
-            self.ageTextView.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 3, objectWidth: self.ageTextView.frame.width))
-            self.areaTextView.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 3, objectWidth: self.areaTextView.frame.width))
-            self.loginTimeView.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 3, objectWidth: self.loginTimeView.frame.width))
+            self.nicknameLabel.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 6, objectWidth: self.nicknameLabel.frame.width))
+            self.ageTextView.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 4, objectWidth: self.loginTimeView.frame.width))
+            self.areaTextView.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 4, objectWidth: self.loginTimeView.frame.width))
+            self.loginTimeView.font = UIFont.systemFont(ofSize: sizeAdjust.objecFontSizeAutoResize(MaxCharacterDigit: 4, objectWidth: self.loginTimeView.frame.width))
         }
 
     }
@@ -72,7 +72,7 @@ class UserListTableViewCell: UITableViewCell {
         returnUIImageView.layer.borderWidth = 1
         returnUIImageView.clipsToBounds = true
         returnUIImageView.layer.borderColor = UIColor.gray.cgColor
-        returnUIImageView.image = UIImage(named: "InitIMage")
+        returnUIImageView.image = UIImage(named: "defProfile")
         return returnUIImageView
     }()
     
@@ -301,8 +301,8 @@ extension UserListTableViewCell {
         }
     }
     ///lottieアニメーション
-    func likeAnimationPlay(targetImageView:LottieAnimationView) {
-        targetImageView.play { finished in
+    func likeAnimationPlay() {
+        ImageView.play { finished in
         }
     }
 }

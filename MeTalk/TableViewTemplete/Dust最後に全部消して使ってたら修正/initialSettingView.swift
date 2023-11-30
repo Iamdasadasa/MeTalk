@@ -140,7 +140,7 @@ class  InitialSettingView:UIView{
     ///性別注意書きラベル
     let SexCautionLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.text = "※性別は後から変更することができません※"
+        returnLabel.text = "※性別・年齢は後から変更することができません※"
         returnLabel.textColor = .red
         returnLabel.backgroundColor = .clear
         returnLabel.font = UIFont.systemFont(ofSize: 15)

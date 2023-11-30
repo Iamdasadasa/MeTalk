@@ -10,13 +10,13 @@ import UIKit
 protocol ModalViewDelegateProtcol:AnyObject {
     func dicisionButtonTappedAction(button:UIButton,objects: updateKind)
     func closeModalButttonClickedButtonTappedAction(button:UIButton,view:ModalBaseView)
+    func pickerFinishedButtonTappedAction()
 }
 
 enum ModalItems {
     case nickName
     case aboutMe
     case Area
-    case Age
     
     struct baseObjects {
         var itemTitleLabel:UILabel
@@ -37,34 +37,33 @@ enum ModalItems {
         switch self {
         case .nickName:
             TITLELABELTEXT = "ニックネーム"
-            ITEMTEXTFIELD.placeholder = "10文字以内"
+            ITEMTEXTFIELD.placeholder = "5文字以内"
+            ITEMTEXTFIELD.clearButtonMode = .always
         case .aboutMe:
             TITLELABELTEXT = "ひとこと"
-            ITEMTEXTFIELD.placeholder = "30文字以内"
+            ITEMTEXTFIELD.placeholder = "15文字以内"
+            ITEMTEXTFIELD.clearButtonMode = .always
         case .Area:
             TITLELABELTEXT = "住まい"
-        case .Age:
-            TITLELABELTEXT = "年齢"
         }
         
         ///インスタンスオプション
         ///タイトルラベル
         ITEMTITLELABEL.text = TITLELABELTEXT
-        ITEMTITLELABEL.textColor = .white
+        ITEMTITLELABEL.textColor = .gray
         ITEMTITLELABEL.backgroundColor = .clear
         ITEMTITLELABEL.font = UIFont.systemFont(ofSize: 15)
         ITEMTITLELABEL.textAlignment = NSTextAlignment.left
         ///テキストフィールド
         ITEMTEXTFIELD.borderStyle = .roundedRect
-        ITEMTEXTFIELD.textColor = .white
+        ITEMTEXTFIELD.textColor = .gray
         ITEMTEXTFIELD.borderStyle = .none
-        ITEMTEXTFIELD.clearButtonMode = .always
         ITEMTEXTFIELD.tag = 1
         ///決定ボタン
         DICISIONBUTTON.setTitle("決定", for: .normal)
-        DICISIONBUTTON.setTitleColor(UIColor.white, for: .normal)
+        DICISIONBUTTON.setTitleColor(UIColor.gray, for: .normal)
         DICISIONBUTTON.tag = 1
-        DICISIONBUTTON.backgroundColor = .orange
+        DICISIONBUTTON.backgroundColor = .white
         
         let BASELAYOUT = baseObjects(itemTitleLabel: ITEMTITLELABEL, decisionButton: DICISIONBUTTON, CloseModalButton: CLOSEMODALBUTTON, itemTextField: ITEMTEXTFIELD)
         return BASELAYOUT
@@ -78,18 +77,6 @@ enum ModalItems {
     var pickerInfo:pickerObject {
         let LIST:[String]
         switch self {
-        case.Age:
-            LIST = ["18", "19", "20",
-                    "21", "22", "23", "24", "25", "26", "27", "28", "29", "30",
-                    "31", "32", "33", "34", "35", "36", "37", "38", "39", "40",
-                    "41", "42", "43", "44", "45", "46", "47", "48", "49", "50",
-                    "51", "52", "53", "54", "55", "56", "57", "58", "59", "60",
-                    "61", "62", "63", "64", "65", "66", "67", "68", "69", "70",
-                    "71", "72", "73", "74", "75", "76", "77", "78", "79", "80",
-                    "81", "82", "83", "84", "85", "86", "87", "88", "89", "90",
-                    "91", "92", "93", "94", "95", "96", "97", "98", "99", "100"]
-
-            return pickerObject(list: LIST)
         case.Area:
             LIST = ["選択しない",
                     "北海道", "青森", "岩手", "宮城", "秋田", "山形", "福島", "茨城", "栃木", "群馬",
@@ -113,9 +100,10 @@ class ModalBaseView:UIView{
     var decisionButton:UIButton
     var CloseModalButton:UIButton
     var itemTextField:UITextField
+    ///陰影表現のView
+    var shadowView:ShadowBaseView = ShadowBaseView()
     ///PICKER
     var pickerView:UIPickerView?
-    
     
     init(ModalItems:ModalItems,frame:CGRect) {
         self.MODALITEMS = ModalItems
@@ -124,8 +112,6 @@ class ModalBaseView:UIView{
         self.decisionButton = MODALITEMS.objectInfo.decisionButton
         self.CloseModalButton = MODALITEMS.objectInfo.CloseModalButton
         switch ModalItems {
-        case .Age:
-            self.pickerView = ModalItems.pickerInfo.pickerView
         case .Area:
             self.pickerView = ModalItems.pickerInfo.pickerView
         default:
@@ -136,19 +122,22 @@ class ModalBaseView:UIView{
         autoLayout()
         setUp()
     }
-    
+        
     ///変数宣言
     weak var delegate: ModalViewDelegateProtcol?
-
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        shadowView.shadowSetting(offset: .buttomReft)
+    }
+
     func setUp() {
+        self.backgroundColor = .white
         self.decisionButton.addTarget(self, action: #selector(dicisionButttonClicked(_:)), for: UIControl.Event.touchUpInside)
         self.CloseModalButton.addTarget(self, action: #selector(closeModalButttonClicked(_:)),for: UIControl.Event.touchUpInside)
         
         switch MODALITEMS {
         case .Area:
-            piceker()
-        case .Age:
             piceker()
         default:
             return
@@ -163,8 +152,6 @@ class ModalBaseView:UIView{
             delegate.dicisionButtonTappedAction(button: sender, objects: .aboutMe)
         case .nickName:
             delegate.dicisionButtonTappedAction(button: sender, objects: .nickName)
-        case .Age:
-            delegate.dicisionButtonTappedAction(button: sender, objects: .age)
         case .Area:
             delegate.dicisionButtonTappedAction(button: sender, objects: .area)
         }
@@ -183,34 +170,44 @@ class ModalBaseView:UIView{
     func autoLayoutSetUp() {
 
         ///各オブジェクトをViewに追加
-        addSubview(self.itemTitleLabel)
-        addSubview(self.itemTextField)
-        addSubview(self.decisionButton)
-        addSubview(self.CloseModalButton)
-        
+        addSubview(itemTitleLabel)
+        addSubview(itemTextField)
+        addSubview(shadowView)
+        addSubview(decisionButton)
+        addSubview(CloseModalButton)
         ///UIオートレイアウトと競合させない処理
-        self.itemTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-        self.itemTextField.translatesAutoresizingMaskIntoConstraints = false
-        self.decisionButton.translatesAutoresizingMaskIntoConstraints = false
-        self.CloseModalButton.translatesAutoresizingMaskIntoConstraints = false
+        itemTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        itemTextField.translatesAutoresizingMaskIntoConstraints = false
+        decisionButton.translatesAutoresizingMaskIntoConstraints = false
+        CloseModalButton.translatesAutoresizingMaskIntoConstraints = false
+        shadowView.translatesAutoresizingMaskIntoConstraints = false
     }
 //※レイアウト※
     func autoLayout() {
-        ///項目変更タイトルラベル
-        self.itemTitleLabel.widthAnchor.constraint(equalTo: self.widthAnchor).isActive = true
-        self.itemTitleLabel.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.03).isActive = true
-        self.itemTitleLabel.topAnchor.constraint(equalTo: self.topAnchor, constant: 30).isActive = true
-        self.itemTitleLabel.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        self.CloseModalButton.trailingAnchor.constraint(equalTo: self.trailingAnchor, constant: 5).isActive = true
+        self.CloseModalButton.widthAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.05).isActive = true
+        self.CloseModalButton.heightAnchor.constraint(equalTo: self.CloseModalButton.widthAnchor).isActive = true
+        self.CloseModalButton.topAnchor.constraint(equalTo: self.topAnchor, constant: 5).isActive = true
         ///項目変更テキストフィールド
-        self.itemTextField.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
+        self.itemTextField.topAnchor.constraint(equalTo: self.topAnchor, constant: 100).isActive = true
+        self.itemTextField.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        self.itemTextField.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.5).isActive = true
         self.itemTextField.heightAnchor.constraint(equalTo: self.heightAnchor, multiplier: 0.05).isActive = true
-        self.itemTextField.topAnchor.constraint(equalTo: self.itemTitleLabel.bottomAnchor).isActive = true
-        self.itemTextField.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
+        ///項目変更タイトルラベル
+        self.itemTitleLabel.trailingAnchor.constraint(equalTo: self.itemTextField.leadingAnchor, constant: 5).isActive = true
+        self.itemTitleLabel.leadingAnchor.constraint(equalTo: self.leadingAnchor,constant: 5).isActive = true
+        self.itemTitleLabel.topAnchor.constraint(equalTo: self.itemTextField.topAnchor).isActive = true
+        self.itemTitleLabel.heightAnchor.constraint(equalTo:self.itemTextField.heightAnchor).isActive = true
         ///決定ボタン
         self.decisionButton.widthAnchor.constraint(equalTo: self.widthAnchor, multiplier: 0.5).isActive = true
         self.decisionButton.heightAnchor.constraint(equalTo: self.itemTextField.heightAnchor).isActive = true
         self.decisionButton.topAnchor.constraint(equalTo: self.itemTextField.bottomAnchor, constant: 10).isActive = true
         self.decisionButton.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
+        ///陰影View
+        self.shadowView.widthAnchor.constraint(equalTo: self.decisionButton.widthAnchor).isActive = true
+        self.shadowView.heightAnchor.constraint(equalTo: self.decisionButton.heightAnchor).isActive = true
+        self.shadowView.topAnchor.constraint(equalTo: self.decisionButton.topAnchor).isActive = true
+        self.shadowView.centerXAnchor.constraint(equalTo: self.decisionButton.centerXAnchor).isActive = true
         ///閉じるボタン
         self.CloseModalButton.heightAnchor.constraint(equalTo: self.itemTitleLabel.heightAnchor).isActive = true
         self.CloseModalButton.widthAnchor.constraint(equalTo: self.CloseModalButton.heightAnchor).isActive = true
@@ -253,8 +250,8 @@ extension ModalBaseView:UIPickerViewDelegate,UIPickerViewDataSource{
         // 決定・キャンセル用ツールバーの生成
         let toolbar = UIToolbar(frame: CGRect(x: 0, y: 0, width: self.frame.size.width, height: 35))
         let spaceItem = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil)
-        let doneItem = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(done))
-        let cancelItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel))
+        let doneItem = UIBarButtonItem(title: "決定", style: .plain, target: self, action: #selector(done))
+        let cancelItem = UIBarButtonItem(title: "キャンセル", style: .plain, target: self, action: #selector(cancel))
         toolbar.setItems([cancelItem, spaceItem, doneItem], animated: true)
         
         ///テキストフィールドにピッカーを適用
@@ -269,6 +266,7 @@ extension ModalBaseView:UIPickerViewDelegate,UIPickerViewDataSource{
     @objc func done() {
         self.itemTextField.endEditing(true)
         self.itemTextField.text = "\(MODALITEMS.pickerInfo.list[pickerView!.selectedRow(inComponent: 0)])"
+        delegate?.pickerFinishedButtonTappedAction()
     }
     // 2. キャンセルボタンのアクション指定
     @objc func cancel(){

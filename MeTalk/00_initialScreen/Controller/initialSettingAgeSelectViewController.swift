@@ -41,9 +41,18 @@ extension initialSettingAgeSelectViewController:initialSettingAgeSelectViewDeleg
         guard let AGE = formattedBirth() else {
             return
         }
+        //18歳未満かの確認
+        if let result = isUnder18YearsOld(birthdate: AGE) {
+            if result {
+                createSheet(for: .Retry(title: "18歳未満の登録は認められません。"), SelfViewController: self)
+                return
+            }
+        } else {
+            createSheet(for: .Retry(title: "年齢が不正です。"), SelfViewController: self)
+            return
+        }
         ///年齢データ格納
         self.PROFILEINFODATA.Age = AGE
-        print(self.PROFILEINFODATA.Age)
         ///年齢データおよび性別データ格納
         nextVC.PROFILEINFODATA = self.PROFILEINFODATA
         ///画面遷移
@@ -77,6 +86,24 @@ extension initialSettingAgeSelectViewController:initialSettingAgeSelectViewDeleg
             }
         }
         return BirthString.convertToFormattedDateString(targetAgeString: BirthString, Type: .EightDigit)
+    }
+    
+    func isUnder18YearsOld(birthdate: String) -> Bool? {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy/MM/dd"
+        
+        if let birthDate = dateFormatter.date(from: birthdate) {
+            let currentDate = Date()
+            let calendar = Calendar.current
+            
+            let ageComponents = calendar.dateComponents([.year], from: birthDate, to: currentDate)
+            if let age = ageComponents.year {
+                return age < 18
+            }
+        }
+        
+        // エラーが発生した場合や計算ができなかった場合はnilを返す
+        return nil
     }
     
 }
