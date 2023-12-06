@@ -10,8 +10,10 @@ exports.generateSecuredApi = functions.https.onCall((data, context) => {
     
     return {
       "data": {
-        "ApiKey": contents
-      }
+        "ApiKey": contents,
+        "AppID":"Q26SG0IYPJ",
+        "version":"0.1.2"
+      },
     };
   } catch (error) {
     console.error("Error reading API key:", error);
