@@ -43,7 +43,6 @@ enum Section:Int,CaseIterable {
 }
 ///セルを制御するためのEnum構造体
 enum CellItem:Int,CaseIterable {
-    
     ///CellItemを実態化する際にこれを呼び出して正しいCaseを決定すること。
     static func dicidedCase (section:Int,Row:Int) -> CellItem {
         let sectionAndRow = [section,Row]

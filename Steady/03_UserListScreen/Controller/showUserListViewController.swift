@@ -35,6 +35,7 @@ class showUserListViewController:UIViewController,UINavigationControllerDelegate
     let activityIndicatorView = UIActivityIndicatorView(style: .large)      ///インジケータロードビュー
     let loading = LOADING(loadingView: LoadingView(), BackClear: true)  ///画面ロードビュー
     var isReadyToLoadPosition:Bool = false  ///スクロール完全停止フラグ
+    let reachabiliting = Reachabiliting() ///ネットワーク接続確認インスタンス
     var scrollServerAccessPermFlag:Bool = true  ///サーバーアクセス停止フラグ
     var selectingCell = UserListTableViewCell() ///現在選択中のセル
     let cache = NSCache<NSString, UIImage>()    ///画像データ用のキャッシュ
@@ -102,7 +103,7 @@ class showUserListViewController:UIViewController,UINavigationControllerDelegate
         navigationBarSetUp()
         ///インジケータレイアウト
         activityIndicatorView.color = UIColor.gray
-        ///インジケータの余白を設定
+        ///インジケータの余白を設定r
         self.CHATUSERLISTTABLEVIEW.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 50, right: 0)
         // スクロールビューの下方向への引っ張りを監視する
         let refreshControl = UIRefreshControl()
@@ -575,6 +576,12 @@ extension showUserListViewController {
     
     ///初期リロード（ベーシック）
     func basicReloadData() {
+        if reachabiliting.NetworkStatus() == 0{
+            createSheet(for: .Completion(title: "インターネット接続がありません。確認してください。", {
+                self.basicReloadData()
+            }), SelfViewController: self)
+            return
+        }
         ///クエリ設定呼び出し
         querySetting()
         ///ユーザー一覧格納配列初期化
@@ -694,7 +701,6 @@ extension showUserListViewController:GADFullScreenContentDelegate {
         bannerAdsView.translatesAutoresizingMaskIntoConstraints = false
     
         // self.tabBarHeightの高さを足す
-        
         bannerAdsView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
         bannerAdsView.widthAnchor.constraint(equalTo: self.view.widthAnchor).isActive = true
         bannerAdsView.heightAnchor.constraint(equalToConstant: 60).isActive = true

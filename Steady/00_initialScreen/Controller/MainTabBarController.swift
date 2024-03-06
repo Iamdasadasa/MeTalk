@@ -27,10 +27,19 @@ final class MainTabBarController: UITabBarController{
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         ///FCMトークン（通知用トークン）の更新
-        let TokenSetterManager = FCMTokenSetterManager()
+        let TokenSetterManager = nortificationSetterManager()
         TokenSetterManager.tokenSetter(callback: { result in
-            self.setupTab()
+            if result {
+                self.setupTab()
+            } else {
+                createSheet(for: .Completion(title: "初期処理に失敗しました。通知が行えません(エラー:通知トークン取得不可)", {
+                    self.setupTab()
+                    return
+                }), SelfViewController: self)
+            }
+
         }, UID: SELFINFO.Required_UID)
     }
 
@@ -43,35 +52,43 @@ final class MainTabBarController: UITabBarController{
         let SelectedtabImage01 = UIImage().tabBarImageCreate(KIND: .selectedTalk)
         let SelectedtabImage02 = UIImage().tabBarImageCreate(KIND: .selectedCHAT)
         let SelectedtabImage03 = UIImage().tabBarImageCreate(KIND: .selectedPROFILE)
-
         
+        //一つ目のタブ
         let firstViewController = showUserListViewController(tabBarHeight: self.tabBar.frame.height, SELFINFO: SELFINFO)
-        let UINavigationController_0 = UINavigationController(rootViewController: firstViewController)
-        UINavigationController_0.modalPresentationStyle = .fullScreen
-        UINavigationController_0.tabBarItem = UITabBarItem(title: "", image: nonSelectedTabImage01, tag: 0)
+        let firstUINavivationContoroller = UINavigationController(rootViewController: firstViewController)
+        firstUINavivationContoroller.modalPresentationStyle = .fullScreen
+        firstUINavivationContoroller.tabBarItem = UITabBarItem(title: "", image: nonSelectedTabImage01, tag: 0)
         
+        //二つ目のタブ
         let secondViewController = ChatUserListViewController(tabBarHeight: self.tabBar.frame.height, SELFINFO: SELFINFO)
         ///delegate適用
         secondViewController.delegate = self
-        checkNewMessage(secondVC: secondViewController)
+        ///リストに関してはここでセットアップ処理として開始する
+        secondViewController.setUp()
+        let secondUINavigationController = UINavigationController(rootViewController: secondViewController)
+        secondUINavigationController.modalPresentationStyle = .fullScreen
+        secondUINavigationController.tabBarItem = UITabBarItem(title: "", image: nonSelectedTabImage02, tag: 1)
+        ///変数に格納
+        secondVC = secondUINavigationController
         
-        let UINavigationController_1 = UINavigationController(rootViewController: secondViewController)
-        UINavigationController_1.modalPresentationStyle = .fullScreen
-        UINavigationController_1.tabBarItem = UITabBarItem(title: "", image: nonSelectedTabImage02, tag: 1)
-        //変数に格納
-        secondVC = UINavigationController_1
+        //三つ目のタブ
+        let thirdViewControllerViewController = PublicRoomChatListViewController(tabBarHeight: self.tabBar.frame.height, SELFINFO: SELFINFO)
+        let thirdUINavivationContoroller = UINavigationController(rootViewController: thirdViewControllerViewController)
+        thirdUINavivationContoroller.modalPresentationStyle = .fullScreen
+        thirdUINavivationContoroller.tabBarItem = UITabBarItem(title: "", image: nonSelectedTabImage01, tag: 2)
         
-        let thirdViewController = ProfileViewController(TARGETINFO: SELFINFO, SELFINFO: SELFINFO, TARGETIMAGE: nil)
-        thirdViewController.tabBarItem = UITabBarItem(title: "", image: nonSelectedTabImage03, tag: 2)
+        //四つ目のタブ
+        let fourthViewController = ProfileViewController(TARGETINFO: SELFINFO, SELFINFO: SELFINFO, TARGETIMAGE: nil)
+        fourthViewController.tabBarItem = UITabBarItem(title: "", image: nonSelectedTabImage03, tag: 3)
         
         ///背景色変更
         self.tabBar.barTintColor = UIColor.white
         ///選択中の色の画像設定
-        UINavigationController_0.tabBarItem.selectedImage = SelectedtabImage01
-        UINavigationController_1.tabBarItem.selectedImage = SelectedtabImage02
-        thirdViewController.tabBarItem.selectedImage = SelectedtabImage03
+        firstUINavivationContoroller.tabBarItem.selectedImage = SelectedtabImage01
+        secondUINavigationController.tabBarItem.selectedImage = SelectedtabImage02
+        fourthViewController.tabBarItem.selectedImage = SelectedtabImage03
         
-        viewControllers = [UINavigationController_0, UINavigationController_1, thirdViewController]
+        viewControllers = [firstUINavivationContoroller, secondUINavigationController,thirdUINavivationContoroller, fourthViewController]
     }
 
 }
@@ -80,8 +97,6 @@ final class MainTabBarController: UITabBarController{
 extension MainTabBarController:ChatUserListVCForMeinTabBarVCDelegate {
     func listnerDelegate(SelectedChatVC:Bool) {
         tabBarNortificationIconSet(SelectedChatVC: SelectedChatVC)
-        ///起動時のメッセージチェックのリスナーを破棄する
-        messageChekingHostGetter.checkNewMessageLisnterRemover()
     }
 
     func tabBarNortificationIconSet(SelectedChatVC:Bool) {
@@ -116,15 +131,6 @@ extension MainTabBarController:ChatUserListVCForMeinTabBarVCDelegate {
             let image = UIImage().tabBarImageCreate(KIND: .nonSelectedChatNortification)
             secondVC?.tabBarItem.image = image
         }
-    }
-    
-    func checkNewMessage(secondVC:ChatUserListViewController) {
-        
-        messageChekingHostGetter.checkNewMessage(callback: { result in
-            if result {
-                self.tabBarNortificationIconSet(SelectedChatVC: false)
-            }
-        }, UID: SELFINFO.Required_UID, greaterThanDate: secondVC.greaterThanOrEqualTime)
     }
     
 }

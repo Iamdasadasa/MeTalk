@@ -45,23 +45,33 @@ struct RegisterHostSetter:ProfileRegisterProtocol{
 
     ///FireStoreにユーザー情報登録
     func userInfoRegister(callback: @escaping (HostingResult) -> Void,USER:ProfileInfoLocalObject,uid:String,signUpFlg:signUpFlg){
-        Firestore.firestore().collection("users").document(uid).setData([
-            "nickname": USER.lcl_NickName,
-            "Sex": USER.lcl_Sex,
-            "aboutMeMassage":USER.lcl_AboutMeMassage,
-            "area":USER.lcl_Area,
-            "age":USER.lcl_Age,
-            "signUpFlg":signUpFlg.rawValue,
-            "createdAt": FieldValue.serverTimestamp(),
-            "updatedAt": FieldValue.serverTimestamp(),
-            "likeIncrement":FieldValue.increment(0.0)
-        ],completion: { error in
-            guard let error = error  else {
-                callback(.Success("成功"))
+        ///トークンを取得
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                callback(.failure(error))
                 return
             }
-            callback(.failure(error))
-        })
+            Firestore.firestore().collection("users").document(uid).setData([
+                "nickname": USER.lcl_NickName,
+                "Sex": USER.lcl_Sex,
+                "aboutMeMassage":USER.lcl_AboutMeMassage,
+                "area":USER.lcl_Area,
+                "age":USER.lcl_Age,
+                "signUpFlg":signUpFlg.rawValue,
+                "createdAt": FieldValue.serverTimestamp(),
+                "updatedAt": FieldValue.serverTimestamp(),
+                "FCMTokenID":token,
+                "TokenUpdate":FieldValue.serverTimestamp(),
+                "likeIncrement":FieldValue.increment(0.0)
+            ],completion: { error in
+                guard let error = error  else {
+                    callback(.Success("成功"))
+                    return
+                }
+                callback(.failure(error))
+            })
+        }
+
     }
 }
 
@@ -236,6 +246,119 @@ struct ChatDataHostSetterManager {
         updateTime()
     }
 }
+
+//入室不可原因
+
+enum reasonNotEnterTheRoom {
+    case cantGetRoomInfo
+    case roomIsFull
+    case entryErrorRetry
+    
+    var errorDescription:String{
+        switch self {
+        case .cantGetRoomInfo:
+            "ルーム情報を取得できませんでした。"
+        case .roomIsFull:
+            "ルームが満員です"
+        case .entryErrorRetry:
+            "入室に失敗しました。再度お試しください。"
+        }
+    }
+}
+
+
+//ルームチャットデータ保存マネージャー
+struct PublicRoomChatDataHostSetter {
+    ///入室
+    func updateEnterRoom(callback:@escaping (reasonNotEnterTheRoom?) -> Void,gender:GENDER,UID:String,RoomInfo:RequiredPublicRoomInfoStruct){
+        var pathes:String {
+            get {
+                ///パス名
+                return "\(UID)_UpdateDate"
+            }
+        }
+        //入室時処理
+        var databaseRef = Database.database().reference()   //アクセス変数
+        let networkPathName = databaseRef.child("Rooms").child(RoomInfo.roomObjectName)
+        ///入室時データ更新用値
+        let EnterUpdatedData: [String: Any] = [
+            "currentParticipants": RoomInfo.currentParticipants + 1,
+            "\(pathes)": ServerValue.timestamp()
+        ]
+        
+        networkPathName.updateChildValues(EnterUpdatedData){ (error, reference) in
+            if error != nil {
+                callback(.entryErrorRetry)
+            } else {
+                callback(nil)
+            }
+        }
+    }
+    
+    ///退室
+//    static func updateLeavingRoom(UID:String) ->Bool {
+//        
+//    }
+//    ///チャットデータ保存
+//    func messageUpload(callback:@escaping (Error?) -> Void ,Message:MessageType,text:String,roomID:String,Like:Bool,receiverID:String,senderNickname:String) -> ERROR? {
+//        
+//        let date = {(DateTime:Date) in
+//            let TOOLS = TimeTools()
+//            return TOOLS.dateToStringFormatt(date: DateTime, formatFlg: .YMDHMS)
+//        }
+//        
+//        let messageData:[String:Any] = [
+//            "message":text,
+//            "messageID":Message.messageId,
+//            "sender":Message.sender.senderId,
+//            "senderNickname":senderNickname,
+//            "receiverID":receiverID,
+//            "Date":date(Message.sentDate),
+//            "listend":false,
+//            "LikeButtonFLAG":Like
+//        ]
+//        
+//        databaseRef.child("Chat").child(roomID).childByAutoId().setValue(messageData) { (err,ref) in
+//            if let err = err{
+//                callback(err)
+//            } else {
+//                callback(nil)
+//            }
+//        }
+//        return nil
+//    }
+//    
+    var databaseRef = Database.database().reference()   //アクセス変数
+    ///チャットデータ保存
+    func publicRoomChatMessageUpload(callback:@escaping (Error?) -> Void ,Message:MessageType,text:String,roomName:String,senderNickname:String,UID:String) -> ERROR? {
+        ///サーバーの最新更新時間を更新
+        databaseRef.child("Rooms").child(roomName).setValue(["\(UID)_UpdateDate",Message.sentDate])
+        
+        let date = {(DateTime:Date) in
+            let TOOLS = TimeTools()
+            return TOOLS.dateToStringFormatt(date: DateTime, formatFlg: .YMDHMS)
+        }
+        
+        let messageData:[String:Any] = [
+            "message":text,
+            "messageID":Message.messageId,
+            "sender":Message.sender.senderId,
+            "senderNickname":senderNickname,
+            "Date":date(Message.sentDate),
+            "listend":false
+        ]
+        
+        databaseRef.child("Rooms").child(roomName).child("Chat").childByAutoId().setValue(messageData) { (err,ref) in
+            if let err = err{
+                callback(err)
+            } else {
+                callback(nil)
+            }
+        }
+        return nil
+    }
+}
+
 ///
 //--------------------------------------------------
 //--リスト一覧画面データ更新--
@@ -517,34 +640,37 @@ func updateTime() {
     Firestore.firestore().collection("users").document(Singleton.selfUIDGetter()!).updateData(["updatedAt":Date()])
 }
 
-struct FCMTokenSetterManager {
+///
+//--------------------------------------------------
+//--通知関連--
+//--------------------------------------------------
+///
+///
+struct nortificationSetterManager {
     let collectionPath = "users"
     ///トークンを取得後にデータベースにセット
     func tokenSetter(callback:@escaping(Bool) -> Void,UID:String) {
-        
-        ///一旦ドキュメントを取ってくる
-        Firestore.firestore().collection(collectionPath).document(UID).getDocument { document, err in
-            guard let document = document else {
-                ///ドキュメントの存在が確認できない場合Return（ここに入る事はない）
-                return
-            }
-            guard let serverToken = document["FCMTokenID"] as? String,let TokenUpdateTime = document["TokenUpdate"] as? Timestamp else {
-                ///トークンの存在が確認できなかったので更新
-                tokenSetting(callback: { result in
-                    callback(result)
-                }, UID: UID)
-                return
-            }
+        ///端末内にTokenとToken保存時間が残っているか
+        if let TokenID = UserDefaults.standard.string(forKey: "TokenID"),
+           let TokenUpdateDate = UserDefaults.standard.object(forKey: "TokenUpdateDate") as? Date
+        {
             ///Tokenの更新が一ヶ月以内か
-            if TimeCalculator.isMoreThanOneMonthAgo(from: TokenUpdateTime.dateValue()) {
+            if TimeCalculator.isMoreThanOneMonthAgo(from: TokenUpdateDate) {
                 ///一ヶ月を過ぎているので更新
                 tokenSetting(callback: { result in
                     callback(result)
                 }, UID: UID)
+                
             } else {
                 ///トークンに問題無しのため何もせず返却
                 callback(true)
             }
+        } else {
+            ///トークンの存在が確認できなかったので更新
+            tokenSetting(callback: { result in
+                callback(result)
+            }, UID: UID)
+            return
         }
     }
     
@@ -556,8 +682,13 @@ struct FCMTokenSetterManager {
                 callback(false)
             } else {
                 if let token = token {
+                    ///更新時間
+                    let TokenUpdate = Date()
+                    ///自身の端末にToken IDと更新時間を保存
+                    UserDefaults.standard.set(token, forKey: "TokenID")
+                    UserDefaults.standard.set(TokenUpdate, forKey: "TokenUpdateDate")
                     ///取得したトークンをFirebaseに保存
-                    Firestore.firestore().collection(collectionPath).document(UID).updateData(["FCMTokenID":token,"TokenUpdate":Date()]) {  error in
+                    Firestore.firestore().collection(collectionPath).document(UID).updateData(["FCMTokenID":token,"TokenUpdate":TokenUpdate]) {  error in
                         if error != nil {
                           ///Firebaseに保存に失敗
                           callback(false)
@@ -570,5 +701,21 @@ struct FCMTokenSetterManager {
             }
         }
     }
+    
+    ///通知設定をサーバーに保存
+    func nortificationFlagSetting(callback:@escaping(Bool) -> Void ,flag:Bool,UID:String) {
+        let collectionPath = "users"
+        
+        Firestore.firestore().collection(collectionPath).document(UID).updateData(["nortificationFlag":flag]) {  error in
+            if error != nil {
+              ///Firebaseに保存に失敗
+              callback(false)
+            } else {
+              ///Firebaseに保存に成功
+              callback(true)
+            }
+        }
+    }
+
     
 }

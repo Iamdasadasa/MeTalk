@@ -10,6 +10,7 @@ import Firebase
 import FirebaseCore
 import GoogleMobileAds
 import FirebaseMessaging
+import AudioToolbox
 @main
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -39,7 +40,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // 1. 初期化
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.makeKeyAndVisible()
-
 
         // 2. 最初に表示する画面を設定
         if let uid = Auth.auth().currentUser?.uid {
@@ -73,21 +73,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate: MessagingDelegate {}
 
 extension AppDelegate: UNUserNotificationCenterDelegate {
-    // アプリがフォアグラウンドでプッシュ通知を受信した場合に呼ばれる
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                willPresent notification: UNNotification,
-                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        let userInfo = notification.request.content.userInfo
-        print(userInfo)
-        completionHandler([.banner, .badge, .sound])
-    }
-
-    // 通知センター等でプッシュ通知をタップした場合に呼ばれる
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                didReceive response: UNNotificationResponse,
-                                withCompletionHandler completionHandler: @escaping () -> Void) {
-        let userInfo = response.notification.request.content.userInfo
-        print(userInfo)
-        completionHandler()
-    }
+//    // アプリがフォアグラウンドでプッシュ通知を受信した場合に呼ばれる
+//    func userNotificationCenter(_ center: UNUserNotificationCenter,
+//                                willPresent notification: UNNotification,
+//                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+//        ///フォアグラウンドでは通知を表示しない
+//        return
+////        completionHandler([.banner, .badge, .sound])
+//    }
+//    // アプリがバックグラウンドでプッシュ通知を受信した場合に呼ばれる
+//    func userNotificationCenter(_ center: UNUserNotificationCenter,
+//                                didReceive response: UNNotificationResponse,
+//                                withCompletionHandler completionHandler: @escaping () -> Void) {
+//        let userInfo = response.notification.request.content.userInfo
+//        completionHandler()
+//    }
+    
+//    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable : Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
+//        // バッジの処理
+//        if let badgeCount = userInfo["badge"] as? Int {
+//            application.applicationIconBadgeNumber = badgeCount
+//        }
+//
+//        // サウンドの処理
+//        if let soundName = userInfo["sound"] as? String {
+//            // バイブレーションをトリガーするコード
+//            let generator = UINotificationFeedbackGenerator()
+//            generator.prepare()
+//            generator.notificationOccurred(.success)
+//
+//        }
+//
+//        // その他の処理...
+//        
+//        completionHandler(UIBackgroundFetchResult.newData)
+//    }
+    
 }

@@ -8,6 +8,7 @@
 import Foundation
 import UIKit
 import FloatingPanel
+import Firebase
 
 
 ///セルを制御するためのenum構造体
@@ -36,8 +37,14 @@ enum notificationMenuCellItem:Int,CaseIterable{
 class NotificationViewController:UIViewController{
     ///Barボタンの設定(NavigationBar)
     var backButtonItem: UIBarButtonItem! // Backボタン
+    
+    ///自身の情報
+    var SELFUID:String {
+        Auth.auth().currentUser!.uid
+    }
     ///インスタンス化（View）
     let notificationTableView = UITableView()
+    ///
     override func viewDidLoad() {
         super.viewDidLoad()
         ///Viewの適用
@@ -82,6 +89,22 @@ extension NotificationViewController:UITableViewDelegate,UITableViewDataSource{
         let cell = tableView.dequeueReusableCell(withIdentifier: "NotificationTableViewCell", for: indexPath) as! NotificationTableViewCell
         
         guard let notificationMenuCellItem = notificationMenuCellItem(rawValue: indexPath.row) else {return cell}
+        if notificationMenuCellItem == .pushNotification {
+            cell.cellFlag = .nortification
+            if UserDefaults.standard.bool(forKey: "NotificationToggleKey"){
+                cell.switchButton.isOn = true
+            } else {
+                cell.switchButton.isOn = false
+            }
+        } else {
+            cell.cellFlag = .vibration
+            if !UserDefaults.standard.bool(forKey: "vibrationToggleKey"){
+                cell.switchButton.isOn = true
+            } else {
+                cell.switchButton.isOn = false
+            }
+        }
+        cell.delegate = self
         cell.setCell(Item: notificationMenuCellItem.info.celltitle)
         
         return cell
@@ -90,6 +113,84 @@ extension NotificationViewController:UITableViewDelegate,UITableViewDataSource{
     func tableView(_ tableView: UITableView, shouldHighlightRowAt indexPath: IndexPath) -> Bool {
         return false
     }
+}
+
+
+extension NotificationViewController:nortificationSettingCellDelegate {
+    func nortificationSwitchAction(enable: Bool,Switch:UISwitch) {
+        ///失敗時のアクションシート
+        let flagUpdateFailed = {
+            createSheet(for: .Retry(title: "通知設定の更新に失敗しました。"), SelfViewController: self)
+        }
+        ///通知設定のサーバーインスタンス
+        let nortificationSettingSetter = nortificationSetterManager()
+        ///現在の本体側の通知設定確認
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { granted, error in
+            // ユーザーが本体側の通知設定を許可している場合確認
+            if granted {
+                ///トグルの許可
+                if enable {
+                    ///サーバーに設定しに行く
+                    nortificationSettingSetter.nortificationFlagSetting(callback: { result in
+                        ///失敗の場合
+                        if !result {
+                            DispatchQueue.main.async {
+                                ///トグルを戻す
+                                Switch.isOn = false
+                                ///アクションシート表示
+                                flagUpdateFailed()
+                                return
+                            }
+                        } else {
+                            ///端末に情報保存
+                            UserDefaults.standard.set(true, forKey: "NotificationToggleKey")
+                        }
+                    }, flag: true, UID:self.SELFUID)
+
+                } else {
+                ///トグルの拒否
+                    ///サーバーに設定しに行く
+                    nortificationSettingSetter.nortificationFlagSetting(callback: { result in
+                        ///失敗の場合
+                        if !result {
+                            DispatchQueue.main.async {
+                                ///トグルを戻す
+                                Switch.isOn = true
+                                ///アクションシート表示
+                                flagUpdateFailed()
+                                return
+                            }
+                        } else {
+                            ///端末に情報保存
+                            UserDefaults.standard.set(true, forKey: "NotificationToggleKey")
+                        }
+                    }, flag: false, UID:self.SELFUID)
+                }
+            } else {
+                // 本体側の通知設定が拒否されている場合
+                DispatchQueue.main.async {
+                    Switch.isOn = false
+                    createSheet(for: .Alert(title: "プッシュ通知が許可されていません", message: "設定画面に遷移しますか？", buttonMessage: "OK", { result in
+                        if result {
+                            // アプリの設定画面に誘導する
+                            if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+                                UIApplication.shared.open(appSettings, options: [:], completionHandler: { success in
+                                })
+                            }
+                        }
+                    }), SelfViewController: self)
+
+                }
+            }
+        }
+    }
     
-    
+    func vibrationSwitchAction(enable: Bool) {
+        ///defaults値の関係上falseでバイブレーションが起動するようにする
+        if enable {
+            UserDefaults.standard.set(false, forKey: "vibrationToggleKey")
+        } else {
+            UserDefaults.standard.set(true, forKey: "vibrationToggleKey")
+        }
+    }
 }

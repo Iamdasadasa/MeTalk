@@ -7,6 +7,16 @@
 
 import UIKit
 
+enum nortificationKind {
+    case nortification
+    case vibration
+}
+
+protocol nortificationSettingCellDelegate:AnyObject {
+    func nortificationSwitchAction(enable:Bool,Switch:UISwitch)
+    func vibrationSwitchAction(enable:Bool)
+}
+
 class NotificationTableViewCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -20,10 +30,13 @@ class NotificationTableViewCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
     
+    weak var delegate:nortificationSettingCellDelegate?
+    
+    var cellFlag:nortificationKind?
     
     let titleLabel:UILabel = {
         let returnLabel = UILabel()
-        returnLabel.textColor = .white
+        returnLabel.textColor = .gray
         returnLabel.backgroundColor = .clear
         returnLabel.textAlignment = NSTextAlignment.left
         returnLabel.adjustsFontSizeToFitWidth = true
@@ -32,20 +45,35 @@ class NotificationTableViewCell: UITableViewCell {
     
     let switchButton:UISwitch = {
        let returnSwitch = UISwitch()
+        returnSwitch.isOn = true
         returnSwitch.addTarget(self, action: #selector(changeSwitch), for: UIControl.Event.valueChanged)
+        
         return returnSwitch
     }()
     
     @objc func changeSwitch(sender: UISwitch) {
+
         // UISwitch値を取得
         let onCheck: Bool = sender.isOn
         // UISwitch値を確認
         if onCheck {
-            //ここはデリゲートして設定に送信予定かな。。。
-            print("スイッチの状態はオンです。値: \(onCheck)")
+            switch cellFlag {
+            case .nortification:
+                delegate?.nortificationSwitchAction(enable: true, Switch: sender)
+            case .vibration:
+                delegate?.vibrationSwitchAction(enable: true)
+            default:
+                return
+            }
         } else {
-            //ここはデリゲートして設定に送信予定かな。。。
-            print("スイッチの状態はオフです。値: \(onCheck)")
+            switch cellFlag {
+            case .nortification:
+                delegate?.nortificationSwitchAction(enable: false, Switch: sender)
+            case .vibration:
+                delegate?.vibrationSwitchAction(enable: false)
+            default:
+                return
+            }
         }
     }
     

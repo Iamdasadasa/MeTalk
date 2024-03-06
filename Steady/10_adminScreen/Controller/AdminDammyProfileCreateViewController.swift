@@ -44,7 +44,7 @@ class AdminDammyProfileCreateViewController:UIViewController{
         ADMINDAMMYVIEW.genderItemView.delegate = self
         ///半モーダルの初期設定
         FPC.delegate = self
-        FPC.layout = CustomFloatingPanelLayout(initialState: .half)
+        FPC.layout = CustomFloatingPanelLayout(initialState: .half, kind: .profileEdit)
         FPC.isRemovalInteractionEnabled  =  true
         FPC.backdropView.dismissalTapGestureRecognizer.isEnabled = true
     }
@@ -150,7 +150,7 @@ extension AdminDammyProfileCreateViewController:FloatingPanelControllerDelegate,
     
     // カスタマイズしたレイアウトに変更(デフォルトで使用する際は不要)
     func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
-            return CustomFloatingPanelLayout(initialState: .half)
+        return CustomFloatingPanelLayout(initialState: .half, kind: .profileEdit)
         }
 
 //    ///FPCをどの位置でRemoveするかを決める

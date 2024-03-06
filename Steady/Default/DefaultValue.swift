@@ -14,7 +14,7 @@ enum USERINFODEFAULTVALUE {
     var value:String {
         switch self {
         case .aboutMeMassage:
-            return "よろしくお願いします     ( ∩'-' )=͟͟͞͞⊃"
+            return "よろしくお願いします"
         case .area:
             return "未設定"
         }

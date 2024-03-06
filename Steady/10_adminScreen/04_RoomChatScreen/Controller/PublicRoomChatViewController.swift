@@ -1,8 +1,8 @@
 //
-//  ChatViewController.swift
-//  MeTalk
+//  PublicRoomChatViewController.swift
+//  Steady
 //
-//  Created by KOJIRO MARUYAMA on 2023/09/12.
+//  Created by KOJIRO MARUYAMA on 2024/01/10.
 //
 
 import Foundation
@@ -12,20 +12,18 @@ import InputBarAccessoryView
 import Firebase
 import FloatingPanel
 
-protocol ChatViewControllerForChatListViewControllerDelegate:AnyObject {
-    func newImageSettingDelegate(UID:String,targetImage:UIImage)
-}
-
-class ChatViewController:MessagesViewController{
+class PublicRoomChatViewController:MessagesViewController{
+    
     weak var delegate:ChatViewControllerForChatListViewControllerDelegate?
     let selfProfile:RequiredProfileInfoLocalData    ///自身のプロフィール
-    let targetProfile:RequiredProfileInfoLocalData  ///相手のプロフィール
-    var targetProfileImage:UIImage
     var newTargetProfileImage:UIImage?
     var selfProfileImage:UIImage
+    var selectedRoom:RoomInfoCommonImmutable
+    var PUBLICROOMCHATLISTVIEWCONTROLLER:PublicRoomChatListViewController?
     
     let CONTENTSHOSTGETTER = ContentsHostGetter()   ///コンテンツ取得インスタンス(FIREBASE)
-    let CHATDATAHOSTGETTER = ChatDataHostGetterManager()
+    let PUBLICROOMCHATDATAHOSTGETTER = PublicRoomChatDataHostGetter()
+    let PUBLICROOMCHATDATAHOSTSETTER = PublicRoomChatDataHostSetter()
     let CHATDATAHOSTSETTER = ChatDataHostSetterManager()
     let MESSAGELOCALGETTER = MessageLocalGetterManager()
     let BLOCLHOSTGETTER = BlockHostGetterManager() ///ブロック情報を取得するインスタンス
@@ -58,35 +56,7 @@ class ChatViewController:MessagesViewController{
         button.addTarget(self, action: #selector(menuBarButtonTapped), for: .touchUpInside)
         return UIBarButtonItem(customView: button)
     }()
-    
-    var BLOCKED:BlockKind = .MeNone   ///ブロックされているか
-    var BLOCKING:BlockKind = .INone {    ///ブロックしているか
-        willSet {
-            if newValue == .IBlocked {
-                //ブロックしている場合はオブザーバーをRemove
-                if handle != nil {
-                    Database.database().reference().child("Chat").child(roomID).removeAllObservers()
-                }
-                blockingLayout(Enable: true)
-            } else {
-                blockingLayout(Enable: false)
-            }
-        }
-    }
-    var blockText:String {
-        get {
-            if BLOCKING == .IBlocked {
-                return "ブロック解除"
-            } else {
-                return "ブロック"
-            }
-        }
-    }
-    var roomID:String { ///チャット相手との一意ID
-        get {
-            return ROOMIDMANAGER.roomIDCreate(UID1: selfProfile.Required_UID, UID2: targetProfile.Required_UID)
-        }
-    }
+
     var reloadData:Bool = true {
         willSet {
             if newValue {
@@ -99,11 +69,10 @@ class ChatViewController:MessagesViewController{
         }
     }
     
-    init (selfProfile:RequiredProfileInfoLocalData,targetProfile:RequiredProfileInfoLocalData,SELFPROFILEIMAGE:UIImage,TARGETPROFILEIMAGE:UIImage) {
+    init (selfProfile:RequiredProfileInfoLocalData,SELFPROFILEIMAGE:UIImage,selectedRoom:RoomInfoCommonImmutable) {
         self.selfProfile = selfProfile
-        self.targetProfile = targetProfile
         self.selfProfileImage = SELFPROFILEIMAGE
-        self.targetProfileImage = TARGETPROFILEIMAGE
+        self.selectedRoom = selectedRoom
         super.init(nibName: nil, bundle: nil)
     }
 
@@ -121,23 +90,20 @@ class ChatViewController:MessagesViewController{
         ///スワイプで前画面に戻れるようにする
         edghPanGestureSetting(selfVC: self, selfView: self.view,gestureDirection: .left)
         ///初回メッセージ取得(ローカル)
-        self.localMessageGetting()
+        self.hostingMessageGetting()
+        ///チャットリスト画面のデリゲート対応
+        PUBLICROOMCHATLISTVIEWCONTROLLER?.delegate = self
         
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        ///相手をブロック中かの確認
-        targetBlockingConf()
         navigationItem.rightBarButtonItem = menuBarButtonItem
-        ///Firebase通信（最新画像）
-        CONTENTSHOSTGETTER.MappingDataGetter(callback: {OBJECT, err in
-            ///ローカルに保存
-            var LOCALCONTENTSSETTER = ImageDataLocalSetterManager(updateImage: OBJECT)
-            LOCALCONTENTSSETTER.commiting = true
-            ///最新画像変数に格納
-            self.newTargetProfileImage = OBJECT.profileImage
-            
-        }, UID: targetProfile.Required_UID, UpdateTime:PASTTIME.pastTimeGet())
+//        ///Firebase通信（最新画像）
+//        CONTENTSHOSTGETTER.MappingDataGetter(callback: {OBJECT, err in
+//            ///最新画像変数に格納
+//            self.newTargetProfileImage = OBJECT.profileImage
+//            
+//        }, UID: targetProfile.Required_UID, UpdateTime:PASTTIME.pastTimeGet())
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -147,20 +113,22 @@ class ChatViewController:MessagesViewController{
     
     //viewが表示されなくなる直前に呼び出されるメソッド
     override func viewWillDisappear(_ animated: Bool) {
+        ///⭐️退出するときにChatメッセージを削除する処理を
         if let handle = handle {
             databaseRef.child("chats").removeObserver(withHandle: handle)
+            
         }
     }
 }
-
+    
 ///EXTENSION[メッセージ関連]
-extension ChatViewController:MessagesDataSource {
+extension PublicRoomChatViewController:MessagesDataSource {
     var currentSender: MessageKit.SenderType {
         return User(senderId: selfProfile.Required_UID, displayName: selfProfile.Required_NickName)
     }
 
     func otherSender() -> SenderType {
-        return User(senderId: targetProfile.Required_UID, displayName: targetProfile.Required_NickName)
+        return User(senderId: "テス", displayName:"")
     }
 
     func numberOfSections(in messagesCollectionView: MessagesCollectionView) -> Int {
@@ -190,7 +158,7 @@ extension ChatViewController:MessagesDataSource {
 }
 
 ///EXTENSION[メッセージラベル関連処理]
-extension ChatViewController:MessagesLayoutDelegate {
+extension PublicRoomChatViewController:MessagesLayoutDelegate {
     ///日付ラベルの高さ（有無）設定
     func cellTopLabelHeight(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> CGFloat {
         ///messageはmessageTypeで直接フラグを持ってこれないので一旦MockMessage型に変換
@@ -213,7 +181,7 @@ extension ChatViewController:MessagesLayoutDelegate {
 }
 
 ///EXTENSION[画面タップ時の関連処理]
-extension ChatViewController:MessageCellDelegate {
+extension PublicRoomChatViewController:MessageCellDelegate {
     //MARK: - Cellのバックグラウンドをタップした時の処理
     func didTapBackground(in cell: MessageCollectionViewCell) {
         print("バックグラウンドタップ")
@@ -246,7 +214,7 @@ extension ChatViewController:MessageCellDelegate {
     
 }
 
-extension ChatViewController:InputBarAccessoryViewDelegate {
+extension PublicRoomChatViewController:InputBarAccessoryViewDelegate {
     
     func inputBar(_ inputBar: InputBarAccessoryView, didChangeIntrinsicContentTo size: CGSize) {
         if inputBar.inputTextView.text == "" && inputBar.inputTextView.text == nil {
@@ -265,33 +233,45 @@ extension ChatViewController:InputBarAccessoryViewDelegate {
 
         ///Messageインスタンスとして保存
         let messageEntity = MessageEntity(message: text, senderID: selfProfile.Required_UID, displayName: selfProfile.Required_NickName, messageID: messageID, sentDate: sentDate, DateGroupFlg: false, SENDUSER: .SELF)
-
-        ///Firebaseにメッセージデータを送信
-        CHATDATAHOSTSETTER.messageUpload(callback: { err in
-
+        
+        PUBLICROOMCHATDATAHOSTSETTER.publicRoomChatMessageUpload(callback: { err in
             if err != nil {
                 createSheet(for: .Retry(title: "メッセージの送信に失敗しました"), SelfViewController: self)
                 ///送信ボタンを有効化
                 self.messageInputBar.sendButton.isEnabled = true
             } else {
-                ///チャットデータに登録できたらリストデータに登録
-                self.TALKLISTSETTER.talkListToUserInfoSetter(callback: { success in
-                    if !success {
-                        ///送信ボタンを有効化
-                        self.messageInputBar.sendButton.isEnabled = true
-                    }
                     ///送信ボタンを有効化
                     self.messageInputBar.sendButton.isEnabled = true
                     self.sendToMessageBar()
-                }, UID1: self.selfProfile.Required_UID, UID2: self.targetProfile.Required_UID, message: text, sender: self.selfProfile.Required_UID, nickName1: self.selfProfile.Required_NickName, nickName2: self.targetProfile.Required_NickName, like: false, blocked: false)
             }
-        }, Message: messageEntity.createBasicMessage(), text: text, roomID: roomID, Like: false, receiverID: targetProfile.Required_UID,senderNickname: self.selfProfile.Required_NickName)
+        }, Message: messageEntity.createBasicMessage(), text: text, roomName: selectedRoom.rawValue,senderNickname: selfProfile.Required_NickName, UID: selfProfile.Required_UID)
+
+//        ///Firebaseにメッセージデータを送信
+//        CHATDATAHOSTSETTER.messageUpload(callback: { err in
+//
+//            if err != nil {
+//                createSheet(for: .Retry(title: "メッセージの送信に失敗しました"), SelfViewController: self)
+//                ///送信ボタンを有効化
+//                self.messageInputBar.sendButton.isEnabled = true
+//            } else {
+//                ///チャットデータに登録できたらリストデータに登録
+//                self.TALKLISTSETTER.talkListToUserInfoSetter(callback: { success in
+//                    if !success {
+//                        ///送信ボタンを有効化
+//                        self.messageInputBar.sendButton.isEnabled = true
+//                    }
+//                    ///送信ボタンを有効化
+//                    self.messageInputBar.sendButton.isEnabled = true
+//                    self.sendToMessageBar()
+//                }, UID1: self.selfProfile.Required_UID, UID2: self.targetProfile.Required_UID, message: text, sender: self.selfProfile.Required_UID, nickName1: self.selfProfile.Required_NickName, nickName2: self.targetProfile.Required_NickName, like: false, blocked: false)
+//            }
+//        }, Message: messageEntity.createBasicMessage(), text: text, roomID: roomID, Like: false, receiverID: targetProfile.Required_UID,senderNickname: self.selfProfile.Required_NickName)
     }
 }
 
 
 ///EXTENSION[表示UI関連処理]
-extension ChatViewController:MessagesDisplayDelegate {
+extension PublicRoomChatViewController:MessagesDisplayDelegate {
     // メッセージの背景色を変更している
     func backgroundColor(
         for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView
@@ -325,59 +305,36 @@ extension ChatViewController:MessagesDisplayDelegate {
         if message.sender.senderId == self.selfProfile.Required_UID{
             ///自身のプロフィール画像設定
             avatarView.set( avatar: Avatar(image: selfProfileImage) )
-        } else {
-            ///相手のプロフィール画像設定
-            avatarView.set( avatar: Avatar(image: targetProfileImage) )
         }
+//        else {
+//            ///相手のプロフィール画像設定
+//            avatarView.set( avatar: Avatar(image: targetProfileImage) )
+//        }
 
     }
 
 }
 ///EXTENSION[メッセージの受信関連]
-extension ChatViewController {
-    ///ローカルからチャットデータを取得
-    func localMessageGetting() {
-        self.messageListAppendManager()
-    }
+extension PublicRoomChatViewController {
     
     func hostingMessageGetting() {
-        ///自分がブロックしている場合または自分がブロックされている場合は受信しない
-        if self.BLOCKING == .IBlocked || self.BLOCKING == .Meblocked {
-            return
-        } else {
-            ///ハンドラーに追加
-            handle = CHATDATAHOSTGETTER.messageListenerManager(callback: { hstMsgArray in
-
-                ///メッセージを一つずつ取り出して保存関数へ
-                for hstMessage in hstMsgArray {
-                    self.LocalMessageDataSave(lclMessage: hstMessage)
-                    ///相手のメッセージだった場合は既読をつける
-                    if hstMessage.lcl_Sender != self.selfProfile.Required_UID {
-                        self.CHATDATAHOSTSETTER.ProcessListendFetch(childKey: hstMessage.lcl_ChildKey, roomID: self.roomID)
-                    }
-                }
-                ///Firebaseから受信したものも含めてローカルデータでチャットデータ追加処理
-                self.messageListAppendManager()
-                ///ここで配列格納変数を呼び出し
-            }, roomID: roomID, TIMETOOL: TIMETOOL)
-        }
-    }
-    
-    ///ローカル保存
-    func LocalMessageDataSave(lclMessage:MessageLocalObject) {
-        var MessgeLocalSetterManager = MessageLocalSetterManager(updateMessage: lclMessage)
-        MessgeLocalSetterManager.commiting = true
+        ///ハンドラーに追加
+        handle = PUBLICROOMCHATDATAHOSTGETTER.publicRoomMessageListenerManager(callback: { hstMsgArray in
+            self.messageListAppendManager(messageArray: hstMsgArray)
+        }, roomName: selectedRoom.rawValue, TIMETOOL: TIMETOOL)
     }
     
 }
 
 ///EXTENSION[配列にメッセージを追加]
-extension ChatViewController {
-    func messageListAppendManager() {
-        ///現在ある配列から時間を取得
-        let desiredUpdateAtValue = messageArray.last?.sentDate
+extension PublicRoomChatViewController {
+    func messageListAppendManager(messageArray:[MessageLocalObject]) {
         
-        for lclMessage in MESSAGELOCALGETTER.Getter(loomId: roomID, desiredUpdateAtValue: desiredUpdateAtValue) {
+        for lclMessage in messageArray {
+            ///既にある配列からサーバーのメッセージの有無を確認
+            if messageArray.filter {$0.lcl_MessageID == lclMessage.lcl_MessageID}.isEmpty {
+                break
+            }
             ///Date型をStringに変換
             let messageSentDataString = TIMETOOL.dateToStringFormatt(date: lclMessage.lcl_Date, formatFlg: .YMDHMS)
             ///日付を年月までで切り取り
@@ -411,7 +368,7 @@ extension ChatViewController {
             if localmessage.lcl_Sender == selfProfile.Required_UID {
                 return selfProfile.Required_NickName
             }
-            return targetProfile.Required_NickName
+            return "テス"
         }()
         ///自分と相手どちらが送信者かを判断
         let assignedUser:SENDUSER = {
@@ -445,12 +402,9 @@ extension ChatViewController {
 }
 
 ///EXTENSION[各種処理]
-extension ChatViewController:FloatingPanelControllerDelegate,reportViewControllerDelegate {
+extension PublicRoomChatViewController:FloatingPanelControllerDelegate,reportViewControllerDelegate {
     
     func initSetting() {
-        let targetUID = targetProfile.Required_UID
-        ///現在チャット中の相手のUIDを保存
-        UserDefaults.standard.set(targetUID, forKey: "chatingTargetUID")
         ///表示時点では送信無効化
         messageInputBar.sendButton.isEnabled = false
         ///背景色
@@ -477,7 +431,7 @@ extension ChatViewController:FloatingPanelControllerDelegate,reportViewControlle
     func navigationBarSetUp() {
         /// カスタムのタイトルビューを作成
         let titleLabel = UILabel()
-        titleLabel.text = targetProfile.Required_NickName
+        titleLabel.text = "テス"
         titleLabel.textColor = UIColor.gray
         /// ナビゲーションバーのタイトルビューを設定
         self.navigationItem.titleView = titleLabel
@@ -491,56 +445,49 @@ extension ChatViewController:FloatingPanelControllerDelegate,reportViewControlle
     
     ///戻るボタンタップ時のアクション
     @objc func backButtonTapped() {
-        ///リスト画面へのデリゲート処理。
-        listViewControllerDelegateAction()
         ///前の画面に戻る
         self.dismiss(animated: false, completion: nil)
         self.slideOutToLeft()
     }
-    //デリゲート処理(最新画像および通知アイコン更新)
-    func listViewControllerDelegateAction() {
-        if let newTargetProfileImage = newTargetProfileImage {
-            delegate?.newImageSettingDelegate(UID: targetProfile.Required_UID, targetImage: newTargetProfileImage)
-        }
-    }
+
     ///メニューボタンタップ時のアクション
     @objc func menuBarButtonTapped() {
-        createSheet(for: .Options(["プロフィールを表示",blockText,"通報"], { selected in
-            switch selected {
-                ///プロフィール画面遷移
-            case 0:
-                ///遷移先の画面
-                let profileViewController = ProfileViewController(TARGETINFO: self.targetProfile, SELFINFO: self.selfProfile, TARGETIMAGE: self.targetProfileImage)
-                ///チャットビューから来ていることを知らせるフラグ
-                profileViewController.fromChatViewController = true
-                profileViewController.modalPresentationStyle = .fullScreen
-                self.present(profileViewController, animated: false, completion: nil)
-                self.slideInFromRight() // 遷移先の画面を横スライドで表示
-                return
-                ///ブロックボタン押下処理
-            case 1:
-                ///現在ブロックしていたら解除
-                if self.BLOCKING == .IBlocked {
-                    self.blockPush(Blocking: false)
-                } else {
-                ///現在ブロックしていなかったらブロック
-                    self.blockPush(Blocking: true)
-                }
-                return
-            case 2:
-                self.REPORT_FPC.delegate = self
-//                self.modalState = .report
-                self.REPORT_FPC.layout = CustomFloatingPanelLayout(initialState: .full, kind: .report)
-                self.REPORT_FPC.isRemovalInteractionEnabled  =  true
-                self.REPORT_FPC.backdropView.dismissalTapGestureRecognizer.isEnabled = true
-                let reportViewController = ReportViewController(roomID: self.roomID, selfInfo: self.selfProfile, targetInfo: self.targetProfile)
-                reportViewController.delegate = self
-                self.REPORT_FPC.set(contentViewController: reportViewController)
-                self.REPORT_FPC.addPanel(toParent: self, at: -1, animated: true, completion: nil)
-            default:
-                return
-            }
-        }), SelfViewController:  self)
+//        createSheet(for: .Options(["プロフィールを表示",blockText,"通報"], { selected in
+//            switch selected {
+//                ///プロフィール画面遷移
+//            case 0:
+//                ///遷移先の画面
+//                let profileViewController = ProfileViewController(TARGETINFO: self.targetProfile, SELFINFO: self.selfProfile, TARGETIMAGE: self.targetProfileImage)
+//                ///チャットビューから来ていることを知らせるフラグ
+//                profileViewController.fromChatViewController = true
+//                profileViewController.modalPresentationStyle = .fullScreen
+//                self.present(profileViewController, animated: false, completion: nil)
+//                self.slideInFromRight() // 遷移先の画面を横スライドで表示
+//                return
+//                ///ブロックボタン押下処理
+//            case 1:
+//                ///現在ブロックしていたら解除
+//                if self.BLOCKING == .IBlocked {
+//                    self.blockPush(Blocking: false)
+//                } else {
+//                ///現在ブロックしていなかったらブロック
+//                    self.blockPush(Blocking: true)
+//                }
+//                return
+//            case 2:
+//                self.REPORT_FPC.delegate = self
+////                self.modalState = .report
+//                self.REPORT_FPC.layout = CustomFloatingPanelLayout(initialState: .full, kind: .report)
+//                self.REPORT_FPC.isRemovalInteractionEnabled  =  true
+//                self.REPORT_FPC.backdropView.dismissalTapGestureRecognizer.isEnabled = true
+//                let reportViewController = ReportViewController(roomID: self.roomID, selfInfo: self.selfProfile, targetInfo: self.targetProfile)
+//                reportViewController.delegate = self
+//                self.REPORT_FPC.set(contentViewController: reportViewController)
+//                self.REPORT_FPC.addPanel(toParent: self, at: -1, animated: true, completion: nil)
+//            default:
+//                return
+//            }
+//        }), SelfViewController:  self)
     }
     
     func removeFPC() {
@@ -551,65 +498,15 @@ extension ChatViewController:FloatingPanelControllerDelegate,reportViewControlle
     func sendToMessageBar() {
         messageInputBar.inputTextView.text = ""
     }
-    ///ブロックサーバー確認
-    func targetBlockingConf() {
-        BLOCLHOSTGETTER.targetBlockConfListener(callback: { BlockKind in
-            switch BlockKind {
-            case .INone:
-                self.BLOCKING = .INone
-                ///ブロック情報が問題ない場合サーバーメッセージ取得
-                self.hostingMessageGetting()
-            case .MeNone:
-                self.BLOCKED = .MeNone
-                ///ブロック情報が問題ない場合サーバーメッセージ取得
-                self.hostingMessageGetting()
-            case .IBlocked:
-                self.BLOCKING = .IBlocked
-                
-            case .Meblocked:
-                self.BLOCKED = .Meblocked
-            }
-
-        }, targetUID: targetProfile.Required_UID, selfUID: selfProfile.Required_UID)
-    }
-    ///ブロック押下時
-    func blockPush(Blocking:Bool) {
-        ///ロードビュー表示
-        loadingView.loadingViewIndicator(isVisible: true)
-        ///ブロック登録処理
-        BLOCKHOSTSETTER.blockingOperater(callback: { result in
-            ///ロードビュー非表示
-            self.loadingView.loadingViewIndicator(isVisible: false)
-            if !result {
-                createSheet(for: .Retry(title: "ブロック処理に失敗しました。再度試してください"), SelfViewController: self)
-            } else {
-                if Blocking {
-                    ///ブロック成功
-                    self .BLOCKING = .IBlocked
-                } else {
-                    ///ブロック解除成功
-                    self .BLOCKING = .INone
-                }
-            }
-        }, MyUID: selfProfile.Required_UID, targetUID: targetProfile.Required_UID, block: Blocking, nickname: targetProfile.Required_NickName)
-    }
-    ///ブロック時のViewレイアウト
-    func blockingLayout(Enable:Bool) {
-        if Enable {
-            messageInputBar.inputTextView.placeholder = "ブロック中"
-            ///送信画像の色彩変更
-            if let image = UIImage(systemName: "paperplane") {
-                let coloredImage = image.withTintColor(UIColor.gray)
-                messageInputBar.sendButton.image = coloredImage
-            }
-            messageInputBar.inputTextView.isEditable = false // テキスト入力を無効にする
-        } else {
-            messageInputBar.inputTextView.placeholder = "メッセージを入力"
-            messageInputBar.sendButton.image = UIImage(systemName: "paperplane")
-            messageInputBar.inputTextView.isEditable = true // テキスト入力を有効にする
-        }
-
-    }
-    
 }
 
+//チャットリスト画面の強制退出通知
+extension PublicRoomChatViewController:PublicRoomChatListViewControllerDelegate{
+    func PublicRoomAlreadyEnterdNortification() {
+        createSheet(for: .Completion(title: "更新されずに特定の時間が経過いたしました。\n退出します。", {
+            ///前の画面に戻る
+            self.dismiss(animated: false, completion: nil)
+            self.slideOutToLeft()
+        }), SelfViewController: self)
+    }
+}

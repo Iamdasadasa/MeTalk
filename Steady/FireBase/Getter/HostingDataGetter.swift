@@ -321,7 +321,7 @@ class ChatListListenerManager {
             .document(UID)
             .collection("TalkUsersList")
             .whereField("listend", isEqualTo: false)
-            .order(by: "UpdateAt", descending: true)
+            .order(by: "UpdateAt", descending: false)
             .addSnapshotListener { (document, err) in
                 //配列初期化
                 ChatUserListLocalArray = []
@@ -356,36 +356,36 @@ class ChatListListenerManager {
             }
     }
     
-    ///リスナー格納用変数
-    var CNMListener:ListenerRegistration?
-    
-    func checkNewMessage(callback: @escaping (Bool) -> Void,UID:String,greaterThanDate:Date) {
-        let db = Firestore.firestore() ///FireStore変数
-        let query = db.collection("users")
-            .document(UID)
-            .collection("TalkUsersList")
-            .whereField("listend", isEqualTo: false)
-            .whereField("SendID", isNotEqualTo: UID)
-        ///リスナー処理開始
-        CNMListener = query.addSnapshotListener { snapshot, err in
-                if err != nil {
-                    callback(false)
-                }
-                guard let snapshot = snapshot else {
-                    callback(false)
-                    return
-                }
-                if snapshot.documents.count != 0 {
-                    print("タブのリスナーが起動して通知あり")
-                    callback(true)
-                }
-            }
-    }
-    
-    
-    func checkNewMessageLisnterRemover() {
-        CNMListener?.remove()
-    }
+//    ///リスナー格納用変数
+//    var CNMListener:ListenerRegistration?
+//    
+////    func checkNewMessage(callback: @escaping (Bool) -> Void,UID:String,greaterThanDate:Date) {
+////        let db = Firestore.firestore() ///FireStore変数
+////        let query = db.collection("users")
+////            .document(UID)
+////            .collection("TalkUsersList")
+////            .whereField("listend", isEqualTo: false)
+////            .whereField("SendID", isNotEqualTo: UID)
+////        ///リスナー処理開始
+////        CNMListener = query.addSnapshotListener { snapshot, err in
+////                if err != nil {
+////                    callback(false)
+////                }
+////                guard let snapshot = snapshot else {
+////                    callback(false)
+////                    return
+////                }
+////                if snapshot.documents.count != 0 {
+////                    print("タブのリスナーが起動して通知あり")
+////                    callback(true)
+////                }
+////            }
+////    }
+////    
+////    
+////    func checkNewMessageLisnterRemover() {
+////        CNMListener?.remove()
+////    }
     
 }
 
@@ -394,12 +394,86 @@ class ChatListListenerManager {
 //--メッセージ取得--
 //--------------------------------------------------
 ///
+class PublicRoomChatDataHostGetter {
+    
+    ///すべてのルームの情報を取得
+    func AllRoomParticipants(callback:@escaping ([RequiredPublicRoomInfoStruct],Bool?) -> Void,UID:String){
+        var pathes:String{
+            get {
+                ///パス名
+                return "\(UID)_UpdateDate"
+            }
+        }
+        
+        Database.database().reference().child("Rooms").observe(.value, with: { snapshot in
+            if let children = snapshot.children.allObjects as? [DataSnapshot] {
+                var RequirePublicRoomInfoLocalArray:[RequiredPublicRoomInfoStruct] = []
+                var alreadyEnterd:Bool? = nil
+                for childSnapshot in children {
+                    
+                    guard let ArrayInfoDatas = childSnapshot.value as? [String: Any] else {
+                        callback([],nil)
+                        return
+                    }
+                    if let _ = ArrayInfoDatas[pathes]{
+                        alreadyEnterd = true
+                    }
+                    guard let Name = ArrayInfoDatas ["Name"] as? String,
+                          let currentParticipants =  ArrayInfoDatas["currentParticipants"] as? Int,
+                          let maxParticipants = ArrayInfoDatas["maxParticipants"] as? Int else {
+                        callback([],alreadyEnterd)
+                        return
+                    }
+                    let requirePublicRoomInfoLocal = RequiredPublicRoomInfoStruct(name: Name, maxParticipants: maxParticipants, currentParticipants: currentParticipants, roomObjectName: childSnapshot.key)
+                    
+                    RequirePublicRoomInfoLocalArray.append(requirePublicRoomInfoLocal)
+                }
+                ///正しいデータを取得できたら返却
+                callback(RequirePublicRoomInfoLocalArray,alreadyEnterd)
+            }
+        }
+    )}
+    //パブリックルーム用のメッセージ取得
+    func publicRoomMessageListenerManager(callback:@escaping ([MessageLocalObject]) -> Void,roomName:String,TIMETOOL:TimeTools) -> DatabaseHandle{
+    
+        let handle:DatabaseHandle = Database.database().reference().child("Rooms").child(roomName).child("Chat").queryLimited(toLast: 15).observe(.value) { (snapshot: DataSnapshot,error) in
+            if let error = error {
+                callback([])
+                return
+            }
+            if snapshot.children.allObjects as? [DataSnapshot] != nil  {
+                callback(messageLocalDataSafeMapping(snapshot: snapshot, roomID: roomName, TIMETOOL: TIMETOOL, Public: true))
+            }
+        }
+        return handle
+    }
+
+//    ///パブリックルーム用のメッセージ取得
+//    func messageListenerManager(callback:@escaping ([MessageLocalObject]) -> Void,selectedRoom:RoomInfoCommonImmutable,TIMETOOL:TimeTools) -> DatabaseHandle {
+//        ///チャットのリスナー
+//        let ChatHandle:DatabaseHandle = Database.database().reference().child("Rooms").child(selectedRoom.rawValue).child("Chat").queryLimited(toLast: 15).observe(.value) { (snapshot: DataSnapshot,error) in
+//            if let error = error {
+//                callback([])
+//                return
+//            }
+//            if snapshot.children.allObjects as? [DataSnapshot] != nil  {
+//                callback(messageLocalDataSafeMapping(snapshot: snapshot, roomID: selectedRoom.rawValue, TIMETOOL: TIMETOOL))
+//            }
+//        }
+//        return ChatHandle
+//    }
+}
+
 class ChatDataHostGetterManager {
     //通常のメッセージ取得
     func messageListenerManager(callback:@escaping ([MessageLocalObject]) -> Void,roomID:String,TIMETOOL:TimeTools) -> DatabaseHandle{
-        let handle:DatabaseHandle = Database.database().reference().child("Chat").child(roomID).queryOrdered(byChild: "listend").queryEqual(toValue: false).observe(.value) { (snapshot: DataSnapshot) in
+        let handle:DatabaseHandle = Database.database().reference().child("Chat").child(roomID).queryOrdered(byChild: "listend").queryEqual(toValue: false).observe(.value) { (snapshot: DataSnapshot,error) in
+            if let error = error {
+                callback([])
+                return
+            }
             if snapshot.children.allObjects as? [DataSnapshot] != nil  {
-                callback(self.messageLocalDataSafeMapping(snapshot: snapshot, roomID: roomID, TIMETOOL: TIMETOOL))
+                callback(messageLocalDataSafeMapping(snapshot: snapshot, roomID: roomID, TIMETOOL: TIMETOOL, Public: false))
             }
         }
         return handle
@@ -409,58 +483,70 @@ class ChatDataHostGetterManager {
 
         Database.database().reference().child("Chat").child(roomID).queryLimited(toLast: 30).observe(.value) { (snapshot: DataSnapshot) in
             if snapshot.children.allObjects as? [DataSnapshot] != nil  {
-                callback(self.messageLocalDataSafeMapping(snapshot: snapshot, roomID: roomID, TIMETOOL: TIMETOOL))
+                callback(messageLocalDataSafeMapping(snapshot: snapshot, roomID: roomID, TIMETOOL: TIMETOOL, Public: false))
             }
         }
     }
-    
-    private func messageLocalDataSafeMapping(snapshot:DataSnapshot,roomID:String,TIMETOOL:TimeTools) -> [MessageLocalObject] {
-        var messageLocalObjectArray:[MessageLocalObject] = []
-        let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
-        ///更新件数がない場合
-        if snapChildren?.count == 0 {
-            ///メッセージ追加
-            return []
-        } else {
-            //Firebaseのメッセージ配列からメッセージを取得
-            for snapChild in snapChildren! {
-                ///それぞれのValue配列を取得
-                if let postDict = snapChild.value as? [String: Any] {
-                    var sentDataFR: Date {
-                        get {
-                            if postDict["Date"] != nil {
-                                return TIMETOOL.stringToDateFormatte(date: postDict["Date"] as! String)
-                            } else {
-                                return Date()
-                            }
+
+}
+///チャット系のデータを安全なデータに変換する
+func messageLocalDataSafeMapping(snapshot:DataSnapshot,roomID:String,TIMETOOL:TimeTools,Public:Bool) -> [MessageLocalObject] {
+    var messageLocalObjectArray:[MessageLocalObject] = []
+    let snapChildren = snapshot.children.allObjects as? [DataSnapshot]
+    ///更新件数がない場合
+    if snapChildren?.count == 0 {
+        ///メッセージ追加
+        return []
+    } else {
+        //Firebaseのメッセージ配列からメッセージを取得
+        for snapChild in snapChildren! {
+            ///それぞれのValue配列を取得
+            if let postDict = snapChild.value as? [String: Any] {
+                var sentDataFR: Date {
+                    get {
+                        if postDict["Date"] != nil {
+                            return TIMETOOL.stringToDateFormatte(date: postDict["Date"] as! String)
+                        } else {
+                            return Date()
                         }
                     }
-                    let sentDate = sentDataFR
-                    let likeButtonFLAG = postDict["LikeButtonFLAG"] as? Bool ?? false
+                }
+                
+                //送信時刻
+                let sentDate = sentDataFR
+                //送信者//メッセージ//メッセージID
+                if let senderID = postDict["sender"] as? String,
+                   let message = postDict["message"] as? String,
+                   let messageID = postDict["messageID"] as? String{
                     
-                    if let senderID = postDict["sender"] as? String,
-                       let message = postDict["message"] as? String,
-                       let messageID = postDict["messageID"] as? String{
-                        
-                        let messageLcl = MessageLocalObject()
-                        messageLcl.lcl_Sender = senderID
-                        messageLcl.lcl_Message = message
-                        messageLcl.lcl_MessageID = messageID
-                        messageLcl.lcl_RoomID = roomID
+                    let messageLcl = MessageLocalObject()
+                    messageLcl.lcl_Sender = senderID
+                    messageLcl.lcl_Message = message
+                    messageLcl.lcl_MessageID = messageID
+                    messageLcl.lcl_Date = sentDate
+                    messageLcl.lcl_RoomID = roomID
+                    ///通常時のメッセージ
+                    if Public {
+                        //ライクフラグ
+                        let likeButtonFLAG = postDict["LikeButtonFLAG"] as? Bool ?? false
                         messageLcl.lcl_LikeButtonFLAG = likeButtonFLAG
-                        messageLcl.lcl_Date = sentDate
                         messageLcl.lcl_Listend = true
                         messageLcl.lcl_ChildKey = snapChild.key
-                        
-                        messageLocalObjectArray.append(messageLcl)
+                    } else {
+                    ///パブリックルーム
+                        messageLcl.lcl_LikeButtonFLAG = false
+                        messageLcl.lcl_Listend = true
+                        messageLcl.lcl_ChildKey = "Public"
                     }
+
+
+                    messageLocalObjectArray.append(messageLcl)
                 }
             }
-            return messageLocalObjectArray
         }
+        return messageLocalObjectArray
     }
 }
-
 ///
 //--------------------------------------------------
 //--ブロックリスト関連--

@@ -69,6 +69,6 @@ class searchAPIKeySingleton {
 class ADSInfoSingleton {
     static let shared = ADSInfoSingleton() // 唯一のインスタンスを保持するプロパティ
     
-    var bannerAdUnitID = "ca-app-pub-3940256099942544/2934735716"
-    var interstitialAdUnitID = "ca-app-pub-3940256099942544/5135589807"
+    var bannerAdUnitID = ""
+    var interstitialAdUnitID = ""
 }

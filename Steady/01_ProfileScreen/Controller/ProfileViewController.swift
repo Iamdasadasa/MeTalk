@@ -94,16 +94,12 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
             return IMAGE.profileImage
         }
     }
-    //モーダルの判断
-    enum modalKind {
-        case profileEdit
-        case report
-    }
     var modalState:modalKind?
     var TARGETIMAGE:UIImage?
         
 
     init(TARGETINFO:RequiredProfileInfoLocalData,SELFINFO:RequiredProfileInfoLocalData,TARGETIMAGE:UIImage?) {
+        
         self.TARGETINFO = TARGETINFO
         self.SELFINFO = SELFINFO
         self.TARGETIMAGE = TARGETIMAGE
@@ -124,7 +120,7 @@ class ProfileViewController:UIViewController, CropViewControllerDelegate{
         PROFILEVIEW.TargetProfileButtonTappedDelegate = self
         ///半モーダルの初期設定
         FPC.delegate = self
-        FPC.layout = CustomFloatingPanelLayout(initialState: .half)
+        FPC.layout = CustomFloatingPanelLayout(initialState: .half, kind: .profileEdit)
         FPC.isRemovalInteractionEnabled  =  true
         FPC.backdropView.dismissalTapGestureRecognizer.isEnabled = true
         REPORT_FPC.delegate = self
@@ -439,11 +435,11 @@ extension ProfileViewController:FloatingPanelControllerDelegate,SemiModalTranslu
     func floatingPanel(_ vc: FloatingPanelController, layoutFor newCollection: UITraitCollection) -> FloatingPanelLayout {
         switch self.modalState {
         case .profileEdit:
-            return CustomFloatingPanelLayout(initialState: .half)
+            return CustomFloatingPanelLayout(initialState: .half, kind: .profileEdit)
         case .report:
-            return CustomFloatingPanelLayout(initialState: .full)
+            return CustomFloatingPanelLayout(initialState: .full, kind: .report)
         case .none:
-            return CustomFloatingPanelLayout(initialState: .half)
+            return CustomFloatingPanelLayout(initialState: .half, kind: .profileEdit)
         }
     }
 
@@ -467,6 +463,13 @@ extension ProfileViewController:FloatingPanelControllerDelegate,SemiModalTranslu
             ///破棄時にデータセットアップ
             self.userInfoDataSetup()
             self.tabBarController?.tabBar.isHidden = false
+        }
+    }
+    // モーダルが下にスワイプされたときに呼ばれるデリゲートメソッド
+    func floatingPanelWillEndDragging(_ fpc: FloatingPanelController, withVelocity velocity: CGPoint, targetState: UnsafeMutablePointer<FloatingPanelState>) {
+        // ここで一回で閉じるための処理を行う
+        if self.modalState == .report {
+            fpc.removePanelFromParent(animated: true)
         }
     }
 }
@@ -667,7 +670,7 @@ extension ProfileViewController:reportViewControllerDelegate {
     func reportFpcSetting_Indication() {
         //モーダル状態を指定
         self.modalState = .report
-        REPORT_FPC.layout = CustomFloatingPanelLayout(initialState: .full)
+        REPORT_FPC.layout = CustomFloatingPanelLayout(initialState: .full, kind: .report)
         REPORT_FPC.isRemovalInteractionEnabled  =  true
         REPORT_FPC.backdropView.dismissalTapGestureRecognizer.isEnabled = true
         var loomID:String = ROOMID.roomIDCreate(UID1: SELFINFO.Required_UID, UID2: TARGETINFO.Required_UID)

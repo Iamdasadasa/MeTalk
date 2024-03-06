@@ -110,7 +110,6 @@ class ProfileInfoLocalObject: Object {
     @objc dynamic var lcl_Area: String?
     @objc dynamic var lcl_LikeButtonPushedFLAG:Bool = false
     @objc dynamic var lcl_LikeButtonPushedDate:Date?
-
 }
 
 struct TargetProfileLocalDataGetterManager{

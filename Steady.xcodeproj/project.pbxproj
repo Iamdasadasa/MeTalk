@@ -45,6 +45,9 @@
 		D655505127EADC7C00C86E34 /* chatUserListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D655505027EADC7C00C86E34 /* chatUserListTableViewCell.swift */; };
 		D65BD34828EFE2BC00DDAFA4 /* UserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */; };
 		D65BD34A28EFE2D100DDAFA4 /* UserListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65BD34928EFE2D100DDAFA4 /* UserListTableViewCell.swift */; };
+		D65D99DC2B301F9C00034E71 /* PublicRoomChatListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65D99DB2B301F9C00034E71 /* PublicRoomChatListViewController.swift */; };
+		D65D99DE2B315D3F00034E71 /* PublicRoomChatListTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65D99DD2B315D3F00034E71 /* PublicRoomChatListTableViewCell.swift */; };
+		D65D99E02B32C02D00034E71 /* PublicRoomChatListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D65D99DF2B32C02D00034E71 /* PublicRoomChatListModel.swift */; };
 		D66236522AFCC31700F4B351 /* AdminRegistedDammyUsersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D66236512AFCC31700F4B351 /* AdminRegistedDammyUsersViewController.swift */; };
 		D663007F2950471D00C59657 /* HostingBasicObjec.swift in Sources */ = {isa = PBXBuildFile; fileRef = D663007E2950471D00C59657 /* HostingBasicObjec.swift */; };
 		D673C2A029EDB6FD00DCB995 /* typingUILabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D673C29F29EDB6FD00DCB995 /* typingUILabel.swift */; };
@@ -55,6 +58,7 @@
 		D67C27DA2907C8CD00C25BA3 /* TargetProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27D92907C8CD00C25BA3 /* TargetProfileView.swift */; };
 		D67C27DC2908FAAF00C25BA3 /* TargetProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67C27DB2908FAAF00C25BA3 /* TargetProfileViewController.swift */; };
 		D67EC6A02AF900CD0028FD01 /* TargetChatUserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D67EC69F2AF900CD0028FD01 /* TargetChatUserListViewController.swift */; };
+		D6819B2C2B4E69CB00DEE2FC /* PublicRoomChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6819B2B2B4E69CB00DEE2FC /* PublicRoomChatViewController.swift */; };
 		D68FB39227D5AC5300E57F5A /* sideMenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */; };
 		D68FB39B27D5C97200E57F5A /* SideMenuTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */; };
 		D68FB3A227D7410800E57F5A /* NotificationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D68FB3A127D7410800E57F5A /* NotificationViewController.swift */; };
@@ -148,6 +152,19 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		D6A0C31D2B21C83C005C45FB /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		D6262D132A5D2E2500456B73 /* ShowUserListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowUserListModel.swift; sourceTree = "<group>"; };
 		D6262D182A5D2ED000456B73 /* SearchSettingViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettingViewController.swift; sourceTree = "<group>"; };
@@ -190,6 +207,9 @@
 		D655505027EADC7C00C86E34 /* chatUserListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = chatUserListTableViewCell.swift; sourceTree = "<group>"; };
 		D65BD34728EFE2BC00DDAFA4 /* UserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListViewController.swift; sourceTree = "<group>"; };
 		D65BD34928EFE2D100DDAFA4 /* UserListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListTableViewCell.swift; sourceTree = "<group>"; };
+		D65D99DB2B301F9C00034E71 /* PublicRoomChatListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicRoomChatListViewController.swift; sourceTree = "<group>"; };
+		D65D99DD2B315D3F00034E71 /* PublicRoomChatListTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicRoomChatListTableViewCell.swift; sourceTree = "<group>"; };
+		D65D99DF2B32C02D00034E71 /* PublicRoomChatListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicRoomChatListModel.swift; sourceTree = "<group>"; };
 		D66236512AFCC31700F4B351 /* AdminRegistedDammyUsersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminRegistedDammyUsersViewController.swift; sourceTree = "<group>"; };
 		D663007E2950471D00C59657 /* HostingBasicObjec.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostingBasicObjec.swift; sourceTree = "<group>"; };
 		D673C29F29EDB6FD00DCB995 /* typingUILabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = typingUILabel.swift; sourceTree = "<group>"; };
@@ -200,6 +220,7 @@
 		D67C27D92907C8CD00C25BA3 /* TargetProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetProfileView.swift; sourceTree = "<group>"; };
 		D67C27DB2908FAAF00C25BA3 /* TargetProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetProfileViewController.swift; sourceTree = "<group>"; };
 		D67EC69F2AF900CD0028FD01 /* TargetChatUserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TargetChatUserListViewController.swift; sourceTree = "<group>"; };
+		D6819B2B2B4E69CB00DEE2FC /* PublicRoomChatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicRoomChatViewController.swift; sourceTree = "<group>"; };
 		D68FB39127D5AC5300E57F5A /* sideMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = sideMenuViewController.swift; sourceTree = "<group>"; };
 		D68FB39927D5C97200E57F5A /* SideMenuTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideMenuTableViewCell.swift; sourceTree = "<group>"; };
 		D68FB3A127D7410800E57F5A /* NotificationViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationViewController.swift; sourceTree = "<group>"; };
@@ -217,6 +238,8 @@
 		D69EC37B27AA85C300290B18 /* loadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = loadingView.swift; sourceTree = "<group>"; };
 		D69EC37F27AA92F100290B18 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
 		D69EC38127AA952000290B18 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		D6A0C3172B21C83C005C45FB /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		D6A0C3192B21C83C005C45FB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D6A8C0D7286345AD0017171A /* UserListLocalModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListLocalModel.swift; sourceTree = "<group>"; };
 		D6AB97D82ADF808F007CE054 /* AdminMenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminMenuViewController.swift; sourceTree = "<group>"; };
 		D6AB97DA2ADFB057007CE054 /* AdminMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminMenuView.swift; sourceTree = "<group>"; };
@@ -342,6 +365,7 @@
 				D631EBEC27A581BE00800693 /* Steady */,
 				D631EC0327A581BF00800693 /* SteadyTests */,
 				D631EC0D27A581BF00800693 /* SteadyUITests */,
+				D6A0C3162B21C83C005C45FB /* NotificationExtension */,
 				D631EBEB27A581BE00800693 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -371,6 +395,7 @@
 				D655504327E2107100C86E34 /* 01_ProfileScreen */,
 				D655504427E35FC800C86E34 /* 02_ChatScreen */,
 				D65BD34628EFE15F00DDAFA4 /* 03_UserListScreen */,
+				D65D99D72B301C6300034E71 /* 04_RoomChatScreen */,
 				D6AB97D42ADF7FF3007CE054 /* 10_adminScreen */,
 			);
 			path = Steady;
@@ -604,7 +629,6 @@
 		D65BD34628EFE15F00DDAFA4 /* 03_UserListScreen */ = {
 			isa = PBXGroup;
 			children = (
-				D6CC85172ADF7F4A00A336E3 /* New Group */,
 				D67C27D228F88B9E00C25BA3 /* Model */,
 				D65BD34E28F8895400DDAFA4 /* View */,
 				D65BD34F28F8895B00DDAFA4 /* Controller */,
@@ -625,6 +649,42 @@
 			isa = PBXGroup;
 			children = (
 				D6D8030D2A31756500107DBB /* showUserListViewController.swift */,
+			);
+			path = Controller;
+			sourceTree = "<group>";
+		};
+		D65D99D72B301C6300034E71 /* 04_RoomChatScreen */ = {
+			isa = PBXGroup;
+			children = (
+				D65D99D82B301C8300034E71 /* Model */,
+				D65D99D92B301C8900034E71 /* View */,
+				D65D99DA2B301C8E00034E71 /* Controller */,
+			);
+			name = 04_RoomChatScreen;
+			path = 10_adminScreen/04_RoomChatScreen;
+			sourceTree = "<group>";
+		};
+		D65D99D82B301C8300034E71 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				D65D99DF2B32C02D00034E71 /* PublicRoomChatListModel.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		D65D99D92B301C8900034E71 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D65D99DD2B315D3F00034E71 /* PublicRoomChatListTableViewCell.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		D65D99DA2B301C8E00034E71 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				D65D99DB2B301F9C00034E71 /* PublicRoomChatListViewController.swift */,
+				D6819B2B2B4E69CB00DEE2FC /* PublicRoomChatViewController.swift */,
 			);
 			path = Controller;
 			sourceTree = "<group>";
@@ -695,6 +755,15 @@
 			path = Controller;
 			sourceTree = "<group>";
 		};
+		D6A0C3162B21C83C005C45FB /* NotificationExtension */ = {
+			isa = PBXGroup;
+			children = (
+				D6A0C3172B21C83C005C45FB /* NotificationService.swift */,
+				D6A0C3192B21C83C005C45FB /* Info.plist */,
+			);
+			path = NotificationExtension;
+			sourceTree = "<group>";
+		};
 		D6A8C0D5286345610017171A /* RealM */ = {
 			isa = PBXGroup;
 			children = (
@@ -763,13 +832,6 @@
 			path = Setter;
 			sourceTree = "<group>";
 		};
-		D6CC85172ADF7F4A00A336E3 /* New Group */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = "New Group";
-			sourceTree = "<group>";
-		};
 		D6D8030C2A2F32F200107DBB /* Dust最後に全部消して使ってたら修正 */ = {
 			isa = PBXGroup;
 			children = (
@@ -807,6 +869,7 @@
 				D631EBE627A581BE00800693 /* Sources */,
 				D631EBE727A581BE00800693 /* Frameworks */,
 				D631EBE827A581BE00800693 /* Resources */,
+				D6A0C31D2B21C83C005C45FB /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
@@ -895,7 +958,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1320;
+				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1320;
 				TargetAttributes = {
 					D631EBE927A581BE00800693 = {
@@ -988,6 +1051,7 @@
 				D631EC2127A582A200800693 /* initialSettingViewcontroller.swift in Sources */,
 				D6BC3C082A1CD05600E00A2A /* initialSettingAgeSelectViewController.swift in Sources */,
 				D6262D1B2A5D2FBB00456B73 /* searchSettingView.swift in Sources */,
+				D65D99E02B32C02D00034E71 /* PublicRoomChatListModel.swift in Sources */,
 				D68FB3AD27D9D65400E57F5A /* BlockListViewController.swift in Sources */,
 				D673C2A029EDB6FD00DCB995 /* typingUILabel.swift in Sources */,
 				D6BC3C0C2A259AB200E00A2A /* initialSettingNicknameSelectViewController.swift in Sources */,
@@ -1012,6 +1076,7 @@
 				D68FB3A227D7410800E57F5A /* NotificationViewController.swift in Sources */,
 				D6543DCB27BA7AC200444454 /* UserDataManageData.swift in Sources */,
 				D6C663792AF9C9E70010D1E8 /* AdminDammyProfileCreateView.swift in Sources */,
+				D65D99DC2B301F9C00034E71 /* PublicRoomChatListViewController.swift in Sources */,
 				D6FD91402AB072960013424D /* MessageObject.swift in Sources */,
 				D655504D27E4260C00C86E34 /* ChatDataManagedData.swift in Sources */,
 				D6AB97D92ADF808F007CE054 /* AdminMenuViewController.swift in Sources */,
@@ -1043,6 +1108,7 @@
 				D69EC38227AA952000290B18 /* ProfileView.swift in Sources */,
 				D6C6637C2AF9D1470010D1E8 /* AdminDammyProfileCreateViewController.swift in Sources */,
 				D631EC2327A5831400800693 /* initialSettingView.swift in Sources */,
+				D6819B2C2B4E69CB00DEE2FC /* PublicRoomChatViewController.swift in Sources */,
 				D631EBF027A581BE00800693 /* SceneDelegate.swift in Sources */,
 				D6BC3C122A26478700E00A2A /* initialSettingFinalConfirmViewController.swift in Sources */,
 				D6EEB0E02992BDA000EBDFA3 /* HostingMock.swift in Sources */,
@@ -1051,6 +1117,7 @@
 				D6543DD027C4822300444454 /* ModalImageData.swift in Sources */,
 				D627952D2AF1E48E009E24CE /* AdminUserCheckingChatViewController.swift in Sources */,
 				D673C2A229EE67C300DCB995 /* initialSettingGenderSelectViewController.swift in Sources */,
+				D65D99DE2B315D3F00034E71 /* PublicRoomChatListTableViewCell.swift in Sources */,
 				D6262D1E2A5E604D00456B73 /* CustomView.swift in Sources */,
 				D6A8C0D8286345AD0017171A /* UserListLocalModel.swift in Sources */,
 				D68FB3A927D884F700E57F5A /* NotificationTableViewCell.swift in Sources */,
@@ -1233,6 +1300,7 @@
 		D631EC1527A581BF00800693 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
@@ -1259,7 +1327,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "Black-Vual.MeTalk";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "SteadyApp Provisioning Profiles";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "SteadyApp Provisioning Profiles dev";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -1269,6 +1337,7 @@
 		D631EC1627A581BF00800693 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = NO;
@@ -1295,7 +1364,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "Black-Vual.MeTalk";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "SteadyApp Provisioning Profiles";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "SteadyApp Provisioning Profiles dev";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;

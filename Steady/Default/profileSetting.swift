@@ -16,6 +16,7 @@ class profileSetting:UIViewController{
     let mapping = profileSafeDataMapping()  ///データマッピング用構造体
     let REPORTHOSTINGGETTER = reportHostGetterManager()
     let REPORTHOSTINGSETTER = reportHostSetterManager()
+    let reachabiliting = Reachabiliting() ///ネットワーク接続確インスタンス
     var selfUID:String{     ///自身のUID
         get{
             guard let selfUID = myProfileSingleton.shared.selfUIDGetter() else {
@@ -63,6 +64,18 @@ class profileSetting:UIViewController{
     }
     
     override func viewDidLayoutSubviews() {
+        initialAction()
+    }
+    
+    ///初期動作
+    func initialAction() {
+        
+        if reachabiliting.NetworkStatus() == 0{
+            createSheet(for: .Completion(title: "インターネット接続がありません。確認してください。", {
+                self.initialAction()
+            }), SelfViewController: self)
+            return
+        }
         //通報確認
         REPORTHOSTINGGETTER.waringOrFreezeConfirmGetter(callback: { report in
             if let report = report {

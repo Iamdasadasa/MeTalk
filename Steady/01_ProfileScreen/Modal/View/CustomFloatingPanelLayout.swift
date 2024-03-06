@@ -8,11 +8,21 @@
 import Foundation
 import FloatingPanel
 
+//モーダルの種類
+enum modalKind {
+    case profileEdit
+    case report
+}
+
 class CustomFloatingPanelLayout: FloatingPanelLayout {
     var state:FloatingPanelState
-    init(initialState:FloatingPanelState) {
+    var kind:modalKind
+    
+    init(initialState:FloatingPanelState,kind:modalKind) {
         self.state = initialState
+        self.kind = kind
     }
+    
     
     var position: FloatingPanelPosition {
         return .bottom
@@ -23,10 +33,20 @@ class CustomFloatingPanelLayout: FloatingPanelLayout {
     }
     
     var anchors: [FloatingPanelState : FloatingPanelLayoutAnchoring]{
-        return [
-            .full: FloatingPanelLayoutAnchor(absoluteInset: 50.0, edge: .top, referenceGuide: .safeArea),
-            // 半モーダル時のレイアウト
-            .half: FloatingPanelLayoutAnchor(absoluteInset: 500.0, edge: .top, referenceGuide: .safeArea)
-        ]
+        if kind == .report {
+            return [
+                .full: FloatingPanelLayoutAnchor(absoluteInset: 50.0, edge: .top, referenceGuide: .safeArea),
+                // 半モーダル時のレイアウト
+                .half: FloatingPanelLayoutAnchor(absoluteInset: 0, edge: .top, referenceGuide: .safeArea)
+            ]
+            
+        } else {
+            return [
+                .full: FloatingPanelLayoutAnchor(absoluteInset: 50.0, edge: .top, referenceGuide: .safeArea),
+                // 半モーダル時のレイアウト
+                .half: FloatingPanelLayoutAnchor(absoluteInset: 500.0, edge: .top, referenceGuide: .safeArea)
+            ]
+        }
+
     } 
 }

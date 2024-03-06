@@ -66,6 +66,9 @@ class ChatUserListViewController:UIViewController,UINavigationControllerDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
+    }
+    
+    func setUp() {
         ///テーブルビューレイアウト
         CHATUSERLISTTABLEVIEW.backgroundColor = .white
         CHATUSERLISTTABLEVIEW.contentInset = defaultInsets
@@ -97,6 +100,10 @@ class ChatUserListViewController:UIViewController,UINavigationControllerDelegate
         delegate?.listnerDelegate(SelectedChatVC: true)
         ///広告表示
         mobAdsViewSetting()
+        ///現在チャット中の相手のUIDをRemove
+        UserDefaults.standard.set("", forKey: "chatingTargetUID")
+        // バッジの数をリセット
+        UIApplication.shared.applicationIconBadgeNumber = 0
     }
 }
 
@@ -248,7 +255,6 @@ extension ChatUserListViewController {
                 return
             }
 
-            
             ///取得してきたトークユーザーの配列を回す
             for listProfile in ChatListInfoArray {
                 if !self.duplicationMessageChecking(profileLocal: listProfile) {
@@ -262,7 +268,17 @@ extension ChatUserListViewController {
                 }
                 ///送信者が自身のUIDでない場合
                 if self.SELFINFO.Required_UID != listProfile.lcl_SendID {
+                    ///タブViewcontrollerにDelegate
                     self.delegate?.listnerDelegate(SelectedChatVC: false)
+                    ///バイブレーション機能がオン設定または行なっていない場合&
+                    ///チャット画面に表示している相手でない場合&
+                    ///(defaluts値の関係上falseでバイブレーションするようにしている)
+                    ///アプリがアクティブ（バックグラウンドでない状態）
+                    if !UserDefaults.standard.bool(forKey: "vibrationToggleKey") && UserDefaults.standard.string(forKey: "chatingTargetUID") != listProfile.lcl_SendID &&
+                        UIApplication.shared.applicationState == .active {
+                        ///バイブレーションを起動
+                        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+                    }
                     ///通知フラグを立てる
                     listProfile.lcl_nortificationIconFlag = true
                 }
@@ -278,8 +294,6 @@ extension ChatUserListViewController {
                 }
                 ///配列に追加
                 self.USERSPROFILEARRAY.insert(SafeChatListData, at: 0)
-
-                print("コミット直前 ChatListInfoArray.count:\(ChatListInfoArray.count)greaterThanOrEqualTime:\(greaterThanOrEqualTime)")
                 ///既読をつける
                 self.LISTDATAHOSTSETTER.talkListNewMessageReaded(selfUID: self.SELFINFO.Required_UID, targetUID: SafeChatListData.Required_targetUID)
                 ///ローカルに保存

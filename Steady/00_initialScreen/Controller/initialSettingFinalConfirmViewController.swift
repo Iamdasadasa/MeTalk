@@ -112,11 +112,20 @@ extension initialSettingFinalConfirmViewController:initialSettingFinalConfirmVie
     ///   - view: 呼び出し元View
     /// - Returns: none
     func decisionButtonTappedAction(initialSettingFinalConfirmView: initialSettingFinalConfirmView) {
-        ///ローディング画面表示
-        LOADINGVIEW.loadingViewIndicator(isVisible: true)
-        ///決定ボタンを重複押下できなくさせる
-        initialSettingFinalConfirmView.decisionButton.isEnabled = false
-        SignUp()
+        
+        createSheet(for: .Alert(title: "プライバシーポリシー及び利用規約の内容に同意します。", message: "内容は設定画面よりご確認いただけます。", buttonMessage: "OK", { result in
+            if !result {
+                createSheet(for: .Completion(title: "アプリを終了します", {
+                    preconditionFailure()
+                }), SelfViewController: self)
+                return
+            }
+            ///ローディング画面表示
+            self.LOADINGVIEW.loadingViewIndicator(isVisible: true)
+            ///決定ボタンを重複押下できなくさせる
+            initialSettingFinalConfirmView.decisionButton.isEnabled = false
+            self.SignUp()
+        }), SelfViewController: self)
     }
     
     private func SignUp() {
